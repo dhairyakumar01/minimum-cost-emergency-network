@@ -1,0 +1,118 @@
+{
+  "startup": {
+    "min_ms": 4.67,
+    "median_ms": 5.72,
+    "mean_ms": 6.01,
+    "max_ms": 10.86
+  },
+  "endpoints": {
+    "/": {
+      "label": "Initial HTML Document",
+      "status_code": 200,
+      "payload_bytes": 17369,
+      "payload_kb": 16.96,
+      "trials": 30,
+      "min_ms": 1.24,
+      "median_ms": 1.65,
+      "mean_ms": 5.05,
+      "max_ms": 101.51,
+      "p95_ms": 47.17
+    },
+    "/assets/css/style.css": {
+      "label": "Static Stylesheet CSS",
+      "status_code": 200,
+      "payload_bytes": 10753,
+      "payload_kb": 10.5,
+      "trials": 30,
+      "min_ms": 1.29,
+      "median_ms": 1.71,
+      "mean_ms": 1.82,
+      "max_ms": 2.57,
+      "p95_ms": 2.56
+    },
+    "/assets/js/app.js": {
+      "label": "Main Frontend JavaScript",
+      "status_code": 200,
+      "payload_bytes": 9436,
+      "payload_kb": 9.21,
+      "trials": 30,
+      "min_ms": 1.36,
+      "median_ms": 1.96,
+      "mean_ms": 2.07,
+      "max_ms": 3.09,
+      "p95_ms": 2.97
+    },
+    "/api/health": {
+      "label": "Health API Endpoint (/api/health)",
+      "status_code": 200,
+      "payload_bytes": 228,
+      "payload_kb": 0.22,
+      "trials": 30,
+      "min_ms": 0.69,
+      "median_ms": 0.81,
+      "mean_ms": 0.97,
+      "max_ms": 1.73,
+      "p95_ms": 1.7
+    },
+    "/api/facilities": {
+      "label": "All Facilities API (/api/facilities)",
+      "status_code": 200,
+      "payload_bytes": 220166,
+      "payload_kb": 215.01,
+      "trials": 30,
+      "min_ms": 6.6,
+      "median_ms": 7.88,
+      "mean_ms": 8.34,
+      "max_ms": 17.43,
+      "p95_ms": 14.41
+    },
+    "/api/facilities?agency=hospital": {
+      "label": "Agency Filter: Hospitals (/api/facilities?agency=hospital)",
+      "status_code": 200,
+      "payload_bytes": 191883,
+      "payload_kb": 187.39,
+      "trials": 30,
+      "min_ms": 5.81,
+      "median_ms": 6.58,
+      "mean_ms": 6.89,
+      "max_ms": 9.65,
+      "p95_ms": 9.46
+    },
+    "/api/facilities?agency=police_station": {
+      "label": "Agency Filter: Police (/api/facilities?agency=police_station)",
+      "status_code": 200,
+      "payload_bytes": 25000,
+      "payload_kb": 24.41,
+      "trials": 30,
+      "min_ms": 1.2,
+      "median_ms": 1.34,
+      "mean_ms": 1.5,
+      "max_ms": 3.05,
+      "p95_ms": 2.56
+    },
+    "/api/facilities?agency=fire_station": {
+      "label": "Agency Filter: Fire (/api/facilities?agency=fire_station)",
+      "status_code": 200,
+      "payload_bytes": 3577,
+      "payload_kb": 3.49,
+      "trials": 30,
+      "min_ms": 0.67,
+      "median_ms": 0.74,
+      "mean_ms": 0.76,
+      "max_ms": 1.25,
+      "p95_ms": 1.06
+    },
+    "/api/mst/full?algo=kruskal": {
+      "label": "Global MST API (/api/mst/full?algo=kruskal)",
+      "status_code": 200,
+      "payload_bytes": 223697,
+      "payload_kb": 218.45,
+      "trials": 30,
+      "min_ms": 6.04,
+      "median_ms": 7.41,
+      "mean_ms": 8.02,
+      "max_ms": 24.02,
+      "p95_ms": 16.29
+    }
+  }
+}
