@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bengaluru Emergency Incidents &amp; MST Study Area GIS Explorer</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    #map { height: 100%; min-height: 460px; width: 100%; z-index: 10; }
+    .custom-marker {
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 9999px; font-weight: 700; font-size: 10px;
+      color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      border: 2px solid #ffffff;
+    }
+    .marker-review {
+      border: 2px dashed #fef08a !important;
+      outline: 2px solid #d97706;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px;
+      padding: 2px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded">DMGT GIS Verification</span>
+          <h1 class="text-base md:text-lg font-bold tracking-tight">Minimum-Cost Emergency Communication Network Using MST — Bengaluru Incident GIS</h1>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">Provisional Study Rectangle: Lat 12.85°N–13.15°N, Lon 77.45°E–77.75°E | Verified against BBMP Municipal Jurisdiction (2019–2024)</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnFitStudy" class="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-md transition">Fit Study Rectangle</button>
+        <button id="btnToggleMST" class="px-3 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-md transition">MST Overlay: ON (63.4 km)</button>
+        <button id="btnToggleExcl" class="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition">Show Excluded Points</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Boundary Integrity Notice Banner -->
+  <div class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+      <div>
+        <strong>GIS Boundary Disclosure:</strong> The dashed blue rectangle shows your exact provisional study box (<code class="font-mono">12.85–13.15°N, 77.45–77.75°E</code>). Per strict GIS non-fabrication rules, no synthetic BBMP polygon is drawn; municipal ward/zone status is verified per incident from primary civic records.
+      </div>
+      <span class="font-semibold whitespace-nowrap text-amber-800">13 Study-Area Records | 6 Excluded/Review Records</span>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Left Controls & Incident List (4 cols) -->
+    <section class="lg:col-span-4 flex flex-col gap-3 bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm max-h-[680px] overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h2 class="text-sm font-bold text-slate-800">Filter &amp; Inspect Incidents</h2>
+        <span id="visibleCountBadge" class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full">13 shown</span>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div>
+          <label for="filterCategory" class="block font-medium text-slate-600 mb-1">Incident Category</label>
+          <select id="filterCategory" class="w-full border border-slate-300 rounded-md px-2 py-1.5 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="ALL">All Categories</option>
+            <option value="BREACH">Lake Bund / Bank Breach</option>
+            <option value="OVERFLOW">Lake Overflow &amp; Inundation</option>
+            <option value="URBAN_FLOOD">Urban Flash Flood / Underpass</option>
+            <option value="COLLAPSE">Rain Infrastructure Collapse</option>
+          </select>
+        </div>
+        <div>
+          <label for="filterStatus" class="block font-medium text-slate-600 mb-1">Verification Status</label>
+          <select id="filterStatus" class="w-full border border-slate-300 rounded-md px-2 py-1.5 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="ALL">All Study-Area (13)</option>
+            <option value="VERIFIED">VERIFIED Only (11)</option>
+            <option value="PARTIALLY_VERIFIED">PARTIALLY_VERIFIED (2)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs space-y-1.5">
+        <div class="font-semibold text-slate-700 mb-1">Map Symbology</div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-600 inline-block"></span><span>Lake Bund Breach</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span><span>Lake Overflow</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-teal-600 inline-block"></span><span>Urban/Road Flood</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span><span>Wall/Infra Collapse</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-600 border border-dashed border-yellow-200 inline-block"></span><span>Partially Verified</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-500 inline-block"></span><span>Excluded (Outside Box)</span></div>
+        </div>
+      </div>
+
+      <!-- Scrollable Incident Cards -->
+      <div id="incidentListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+    </section>
+
+    <!-- Right Map & Unmapped Needs-Review Drawer (8 cols) -->
+    <section class="lg:col-span-8 flex flex-col gap-3">
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1 min-h-[460px] relative">
+        <div id="map"></div>
+      </div>
+
+      <!-- Needs Review / Unmapped Excluded Records Panel -->
+      <div class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Excluded &amp; Unmapped NEEDS_REVIEW Records (excluded_incidents.csv)</h3>
+          <span class="text-xs text-slate-500">Unverified coordinates left blank per Requirement #9</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-600 bg-slate-50">
+                <th class="py-1.5 px-2 font-semibold">ID</th>
+                <th class="py-1.5 px-2 font-semibold">Date</th>
+                <th class="py-1.5 px-2 font-semibold">Reported Site</th>
+                <th class="py-1.5 px-2 font-semibold">BBMP</th>
+                <th class="py-1.5 px-2 font-semibold">In Box</th>
+                <th class="py-1.5 px-2 font-semibold">Coordinates</th>
+                <th class="py-1.5 px-2 font-semibold">Reason for Exclusion / Review</th>
+              </tr>
+            </thead>
+            <tbody id="excludedTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const studyIncidents = [
+      {
+        id: 'INC001', parent: 'EVT-2019-11-HULIMAVU', date: '2019-11-24', pubDate: '2019-11-25',
+        category: 'BREACH', typeLabel: 'Lake Bund Breach (Source Embankment)',
+        location: 'Hulimavu Lake Western/NW Bund, Ward 193 Arekere',
+        site: 'Hulimavu Lake Road, Hulimavu, Bengaluru 560076',
+        lat: 12.8712172, lon: 77.6027994,
+        admin: 'INSIDE', inBox: 'YES', status: 'PARTIALLY_VERIFIED',
+        desc: 'Unauthorized excavation on Hulimavu Lake bund caused embankment collapse around 1:00 PM IST, releasing water 2 km downstream.',
+        sourceTitle: 'Times of India (2019-11-25)',
+        sourceUrl: 'https://timesofindia.indiatimes.com/city/bengaluru/karnataka-hulimavu-lake-breach-hits-1000-families-sinks-300-cars/articleshow/72215744.cms',
+        notes: 'Marks verified lake bund on Hulimavu Lake Rd; marked PARTIALLY_VERIFIED as exact 10m contractor cut is not sub-meter surveyed.'
+      },
+      {
+        id: 'INC002', parent: 'EVT-2019-11-HULIMAVU', date: '2019-11-24', pubDate: '2019-11-25',
+        category: 'OVERFLOW', typeLabel: 'Downstream Residential Flood Inundation',
+        location: 'Krishna Layout & Avani Sringeri Nagar, Hulimavu',
+        site: '1st Main 3rd Cross, Hulimavu Lake Rd, Krishna Layout, Bengaluru 560076',
+        lat: 12.8767567, lon: 77.6026690,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: 'Over 800 homes and 300 cars submerged in 2–4 ft of water across Krishna Layout, DLF Rd, Saraswathipura, and BTM 4th Stage.',
+        sourceTitle: 'The Hindu (2019-11-25)',
+        sourceUrl: 'https://www.thehindu.com/news/cities/bangalore/clean-up-efforts-begin-after-hulimavu-lake-breach/article30074583.ece',
+        notes: 'Separates downstream inundated residential enclave from Hulimavu Lake source.'
+      },
+      {
+        id: 'INC003', parent: 'EVT-2019-10-MONSOON', date: '2019-10-10', pubDate: '2019-10-10',
+        category: 'BREACH', typeLabel: 'Lake Bund Breach & Residential Inundation',
+        location: 'Doddabidarakallu Lake & Bhavani Nagar, Nagasandra',
+        site: '73 Tippenahalli Main Rd, Maranna Layout, Doddabidarakallu, Bengaluru 560073',
+        lat: 13.0367328, lon: 77.4874235,
+        admin: 'INSIDE', inBox: 'YES', status: 'PARTIALLY_VERIFIED',
+        desc: '110 mm night rain ruptured Doddabidarakallu Lake corner bund at 2:00 AM, flooding 500 houses in Bhavani Nagar & adjacent layouts up to 6 ft.',
+        sourceTitle: 'The Hindu (2019-10-10)',
+        sourceUrl: 'https://www.thehindu.com/news/cities/bangalore/lake-breached-owing-to-heavy-rain-in-north-bengaluru-hundreds-of-houses-inundated/article29649697.ece',
+        notes: 'Inside BBMP Ward 40 (Dasarahalli Zone). Civic reference point adjacent to breached southern/eastern bund.'
+      },
+      {
+        id: 'INC004', parent: 'EVT-2019-11-HOSAKEREHALLI', date: '2019-11-10', pubDate: '2019-11-11',
+        category: 'BREACH', typeLabel: 'Lake Bund Breach & Roadway Flooding',
+        location: 'Hosakerehalli Lake & Pushpagiri Layout, Banashankari',
+        site: 'Hosakerehalli Lake Embankment & Kerekodi Main Rd, Bengaluru 560085',
+        lat: 12.9259014, lon: 77.5344728,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: 'Corner bund cut by BDA contractor for SWD pipe breached at 2:00 AM Sunday, flooding Pushpagiri Layout and Kerekodi Road underpass.',
+        sourceTitle: 'The News Minute (2019-11-11)',
+        sourceUrl: 'https://www.thenewsminute.com/karnataka/overnight-hosakerehalli-lake-breach-floods-low-lying-houses-south-bengaluru-112108',
+        notes: 'Inside BBMP Ward 160 Hosakerehalli.'
+      },
+      {
+        id: 'INC005', parent: 'EVT-2021-11-NORTHBLR', date: '2021-11-21', pubDate: '2021-11-23',
+        category: 'OVERFLOW', typeLabel: 'Lake Overflow & Apartment Complex Inundation',
+        location: 'Kendriya Vihar Apartments, Yelahanka',
+        site: 'Bellary Rd (NH-44) Service Rd, Venkatala Village, Yelahanka, Bengaluru 560064',
+        lat: 13.1063301, lon: 77.6006842,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '138 mm rain in 3 hrs caused Yelahanka Lake and 8-ft rajakaluve to submerge Kendriya Vihar (603 flats) under 4–5 ft of water; NDRF boat rescues.',
+        sourceTitle: 'The Hindu (2021-11-23)',
+        sourceUrl: 'https://www.thehindu.com/news/cities/bangalore/bengaluru-rain-fury-kendriya-vihar-flooded-again-residents-rescued-by-ndrf/article37636520.ece',
+        notes: 'Exact gated residential complex footprint in BBMP Yelahanka Zone.'
+      },
+      {
+        id: 'INC006', parent: 'EVT-2021-11-NORTHBLR', date: '2021-11-21', pubDate: '2021-11-23',
+        category: 'OVERFLOW', typeLabel: 'Lake Overflow & Institutional Campus Flooding',
+        location: 'JNCASR Campus & Jakkur Lake Periphery, Jakkur',
+        site: 'JNCASR Campus, Rachenahalli Lake Rd, Jakkur, Bengaluru 560064',
+        lat: 13.0680870, lon: 77.6102647,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: 'Jakkur Lake overflowed from upstream inflows, flooding JNCASR campus and adjacent apartment basements in Jakkur.',
+        sourceTitle: 'Times of India (2021-11-23)',
+        sourceUrl: 'https://timesofindia.indiatimes.com/city/bengaluru/four-lakes-in-north-bengaluruoverflow-flood-adjacent-areas/articleshow/87858217.cms',
+        notes: 'Inside BBMP Ward 5 Jakkur.'
+      },
+      {
+        id: 'INC007', parent: 'EVT-2021-11-NORTHBLR', date: '2021-11-21', pubDate: '2021-11-23',
+        category: 'OVERFLOW', typeLabel: 'Lake Overflow & Roadway/Layout Flooding',
+        location: 'Singapura Lake & Simhadri Layout, Vidyaranyapura',
+        site: 'Singapura Lake Outflow, Dr Ambedkar Main Rd, Singapura, Bengaluru 560097',
+        lat: 13.0843625, lon: 77.5382031,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '66-acre Singapura Lake overflowed due to blocked SWD, submerging Singapura roads under 2 ft of water and stripping asphalt in Simhadri Layout.',
+        sourceTitle: 'Times of India (2021-11-23)',
+        sourceUrl: 'https://timesofindia.indiatimes.com/city/bengaluru/four-lakes-in-north-bengaluruoverflow-flood-adjacent-areas/articleshow/87858217.cms',
+        notes: 'Inside BBMP Yelahanka Zone.'
+      },
+      {
+        id: 'INC008', parent: 'EVT-2022-09-DELUGE', date: '2022-09-05', pubDate: '2022-09-05',
+        category: 'URBAN_FLOOD', typeLabel: 'Urban Flash Flooding & Layout Inundation',
+        location: 'Rainbow Drive Layout, Sarjapur Road, Doddakannelli',
+        site: 'Rainbow Drive Main Entrance Gate & SWD Culvert, Sarjapur Main Rd, Bengaluru 560035',
+        lat: 12.9091400, lon: 77.6868717,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '131.6 mm deluge inundated Rainbow Drive Layout under 4–5 ft of water; firefighters and SDRF evacuated residents on boats and tractors.',
+        sourceTitle: 'The Hindu (2022-09-05)',
+        sourceUrl: 'https://www.thehindu.com/news/national/karnataka/bengaluru-rains-live-updates-flooded-roads-homes-orr-techies-given-work-from-home-to-avoid-traffic/article65853050.ece',
+        notes: 'Inside BBMP Mahadevapura Zone (Ward 150 Bellandur).'
+      },
+      {
+        id: 'INC009', parent: 'EVT-2022-09-DELUGE', date: '2022-09-05', pubDate: '2022-09-06',
+        category: 'URBAN_FLOOD', typeLabel: 'Arterial Highway & Tech Corridor Submergence',
+        location: 'Outer Ring Road (ORR) at RMZ Ecospace / Kadubeesanahalli',
+        site: 'ORR Service Road & Culvert between RMZ Ecospace and Kadubeesanahalli Bridge, Bengaluru 560103',
+        lat: 12.9412978, lon: 77.6958067,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: 'Bellandur–Varthur SWD backflow submerged the ORR IT corridor outside RMZ Ecospace, marooning tech parks and halting traffic.',
+        sourceTitle: 'Times of India (2022-09-06)',
+        sourceUrl: 'https://timesofindia.indiatimes.com/city/bengaluru/75-areas-hit-third-heaviest-rainfall-in-september-in-bengaluru-in-75-years/articleshow/94013558.cms',
+        notes: 'Inside BBMP Ward 150 Bellandur.'
+      },
+      {
+        id: 'INC010', parent: 'EVT-2022-10-MONSOON', date: '2022-10-19', pubDate: '2022-10-20',
+        category: 'COLLAPSE', typeLabel: 'Rain-Induced Retaining Wall Collapse & Waterlogging',
+        location: 'BMRCL Namma Metro Wall near Mantri Mall, Seshadripuram',
+        site: 'No. 1 Sampige Rd, Seshadripuram / Malleshwaram, Bengaluru 560003',
+        lat: 12.9916302, lon: 77.5711719,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '60.5 mm overnight downpour caused BMRCL Namma Metro retaining wall and metal fencing near Mantri Mall to collapse onto parked cars.',
+        sourceTitle: 'The Hindu (2022-10-20)',
+        sourceUrl: 'https://www.thehindu.com/news/cities/bangalore/heavy-rain-batters-bengaluru-roads-flooded-and-vehicles-damaged-yellow-alert-continues/article66035136.ece',
+        notes: 'Inside BBMP West Zone (Seshadripuram/Malleshwaram).'
+      },
+      {
+        id: 'INC011', parent: 'EVT-2024-08-OVERNIGHT', date: '2024-08-12', pubDate: '2024-08-12',
+        category: 'URBAN_FLOOD', typeLabel: 'Railway Underpass Submergence & Arterial Cut-Off',
+        location: 'Panathur Railway Under Bridge (PUB), Panathur',
+        site: 'Panathur Railway Underpass, Panathur Main Rd, Bengaluru 560087',
+        lat: 12.9361082, lon: 77.7075665,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '74 mm overnight rain flooded Panathur Railway Under Bridge (PUB) and Balagere Road due to blocked SWDs feeding Varthur Lake.',
+        sourceTitle: 'The Indian Express (2024-08-12)',
+        sourceUrl: 'https://indianexpress.com/article/cities/bangalore/bengaluru-flooded-overnight-rain-traffic-crawl-9509722/',
+        notes: 'Inside BBMP Mahadevapura Zone (Ward 149 Varthur).'
+      },
+      {
+        id: 'INC012', parent: 'EVT-2024-10-CLOUDBURST', date: '2024-10-21', pubDate: '2024-10-23',
+        category: 'BREACH', typeLabel: 'Lake Bund Breach & Multi-Layout/ORR Inundation',
+        location: 'Doddabommasandra Lake, Vidyaranyapura / Kodigehalli',
+        site: 'Doddabommasandra Lake Eastern Bund & Park, Vidyaranyapura, Bengaluru 560097',
+        lat: 13.0662633, lon: 77.5603290,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: 'Record 186.2 mm GKVK rainfall caused Doddabommasandra Lake bund to breach for the first time in 17–18 years, flooding Tata Nagar, Kodigehalli & BEL–Hebbal ORR.',
+        sourceTitle: 'The Indian Express (2024-10-23)',
+        sourceUrl: 'https://indianexpress.com/article/cities/bangalore/rainfall-north-bengaluru-breach-two-lakes-yelahanka-zone-9634106/',
+        notes: 'Inside BBMP Yelahanka Lake Zone (Ward 10 Doddabommasandra).'
+      },
+      {
+        id: 'INC013', parent: 'EVT-2024-10-CLOUDBURST', date: '2024-10-21', pubDate: '2024-10-23',
+        category: 'BREACH', typeLabel: 'Lake Bank Breach & Apartment Evacuation',
+        location: 'Kogilu Lake & Kendriya Vihar Service Rd, Yelahanka',
+        site: 'Kogilu Lake Western Bund & Walkway, Maruthi Nagar, Yelahanka, Bengaluru 560064',
+        lat: 13.1099922, lon: 77.6136315,
+        admin: 'INSIDE', inBox: 'YES', status: 'VERIFIED',
+        desc: '40.4-acre Kogilu Lake breached/overflowed during the 186.2 mm cloudburst, inundating Kendriya Vihar (8-day evacuation) and closing NH-44 service road.',
+        sourceTitle: 'The Indian Express (2024-10-23)',
+        sourceUrl: 'https://indianexpress.com/article/cities/bangalore/rainfall-north-bengaluru-breach-two-lakes-yelahanka-zone-9634106/',
+        notes: 'Inside BBMP Yelahanka Zone (Ward 1 Kempegowda).'
+      }
+    ];
+
+    const excludedIncidents = [
+      {
+        id: 'EXC001', date: '2019-05-28', site: 'Kadugodi / FCI Railway Underpass (BBMP Ward 83)',
+        admin: 'INSIDE', inBox: 'NO', lat: 12.9953617, lon: 77.7668941, status: 'VERIFIED',
+        reason: 'Inside BBMP Ward 83 (Kadugodi), but Lon 77.7669°E is ~1.83 km east of study rectangle limit (77.75°E).',
+        url: 'https://timesofindia.indiatimes.com/city/bengaluru/kadugodi-underpass-turns-into-a-cesspool-bbmp-railways-trade-blame/articleshow/69571411.cms'
+      },
+      {
+        id: 'EXC002', date: '2017-09-27', site: 'Sai Gardens Community, Seegehalli Gram Panchayat',
+        admin: 'OUTSIDE', inBox: 'NO', lat: null, lon: null, status: 'NEEDS_REVIEW',
+        reason: 'Confirmed by TOI as inside Seegehalli Gram Panchayat (outside BBMP limits) and east of Lon 77.75°E.',
+        url: 'https://timesofindia.indiatimes.com/city/bengaluru/gated-community-in-seegehalli-turns-into-ghost-town/articleshow/60877433.cms'
+      },
+      {
+        id: 'EXC003', date: '2022-09-05', site: 'BWSSB Cauvery Pumping Station, Torekadanahalli (Mandya Dist.)',
+        admin: 'OUTSIDE', inBox: 'NO', lat: 12.4146130, lon: 77.1978668, status: 'VERIFIED',
+        reason: 'Co-reported in Sept 2022 Bengaluru flood news (halted city water), but located 100 km away in Mandya District.',
+        url: 'https://timesofindia.indiatimes.com/city/bengaluru/75-areas-hit-third-heaviest-rainfall-in-september-in-bengaluru-in-75-years/articleshow/94013558.cms'
+      },
+      {
+        id: 'EXC004', date: '2019-10-10', site: 'Madavara Village (Neighbouring Doddabidarakallu)',
+        admin: 'OUTSIDE', inBox: 'NEEDS_REVIEW', lat: null, lon: null, status: 'NEEDS_REVIEW',
+        reason: 'Explicitly noted by The Hindu as outside BBMP limits; exact village dumping/damage coordinate unspecified.',
+        url: 'https://www.thehindu.com/news/cities/bangalore/breach-in-doddabidarakallu-lake-residents-blame-poor-civic-infrastructure-for-flooding/article29659908.ece'
+      },
+      {
+        id: 'EXC005', date: '2024-10-22', site: 'Babusapalya Under-Construction Building Collapse (Ward 25)',
+        admin: 'INSIDE', inBox: 'YES', lat: null, lon: null, status: 'NEEDS_REVIEW',
+        reason: 'Inside BBMP & study box, but exact B-Kharab plot coordinate unverified in news; locality centroid rejected.',
+        url: 'https://www.thehindu.com/news/cities/bangalore/collapsed-building-in-bengalurus-babusapalya-illegal-and-built-on-b-kharab-land-says-bbmp/article68787741.ece'
+      },
+      {
+        id: 'EXC006', date: '2022-09-05', site: 'Sultanpet Flooded Street Open Manhole Fatality (Ward 109)',
+        admin: 'INSIDE', inBox: 'YES', lat: null, lon: null, status: 'NEEDS_REVIEW',
+        reason: 'Inside BBMP & study box, but exact street/manhole coordinate unspecified; locality centroid rejected.',
+        url: 'https://timesofindia.indiatimes.com/city/bengaluru/75-areas-hit-third-heaviest-rainfall-in-september-in-bengaluru-in-75-years/articleshow/94013558.cms'
+      }
+    ];
+
+    // Initialize Leaflet Map
+    const map = L.map('map').setView([13.00, 77.60], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors | Bengaluru Emergency MST Research'
+    }).addTo(map);
+
+    // Draw Provisional Project Study Rectangle (Lat 12.85 to 13.15, Lon 77.45 to 77.75)
+    const studyBounds = [[12.85, 77.45], [13.15, 77.75]];
+    const studyRectLayer = L.rectangle(studyBounds, {
+      color: '#1d4ed8', weight: 2.5, dashArray: '8, 6', fillColor: '#3b82f6', fillOpacity: 0.06
+    }).addTo(map);
+    studyRectLayer.bindTooltip('Provisional Study Rectangle (12.85°N–13.15°N, 77.45°E–77.75°E)', { sticky: true });
+
+    // Haversine function for MST calculation
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371.0;
+      const toRad = d => d * Math.PI / 180.0;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // Compute Prim's MST on the 13 study-area points
+    const mstLayerGroup = L.layerGroup().addTo(map);
+    let mstVisible = true;
+    function renderMST(points) {
+      mstLayerGroup.clearLayers();
+      if (points.length < 2) return 0;
+      const n = points.length;
+      const inMST = new Array(n).fill(false);
+      inMST[0] = true;
+      let totalKm = 0;
+      for (let step = 0; step < n - 1; step++) {
+        let bestD = Infinity, uIdx = -1, vIdx = -1;
+        for (let u = 0; u < n; u++) {
+          if (inMST[u]) {
+            for (let v = 0; v < n; v++) {
+              if (!inMST[v]) {
+                const d = haversineKm(points[u].lat, points[u].lon, points[v].lat, points[v].lon);
+                if (d < bestD) { bestD = d; uIdx = u; vIdx = v; }
+              }
+            }
+          }
+        }
+        if (vIdx !== -1) {
+          inMST[vIdx] = true;
+          totalKm += bestD;
+          const line = L.polyline([[points[uIdx].lat, points[uIdx].lon], [points[vIdx].lat, points[vIdx].lon]], {
+            color: '#059669', weight: 2.5, opacity: 0.8, dashArray: '4, 4'
+          });
+          line.bindTooltip(`MST Edge: ${points[uIdx].id} ↔ ${points[vIdx].id} (${bestD.toFixed(2)} km)`);
+          mstLayerGroup.addLayer(line);
+        }
+      }
+      return totalKm;
+    }
+
+    const markersLayer = L.layerGroup().addTo(map);
+    const excludedLayer = L.layerGroup();
+    let showExcluded = false;
+    const markerMap = {};
+
+    function getCategoryColor(item) {
+      if (item.status === 'PARTIALLY_VERIFIED') return '#d97706';
+      switch (item.category) {
+        case 'BREACH': return '#dc2626';
+        case 'OVERFLOW': return '#2563eb';
+        case 'URBAN_FLOOD': return '#0d9488';
+        case 'COLLAPSE': return '#7c3aed';
+        default: return '#334155';
+      }
+    }
+
+    function renderStudyMarkers() {
+      const catFilter = document.getElementById('filterCategory').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      markersLayer.clearLayers();
+      const listContainer = document.getElementById('incidentListContainer');
+      listContainer.innerHTML = '';
+
+      const filtered = studyIncidents.filter(item => {
+        const matchCat = (catFilter === 'ALL') || (item.category === catFilter);
+        const matchStatus = (statusFilter === 'ALL') || (item.status === statusFilter);
+        return matchCat && matchStatus;
+      });
+
+      document.getElementById('visibleCountBadge').textContent = `${filtered.length} shown`;
+
+      filtered.forEach(item => {
+        const bg = getCategoryColor(item);
+        const isPartial = item.status === 'PARTIALLY_VERIFIED';
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="custom-marker ${isPartial ? 'marker-review' : ''}" style="background:${bg};width:28px;height:28px;">${item.id.replace('INC0','')}</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -14]
+        });
+
+        const popupHtml = `
+          <div class="text-xs space-y-1.5 max-w-xs">
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1">
+              <span class="font-bold text-slate-900">${item.id} (${item.date})</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold ${isPartial ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${item.status}</span>
+            </div>
+            <div class="font-semibold text-blue-900">${item.typeLabel}</div>
+            <div class="text-slate-700"><strong>Site:</strong> ${item.site}</div>
+            <div class="text-slate-600">${item.desc}</div>
+            <div class="bg-slate-50 p-1.5 rounded border border-slate-200 font-mono text-[11px]">
+              Lat: ${item.lat.toFixed(6)}, Lon: ${item.lon.toFixed(6)}<br/>
+              BBMP: ${item.admin} | Study Box: ${item.inBox}
+            </div>
+            <div class="text-[11px] text-slate-500"><strong>Parent Event:</strong> ${item.parent}</div>
+            <div class="pt-1">
+              <a href="${item.sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">Primary Source: ${item.sourceTitle} &rarr;</a>
+            </div>
+          </div>
+        `;
+
+        const m = L.marker([item.lat, item.lon], { icon }).bindPopup(popupHtml);
+        markersLayer.addLayer(m);
+        markerMap[item.id] = m;
+
+        // Create sidebar card
+        const card = document.createElement('div');
+        card.className = 'p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 bg-white cursor-pointer transition shadow-sm';
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-1">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${bg}"></span>
+              <span class="font-bold text-xs text-slate-900">${item.id}</span>
+              <span class="text-[11px] text-slate-500">${item.date}</span>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded font-medium ${isPartial ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'}">${item.status}</span>
+          </div>
+          <div class="text-xs font-semibold text-slate-800 mt-1">${item.location}</div>
+          <div class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">${item.desc}</div>
+          <div class="flex items-center justify-between mt-1.5 pt-1 border-t border-slate-100 text-[10px] font-mono text-slate-500">
+            <span>${item.lat.toFixed(4)}°N, ${item.lon.toFixed(4)}°E</span>
+            <span class="text-blue-600 font-sans font-medium">${item.parent}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          map.setView([item.lat, item.lon], 14);
+          m.openPopup();
+        });
+        listContainer.appendChild(card);
+      });
+
+      const mstKm = renderMST(filtered);
+      const mstBtn = document.getElementById('btnToggleMST');
+      mstBtn.textContent = mstVisible ? `MST Overlay: ON (${mstKm.toFixed(1)} km)` : 'MST Overlay: OFF';
+    }
+
+    // Populate Excluded Markers & Table
+    function initExcluded() {
+      const tbody = document.getElementById('excludedTableBody');
+      tbody.innerHTML = '';
+      excludedIncidents.forEach(ex => {
+        if (ex.lat !== null && ex.lon !== null) {
+          const icon = L.divIcon({
+            className: '',
+            html: `<div class="custom-marker" style="background:#64748b;width:28px;height:28px;border:2px dashed #fff;">${ex.id.replace('EXC0','X')}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+          });
+          const m = L.marker([ex.lat, ex.lon], { icon }).bindPopup(`
+            <div class="text-xs space-y-1 max-w-xs">
+              <div class="font-bold text-red-700">${ex.id} — EXCLUDED FROM STUDY AREA</div>
+              <div class="font-semibold">${ex.site} (${ex.date})</div>
+              <div class="text-slate-600">${ex.reason}</div>
+              <div class="font-mono text-[11px] bg-slate-100 p-1 rounded">Lat: ${ex.lat}, Lon: ${ex.lon} | BBMP: ${ex.admin} | In Box: ${ex.inBox}</div>
+              <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold block pt-1">View Source Article &rarr;</a>
+            </div>
+          `);
+          excludedLayer.addLayer(m);
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+        const coordText = (ex.lat !== null) ? `<button data-lat="${ex.lat}" data-lon="${ex.lon}" class="zoom-excl text-blue-600 hover:underline font-mono">${ex.lat.toFixed(4)}, ${ex.lon.toFixed(4)}</button>` : '<span class="text-amber-700 italic">Blank (NEEDS_REVIEW)</span>';
+        tr.innerHTML = `
+          <td class="py-1.5 px-2 font-bold text-slate-800">${ex.id}</td>
+          <td class="py-1.5 px-2 whitespace-nowrap text-slate-600">${ex.date}</td>
+          <td class="py-1.5 px-2 font-medium text-slate-800"><a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-700">${ex.site}</a></td>
+          <td class="py-1.5 px-2"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold ${ex.admin === 'INSIDE' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}">${ex.admin}</span></td>
+          <td class="py-1.5 px-2 font-mono text-[11px]">${ex.inBox}</td>
+          <td class="py-1.5 px-2 whitespace-nowrap">${coordText}</td>
+          <td class="py-1.5 px-2 text-slate-600">${ex.reason}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.zoom-excl').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const lat = parseFloat(e.currentTarget.getAttribute('data-lat'));
+          const lon = parseFloat(e.currentTarget.getAttribute('data-lon'));
+          if (!showExcluded) {
+            showExcluded = true;
+            map.addLayer(excludedLayer);
+            document.getElementById('btnToggleExcl').textContent = 'Hide Excluded Points';
+          }
+          map.setView([lat, lon], 13);
+        });
+      });
+    }
+
+    // Event Listeners
+    document.getElementById('filterCategory').addEventListener('change', renderStudyMarkers);
+    document.getElementById('filterStatus').addEventListener('change', renderStudyMarkers);
+
+    document.getElementById('btnFitStudy').addEventListener('click', () => {
+      map.fitBounds(studyBounds, { padding: [20, 20] });
+    });
+
+    document.getElementById('btnToggleMST').addEventListener('click', () => {
+      mstVisible = !mstVisible;
+      if (mstVisible) {
+        map.addLayer(mstLayerGroup);
+      } else {
+        map.removeLayer(mstLayerGroup);
+      }
+      renderStudyMarkers();
+    });
+
+    document.getElementById('btnToggleExcl').addEventListener('click', (e) => {
+      showExcluded = !showExcluded;
+      if (showExcluded) {
+        map.addLayer(excludedLayer);
+        e.currentTarget.textContent = 'Hide Excluded Points';
+        map.fitBounds([[12.40, 77.18], [13.16, 77.78]], { padding: [20, 20] });
+      } else {
+        map.removeLayer(excludedLayer);
+        e.currentTarget.textContent = 'Show Excluded Points';
+        map.fitBounds(studyBounds, { padding: [20, 20] });
+      }
+    });
+
+    // Initial Render
+    renderStudyMarkers();
+    initExcluded();
+    map.fitBounds(studyBounds, { padding: [20, 20] });
+  </script>
+</body>
+</html>

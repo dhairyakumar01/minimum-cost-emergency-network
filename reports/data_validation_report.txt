@@ -1,0 +1,23 @@
+MINIMUM-COST EMERGENCY COMMUNICATION NETWORK — INITIAL FACILITY VALIDATION
+==========================================================================
+
+Total records combined: 1255
+Study-area check used: provisional rectangle lat 12.85–13.15, lon 77.45–77.75.
+This is a collection rectangle, not an official Bengaluru municipal boundary.
+
+hospitals_raw.geojson (hospital): 1097 records; missing names=16; missing/unreadable coordinates=0; invalid coordinate ranges=0; outside provisional rectangle=0; missing source IDs=0
+  SHA-256: 37eaf205f9c96c369e55cb7d1528d32e8a4e43cc0367d4e687f339aeb5b571ac
+fire_stations_raw.geojson (fire_station): 20 records; missing names=1; missing/unreadable coordinates=0; invalid coordinate ranges=0; outside provisional rectangle=0; missing source IDs=0
+  SHA-256: 1a0fdf0ab4d6a0df4278e672d4b4822ca059cbc67eae86b530383629bbca9b12
+police_stations_raw.geojson (police_station): 138 records; missing names=7; missing/unreadable coordinates=0; invalid coordinate ranges=0; outside provisional rectangle=1; missing source IDs=0
+  SHA-256: 278cb719a468cbf715ab9c50626df20a9f9a0003a7351075e0936fa847b9c354
+
+Review flags generated: 99
+Review flags can overlap; they are not necessarily unique records.
+
+Interpretation and limitations:
+- These are basic structural and coordinate checks, not proof that records are accurate, complete, current, or unique physical facilities.
+- Records with missing names or review flags were retained; no automatic deduplication or deletion was performed.
+- The GeoJSON exports are treated as OpenStreetMap-derived based on the supplied files; exact collection dates and query history were not provided, so these remain unrecorded.
+- Some geometries may be represented by center points in the export.
+- Check OpenStreetMap attribution and applicable ODbL requirements before publishing or redistributing.

@@ -1,0 +1,232 @@
+{
+  "nav_links": [
+    "\ud83d\udccaDashboard",
+    "\ud83d\uddfa\ufe0fFacilities Map",
+    "\ud83d\udd78\ufe0fMST Network",
+    "\ud83d\udea8Emergency Simulation",
+    "\ud83d\udcc8Project Analysis & Results",
+    "\ud83d\udcb0Cost Analysis"
+  ],
+  "dashboard_metrics": {
+    "TOTAL FACILITIES": "1,255",
+    "HOSPITALS & CLINICS": "1,097",
+    "POLICE STATIONS": "138",
+    "FIRE STATIONS": "20",
+    "CONNECTIONS IN MST": "1,254",
+    "TOTAL MST LENGTH": "480.1784 km"
+  },
+  "map_search_phoenix": "2 match(es) found",
+  "map_search_negative_verified": true,
+  "mst_vertex_search": "Success",
+  "sim_search_results": {
+    "Lalbagh": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Lalbagh Botanical Garden, Bengaluru\n    \n        Coordinates: 12.94653\u00b0N, 77.58004\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Lal Bagh": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Lalbagh Botanical Garden, Bengaluru\n    \n        Coordinates: 12.94653\u00b0N, 77.58004\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Majestic": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Kempegowda Bus Station (Majestic), Bengaluru\n    \n        Coordinates: 12.97818\u00b0N, 77.57218\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Indiranagr": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Indiranagar 100 Feet Road, Bengaluru\n    \n        Coordinates: 12.97329\u00b0N, 77.64047\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Whitefeild": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Whitefield (Kadugodi / ITPL Corridor), Bengaluru\n    \n        Coordinates: 12.99574\u00b0N, 77.75795\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Konankunte": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Forum Mall, Konankunte Cross (South Bengaluru)\n    \n        Coordinates: 12.89060\u00b0N, 77.57500\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Konanakunte": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Konanakunte Cross, Kanakapura Road, Bengaluru\n    \n        Coordinates: 12.88894\u00b0N, 77.56270\u00b0E \u00a0\u00b7\u00a0 Source: Verified Bengaluru Landmark Registry \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Silk Institute": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Silk Institute, Kanakapura Road, Talagattapura, Bengaluru South City Corporation, Bengaluru, Bangalore South, Bengaluru Urban, Karnataka, 560062, India\n    \n        Coordinates: 12.86167\u00b0N, 77.52995\u00b0E \u00a0\u00b7\u00a0 Source: OpenStreetMap Nominatim (Query: 'silk institute') \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency",
+    "Jayanagar Metro": "Confirmed Incident Location\n        Tree Backbone: Prim\n    \n    Jayanagara Metro Station, 30th Cross Road, Geetha Colony, Jayanagar 4th Block, Byrasandra, Bengaluru South City Corporation, Bengaluru, Bangalore South, Bengaluru Urban, Karnataka, 560011, India\n    \n        Coordinates: 12.92877\u00b0N, 77.58034\u00b0E \u00a0\u00b7\u00a0 Source: OpenStreetMap Nominatim (Query: 'jayanagar metro') \u00a0\u00b7\u00a0 Active Scenario: Medical Emergency"
+  },
+  "project_analysis_headings": [
+    "Section A \u2014 Project Network Overview",
+    "Section B \u2014 MST Algorithm Analysis (Prim vs Kruskal)",
+    "Section C \u2014 Computational Performance (Controlled Same-Machine Benchmark)",
+    "Section D \u2014 Emergency Response Analysis (Standard Dispatch Scenarios)",
+    "Section E \u2014 Prim versus Kruskal: Emergency Efficiency Comparison",
+    "Section F \u2014 Key Project Findings"
+  ],
+  "cost_analysis_headings": [
+    "Section A \u2014 Transportation Cost Model & Methodology",
+    "Section B \u2014 Vehicle Operating Cost Comparison & Component Breakdown",
+    "Section C \u2014 Emergency Scenario Dispatch Expenditure",
+    "Section D \u2014 Multidimensional Sensitivity Analysis Across Operating Conditions",
+    "Section E \u2014 Research Evidence & Statutory References"
+  ],
+  "audit_timestamp": "2026-11-10T08:46:25.172958+05:30",
+  "overall_status": "PASS WITH QUALIFICATIONS",
+  "acceptance_verdict": "READY FOR ACADEMIC SUBMISSION",
+  "browser_checks": {
+    "total_checks": 26,
+    "passed_checks": 26,
+    "failed_checks": 0,
+    "skipped_checks": 0,
+    "details": [
+      {
+        "page": "Dashboard",
+        "check": "Sidebar 6 navigation links without Experimental Laboratory",
+        "status": "PASSED"
+      },
+      {
+        "page": "Dashboard",
+        "check": "Accurate metrics: 1,255 facilities, 1,097 hosp, 138 police, 20 fire, 1,254 MST edges, 480.1784 km",
+        "status": "PASSED"
+      },
+      {
+        "page": "Facilities Map",
+        "check": "Positive search query 'Phoenix Hospital' returns matching facilities",
+        "status": "PASSED"
+      },
+      {
+        "page": "Facilities Map",
+        "check": "Negative search query displays user-facing no-match warning",
+        "status": "PASSED"
+      },
+      {
+        "page": "MST Network",
+        "check": "Kruskal algorithm button toggle and active state badge",
+        "status": "PASSED"
+      },
+      {
+        "page": "MST Network",
+        "check": "Prim algorithm button toggle and active state badge",
+        "status": "PASSED"
+      },
+      {
+        "page": "MST Network",
+        "check": "Edge filtering by facility name ('Victoria') and connection dropdown",
+        "status": "PASSED"
+      },
+      {
+        "page": "MST Network",
+        "check": "Vehicle profile selection interaction and illustrative cost computation",
+        "status": "PASSED"
+      },
+      {
+        "page": "MST Network",
+        "check": "Facility vertex search interaction and selected vertex details card",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Simulation Prim/Kruskal toggle switch and active badges",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Reset simulation button restores clean initial state",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Landmark searches (Lalbagh, Majestic, fuzzy Indiranagr, Whitefeild, Konankunte, Silk Institute)",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Invalid landmark search error banner handling without silent fallback",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Emergency type selector interaction (Fire Emergency updates primary responder to Fire Station)",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Vehicle Dispatch & Transportation Comparison Table rendering",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Multi-agency aggregate transportation card with prominent unclipped layout",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Side-by-side Prim vs Kruskal network comparison view mode and controls",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Side-by-side dual Folium maps rendering (Prim Blue and Kruskal Purple)",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Algorithmic & Topological Comparison Table rendering",
+        "status": "PASSED"
+      },
+      {
+        "page": "Emergency Simulation",
+        "check": "Automated Academic Interpretation and DMGT insights rendering",
+        "status": "PASSED"
+      },
+      {
+        "page": "Project Analysis",
+        "check": "Sections A through F verified present and Section G confirmed removed",
+        "status": "PASSED"
+      },
+      {
+        "page": "Project Analysis",
+        "check": "Controlled environment benchmark display and Prim vs Kruskal comparison tables",
+        "status": "PASSED"
+      },
+      {
+        "page": "Cost Analysis",
+        "check": "Sections A through E structure and academic framing verified",
+        "status": "PASSED"
+      },
+      {
+        "page": "Cost Analysis",
+        "check": "Visualizations A, B, C, D (rates, breakdown, scenarios, sensitivity) verified",
+        "status": "PASSED"
+      },
+      {
+        "page": "Cost Analysis",
+        "check": "Duplicate findings cleanly removed and consolidated in Project Analysis",
+        "status": "PASSED"
+      },
+      {
+        "page": "Cost Analysis",
+        "check": "Active external clickable hyperlinks to official research sources and media reports",
+        "status": "PASSED"
+      }
+    ]
+  },
+  "test_execution_summary": {
+    "total_collected": 52,
+    "passed": 52,
+    "failed": 0,
+    "skipped": 0,
+    "warnings": 0,
+    "execution_time_seconds": 5.54,
+    "command": "python -m pytest tests/ -v",
+    "academic_caveat": "Passing automated tests verifies software correctness, graph invariants, and arithmetic; it does not prove the empirical truth of input research assumptions."
+  },
+  "research_audit_summary": {
+    "diesel_benchmark_retail_price_inr_per_liter": 88.94,
+    "diesel_benchmark_origin": "Government of Karnataka Finance Department Notification (effective June 15, 2024, sales tax revision to 18.44%; petrol revised to \u20b9102.86/L under 29.84% tax)",
+    "private_ambulance_tariff_cap": {
+      "rate_per_km_beyond_10km_inr": 120.0,
+      "classification": "SECONDARY_SOURCE_REPORTED_STATUTORY_TARIFF_CAP",
+      "issuing_authority": "Karnataka Health & Family Welfare / Transport Department (May 2021)"
+    },
+    "public_fleet_operating_rates": {
+      "ambulance_inr_per_km": 12.5,
+      "police_hoysala_inr_per_km": 10.0,
+      "fire_tender_inr_per_km": 42.0,
+      "classification": "ILLUSTRATIVE_ENGINEERING_DERIVED_ESTIMATES",
+      "unsupported_inputs_disclosed": true
+    },
+    "mst_model_classification": "CONCEPTUAL_MATHEMATICAL_COMMUNICATION_BACKBONE",
+    "index_html_state": "ABSENT_IN_WORKSPACE_EXCLUSIVELY_STREAMLIT_HOSTED"
+  },
+  "tested_pages": [
+    "Dashboard",
+    "Facilities Map",
+    "MST Network Visualization",
+    "Emergency Response Finder",
+    "Project Analysis & Results",
+    "Emergency Transportation Cost Analysis"
+  ],
+  "screenshots": [
+    "screenshots/audit/01_dashboard.png",
+    "screenshots/audit/02_facilities_map.png",
+    "screenshots/audit/03_mst_network.png",
+    "screenshots/audit/04_emergency_simulation.png",
+    "screenshots/audit/05_project_analysis.png",
+    "screenshots/audit/06_cost_analysis.png"
+  ]
+}

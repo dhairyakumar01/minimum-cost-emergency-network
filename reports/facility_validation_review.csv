@@ -1,0 +1,100 @@
+﻿dataset,record_id,issue,details
+hospitals_raw.geojson,way/347236390,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/351121389,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/678066777,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/726095464,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1076618915,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1077744680,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1084220447,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1205832181,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,node/1290125198,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1456924436,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1498008160,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,way/1544831540,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,node/4171032289,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,node/4446268170,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,node/4447119911,missing_name,Name property absent; retained for review
+hospitals_raw.geojson,node/12270754755,missing_name,Name property absent; retained for review
+fire_stations_raw.geojson,node/11939010319,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,way/668612952,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,way/1050574678,outside_provisional_bbox,"lat=12.8842174, lon=77.4498569"
+police_stations_raw.geojson,way/1065763447,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,way/1217247634,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,way/1353870717,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,node/4472318420,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,node/12265548492,missing_name,Name property absent; retained for review
+police_stations_raw.geojson,node/13205997044,missing_name,Name property absent; retained for review
+multiple,way/1544830710 | way/1544831540,shared_coordinates_rounded_6dp,"(12.954158, 77.660837); records retained for review"
+multiple,relation/5397008 | node/7579683247,repeated_normalized_name,sapthagiri hospital; records retained for review
+multiple,way/38536360 | node/7202935829 | node/8188038718,repeated_normalized_name,k c general hospital; records retained for review
+multiple,way/44091445 | node/307401529 | way/347485349,repeated_normalized_name,apollo hospital; records retained for review
+multiple,way/59358741 | way/328758432 | way/347187836 | node/1436177631 | node/2475284844 | node/7576958095 | node/8188038681,repeated_normalized_name,esi hospital; records retained for review
+multiple,way/89781247 | node/8188038553,repeated_normalized_name,esi dispensary; records retained for review
+multiple,way/135262255 | way/160906231 | way/371602983,repeated_normalized_name,manipal hospital; records retained for review
+multiple,way/135266057 | way/164048206,repeated_normalized_name,isolation hospital; records retained for review
+multiple,way/148065730 | node/4849107926,repeated_normalized_name,hosmat hospital; records retained for review
+multiple,way/169801514 | node/4444989840,repeated_normalized_name,sarvodaya hospital; records retained for review
+multiple,way/256940540 | node/7572131816,repeated_normalized_name,nmpc hospital; records retained for review
+multiple,node/267214379 | node/9276855256,repeated_normalized_name,clinic; records retained for review
+multiple,node/303924572 | node/7579924768,repeated_normalized_name,shanti hospital; records retained for review
+multiple,node/308866071 | node/2623332318,repeated_normalized_name,narayana hrudayalaya dental clinic; records retained for review
+multiple,way/331365081 | node/3719549886,repeated_normalized_name,milann fertility center; records retained for review
+multiple,way/333052556 | way/1149213001,repeated_normalized_name,dr agarwal s eye hospital; records retained for review
+multiple,way/334493050 | way/334493056,repeated_normalized_name,sanjay gandhi accident and trauma hospital; records retained for review
+multiple,way/346722362 | node/663604723 | way/1168448945 | node/1794166166,repeated_normalized_name,government primary health centre; records retained for review
+multiple,way/347236718 | node/12956090274,repeated_normalized_name,proteeth dental; records retained for review
+multiple,way/354497944 | node/4509817152 | node/6938695148,repeated_normalized_name,chanre rheumatology and immunology center and research; records retained for review
+multiple,way/360342803 | way/611385979,repeated_normalized_name,manipal hospitals; records retained for review
+multiple,way/401993917 | way/726497370 | node/3607116665 | node/5259407821 | node/7572526703 | node/7572526783 | node/7576958052 | node/7576958066 | node/8188038448 | node/8188038457 | node/8188038473 | node/8188038742 | node/8188038786,repeated_normalized_name,government hospital; records retained for review
+multiple,node/459464857 | node/7179096799,repeated_normalized_name,ramakrishna hospital; records retained for review
+multiple,way/496821816 | node/1101622501 | way/1352267564,repeated_normalized_name,government maternity hospital; records retained for review
+multiple,way/509638758 | node/3773028057,repeated_normalized_name,hcg cancer hospital; records retained for review
+multiple,way/525508983 | node/1871539757,repeated_normalized_name,shirdi sai hospital; records retained for review
+multiple,way/610471335 | node/13065064242,repeated_normalized_name,motherhood; records retained for review
+multiple,way/632111019 | way/1040899015 | way/1108934944,repeated_normalized_name,rainbow children s hospital; records retained for review
+multiple,way/674362377 | way/1110808778,repeated_normalized_name,sparsh hospital; records retained for review
+multiple,way/1039668732 | node/3714125744,repeated_normalized_name,shifa hospital bengaluru urban; records retained for review
+multiple,way/1039760096 | node/1471781028,repeated_normalized_name,diacon hospital; records retained for review
+multiple,way/1039760097 | node/1474819886 | node/4446664412,repeated_normalized_name,fortis hospital; records retained for review
+multiple,way/1081463156 | node/7576958048,repeated_normalized_name,people tree hospitals; records retained for review
+multiple,way/1082139631 | node/4392383890,repeated_normalized_name,apollo cradle; records retained for review
+multiple,way/1088209015 | node/1437213383,repeated_normalized_name,karunalayam hospital; records retained for review
+multiple,way/1193177992 | node/12651832969,repeated_normalized_name,cloud nine; records retained for review
+multiple,way/1442330288 | node/4441961605,repeated_normalized_name,life care hospital; records retained for review
+multiple,node/1466638204 | node/1469314053,repeated_normalized_name,srinivasa nursing home; records retained for review
+multiple,node/1467969798 | node/6937890455,repeated_normalized_name,chaitanya hospital; records retained for review
+multiple,node/1472878021 | node/6939253041 | node/9841433907,repeated_normalized_name,devi eye hospital; records retained for review
+multiple,node/1474449391 | node/7579924779,repeated_normalized_name,spurthy hospital; records retained for review
+multiple,node/1474875685 | node/6939074293,repeated_normalized_name,dr ambedkar medical college hospital; records retained for review
+multiple,node/1905152108 | node/2720498311 | node/4441681632,repeated_normalized_name,kottakkal arya vaidya sala; records retained for review
+multiple,node/2019362244 | node/3268435578,repeated_normalized_name,cloud nine hospital; records retained for review
+multiple,node/4203857493 | node/4447972412,repeated_normalized_name,prashanth hospital; records retained for review
+multiple,node/4349443891 | node/12959840781,repeated_normalized_name,trilife hospital; records retained for review
+multiple,node/4440987271 | node/12767981104,repeated_normalized_name,narayana nethralaya; records retained for review
+multiple,node/4443301971 | node/4446881168,repeated_normalized_name,nrs medical dental specialists centre; records retained for review
+multiple,node/4445213681 | node/4448133411,repeated_normalized_name,welnext; records retained for review
+multiple,node/4445973784 | node/4447978869,repeated_normalized_name,parimala health care; records retained for review
+multiple,node/4446907220 | node/6938783140,repeated_normalized_name,ring road hospital; records retained for review
+multiple,node/4447009524 | node/6947033494,repeated_normalized_name,pristine hospital; records retained for review
+multiple,node/4447142720 | node/6944332151,repeated_normalized_name,dhanush hospital; records retained for review
+multiple,node/4447273084 | node/4447308983,repeated_normalized_name,oxford hospital; records retained for review
+multiple,node/4447985903 | node/7572669024,repeated_normalized_name,springleaf hospital; records retained for review
+multiple,node/4518518893 | node/8188038795,repeated_normalized_name,anupama hospital; records retained for review
+multiple,node/4729472422 | node/6938777910,repeated_normalized_name,national institute of mental health and neuro sciences; records retained for review
+multiple,node/4840185928 | node/6944449930,repeated_normalized_name,cambridge hospital; records retained for review
+multiple,node/5157373807 | node/9739831278,repeated_normalized_name,altius hospital; records retained for review
+multiple,node/6950124287 | node/7572131814,repeated_normalized_name,little flower hospital; records retained for review
+multiple,node/6950185719 | node/7572526710,repeated_normalized_name,sai baba hospital; records retained for review
+multiple,node/7577248279 | node/9884952776,repeated_normalized_name,cloudnine hospital; records retained for review
+multiple,node/7579924762 | node/9874033652,repeated_normalized_name,sahasra hospital; records retained for review
+multiple,node/8188038578 | node/12056743550,repeated_normalized_name,ashwini hospital; records retained for review
+multiple,node/12103684982 | node/13926749740,repeated_normalized_name,apollo cradle children s hospital; records retained for review
+multiple,way/327551781 | node/428843493,repeated_normalized_name,cubbon park police station; records retained for review
+multiple,way/331352075 | node/844462412,repeated_normalized_name,indira nagar police station; records retained for review
+multiple,way/349794011 | node/951203526,repeated_normalized_name,mico layout police station; records retained for review
+multiple,node/663317752 | way/1076398555,repeated_normalized_name,police headquarters; records retained for review
+multiple,way/1030050639 | node/4447422294,repeated_normalized_name,upparpet traffic police station; records retained for review
+multiple,way/1111108766 | node/1118255762,repeated_normalized_name,rajaji nagar police station; records retained for review
+multiple,way/1124828967 | node/5229482744,repeated_normalized_name,high grounds traffic police station; records retained for review
+multiple,node/1472981151 | node/9783706519,repeated_normalized_name,police station; records retained for review
+multiple,node/1500601533 | node/3369937900,repeated_normalized_name,indiranagar traffic police station; records retained for review

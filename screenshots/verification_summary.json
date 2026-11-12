@@ -1,0 +1,81 @@
+{
+  "facility_types": [],
+  "prim_metrics": [
+    {
+      "label": "Facilities in dataset",
+      "value": "1255"
+    },
+    {
+      "label": "Facilities displayed",
+      "value": "1255"
+    },
+    {
+      "label": "Prim MST edges",
+      "value": "1254"
+    },
+    {
+      "label": "Prim MST total straight-line distance",
+      "value": "480.1784 km"
+    },
+    {
+      "label": "Expected MST edges (V - 1)",
+      "value": "1254"
+    },
+    {
+      "label": "Total weight difference",
+      "value": "5.68e-14 km"
+    },
+    {
+      "label": "Validation",
+      "value": "Passed"
+    },
+    {
+      "label": "MST connections drawn",
+      "value": "1254"
+    },
+    {
+      "label": "Edges without matching facility IDs",
+      "value": "0"
+    }
+  ],
+  "kruskal_metrics": [
+    {
+      "label": "Facilities in dataset",
+      "value": "1255"
+    },
+    {
+      "label": "Facilities displayed",
+      "value": "1255"
+    },
+    {
+      "label": "Kruskal MST edges",
+      "value": "1254"
+    },
+    {
+      "label": "Kruskal MST total straight-line distance",
+      "value": "480.1784 km"
+    },
+    {
+      "label": "Expected MST edges (V - 1)",
+      "value": "1254"
+    },
+    {
+      "label": "Total weight difference",
+      "value": "5.68e-14 km"
+    },
+    {
+      "label": "Validation",
+      "value": "Passed"
+    },
+    {
+      "label": "MST connections drawn",
+      "value": "1254"
+    },
+    {
+      "label": "Edges without matching facility IDs",
+      "value": "0"
+    }
+  ],
+  "comparison_table": "MetricPrimKruskalMST edges12541254Total distance (km)480.178398480.178398Median runtime (s), 10 runs5.02931.5811",
+  "validation_table": "CheckPrimKruskaledge_count_is_V_minus_1PassPassendpoints_are_valid_facility_idsPassPassno_self_loopsPassPassweights_finite_and_nonnegativePassPassno_duplicate_edgesPassPassacyclicPassPassconnected_and_spans_all_facilitiesPassPassstored_weights_match_haversinePassPass"
+}

@@ -1,0 +1,233 @@
+{
+  "research_metadata": {
+    "project_title": "Minimum-Cost Emergency Communication Network Using Minimum Spanning Tree (MST)",
+    "course_context": "Discrete Mathematics and Graph Theory (DMGT) Experiential Learning Project",
+    "geographic_scope": "Bengaluru Metropolitan Area, Karnataka, India",
+    "currency": "INR (₹)",
+    "benchmark_retail_diesel_price_inr_per_liter": 88.94,
+    "benchmark_fuel_source": "Government of Karnataka Finance Department Notification (effective June 15, 2024, raising sales tax on diesel from 14.34% to 18.44%, yielding ₹88.94/L in Bengaluru; petrol revised to ₹102.86/L at 29.84%)",
+    "audit_timestamp": "2026-11-09T15:35:00+05:30",
+    "audit_status": "SECONDARY_SOURCE_AUDITED_WITH_EXPLICIT_LIMITATIONS"
+  },
+  "verified_official_statutory_rates": [
+    {
+      "id": "GO_KTK_AMB_CAP_2021",
+      "issuing_authority": "Government of Karnataka, Department of Health & Family Welfare / Transport Department",
+      "document_title": "Notification on Maximum Fare Ceiling for Private Ambulance Services",
+      "order_identifier": "State Government Directives under Karnataka Epidemic Diseases Ordinance / Act, 2020",
+      "publication_date": "May 2021",
+      "statutory_type": "Government Order / Regulated Maximum Consumer Tariff Cap",
+      "target_service": "Private Commercial Ambulance Operators (Patient Transport & Basic Life Support)",
+      "geographic_applicability": "Karnataka State (including Bengaluru Metropolitan Area)",
+      "regulated_rates": {
+        "base_fare_first_10_km_inr": {
+          "patient_transport_ambulance": 1500.0,
+          "basic_life_support_ambulance": 2000.0
+        },
+        "per_km_rate_beyond_10_km_inr": 120.0,
+        "waiting_charges_per_hour_inr": {
+          "patient_transport_ambulance": 200.0,
+          "basic_life_support_ambulance": 250.0
+        }
+      },
+      "cost_components_included": [
+        "Vehicle capital depreciation",
+        "Fuel consumption",
+        "Sanitization and infection control",
+        "Driver and attendant wages",
+        "Medical consumables (PPE kits, masks, gloves)",
+        "Oxygen administration apparatus",
+        "Commercial operator overhead and profit margin"
+      ],
+      "cost_category_classification": "REGULATED_MAXIMUM_CONSUMER_TARIFF_CAP",
+      "is_direct_fleet_operating_expenditure": false,
+      "verification_status": "SECONDARY_SOURCE_REPORTED_STATUTORY_TARIFF_CAP",
+      "source_reference_type": "SECONDARY_MEDIA_REPORTING",
+      "secondary_sources": [
+        "https://thehindu.com/news/national/karnataka/karnataka-caps-ambulance-rates/article34925828.ece",
+        "https://bangaloremirror.indiatimes.com/bangalore/others/state-caps-ambulance-fares/articleshow/82437812.cms",
+        "https://thecanarapost.com/karnataka-government-caps-ambulance-fares-check-rates-here/"
+      ],
+      "regulatory_notes": "Statutory ceiling enforced to prevent private operator price-gouging during public health emergencies. Because the signed government gazette circular PDF is not accessible via open-access portal, this figure is classified as secondary-source reported. It does NOT represent the marginal per-kilometer running cost of operating a state-owned emergency fleet vehicle."
+    }
+  ],
+  "internal_fleet_operating_costs_status": {
+    "ambulance_108_arogya_kavacha": {
+      "status": "Not established from verified evidence",
+      "agency": "National Health Mission (NHM) Karnataka / Directorate of Health & Family Welfare Services",
+      "reason": "The Karnataka State Government directly funds 108 Arogya Kavacha through departmental budget lines (bulk fuel procurement, institutional maintenance contracts, and salaried staff payroll) rather than reimbursing an official statutory per-km operating fee. No Gazette notification prescribes an internal per-km fleet expenditure figure."
+    },
+    "police_patrol_hoysala": {
+      "status": "Not established from verified evidence",
+      "agency": "Karnataka Police Motor Transport (KPMT) Wing / Bengaluru City Police",
+      "reason": "Police Hoysala patrol vehicles are maintained via departmental police garages and state fuel allocations. There is no public tariff or official per-km charge in police regulations."
+    },
+    "fire_engine_ksfes": {
+      "status": "Not established from verified evidence",
+      "agency": "Karnataka State Fire and Emergency Services (KSFES)",
+      "reason": "Firefighting is a non-commercial state emergency function funded through state budget allocations. KSFES tenders specify chassis procurement and pump equipment standards rather than a per-km operating expenditure tariff."
+    }
+  },
+  "illustrative_derived_estimates": {
+    "label": "Illustrative Estimate — Not an Official or Verified Operating Rate",
+    "disclaimer": "These values are engineering approximations derived for academic modeling purposes to simulate emergency response logistics. They are not official statutory government rates. Specific inputs for fuel efficiency and routine maintenance are unsupported engineering assumptions.",
+    "methodology": "Direct Operating Cost = (Diesel Retail Price / Fuel Efficiency) + Estimated Routine Fleet Maintenance Provision",
+    "unsupported_inputs_disclosure": {
+      "fuel_efficiency_km_l": "Representative OEM baseline estimates under urban stop-and-go driving conditions; not audited departmental fuel logs.",
+      "maintenance_provision_inr_per_km": "Estimated allowance for periodic servicing, lubricants, filters, and tire amortisation; not derived from official state garage balance sheets."
+    },
+    "vehicles": {
+      "ambulance": {
+        "category": "hospital",
+        "vehicle_type": "Ambulance",
+        "representative_chassis": "Force Motors Traveller 3350 / Tata Winger 2.2L CRDe Diesel",
+        "fuel_efficiency_km_l": 10.0,
+        "fuel_cost_per_km_inr": 8.894,
+        "estimated_maintenance_provision_per_km_inr": 3.606,
+        "direct_operating_rate_inr_per_km": 12.50,
+        "composite_rate_inr_per_km": 38.50,
+        "derivation_formula": "R_operating = (88.94 / 10.0) + 3.606 = 12.50 INR/km",
+        "sensitivity_intervals_inr_per_km": {
+          "lower_cruising_highway": 11.09,
+          "base_urban_bengaluru": 12.50,
+          "upper_severe_congestion": 14.38
+        },
+        "separated_sensitivity": {
+          "diesel_price_sensitivity": {
+            "lower_inr_per_km": 11.17,
+            "base_inr_per_km": 12.50,
+            "upper_inr_per_km": 13.83,
+            "condition": "±15% Retail Diesel (₹75.60 to ₹102.28 / L), holding efficiency (10.0 km/L) and maintenance (₹3.61/km) constant"
+          },
+          "fuel_efficiency_sensitivity": {
+            "lower_inr_per_km": 11.69,
+            "base_inr_per_km": 12.50,
+            "upper_inr_per_km": 13.49,
+            "condition": "Varying efficiency from 11.0 km/L (cruising) to 9.0 km/L (congestion), holding diesel price (₹88.94/L) and maintenance constant"
+          },
+          "maintenance_sensitivity": {
+            "lower_inr_per_km": 11.60,
+            "base_inr_per_km": 12.50,
+            "upper_inr_per_km": 13.40,
+            "condition": "±25% Maintenance provision (₹2.70 to ₹4.51 / km), holding diesel price and efficiency constant"
+          },
+          "combined_operating_scenarios": {
+            "lower_inr_per_km": 11.09,
+            "base_inr_per_km": 12.50,
+            "upper_inr_per_km": 14.38,
+            "condition": "Combined Best Case (cruising highway, lower wear) vs Base vs Worst Case (severe congestion, high wear)"
+          }
+        },
+        "verification_status": "ILLUSTRATIVE_ENGINEERING_DERIVED_ESTIMATE"
+      },
+      "police_patrol": {
+        "category": "police_station",
+        "vehicle_type": "Police Patrol Vehicle (Hoysala)",
+        "representative_chassis": "Mahindra Bolero B6 / Maruti Suzuki Ertiga 1.5L Diesel",
+        "fuel_efficiency_km_l": 12.0,
+        "fuel_cost_per_km_inr": 7.412,
+        "estimated_maintenance_provision_per_km_inr": 2.588,
+        "direct_operating_rate_inr_per_km": 10.00,
+        "composite_rate_inr_per_km": 24.00,
+        "derivation_formula": "R_operating = (88.94 / 12.0) + 2.588 = 10.00 INR/km",
+        "sensitivity_intervals_inr_per_km": {
+          "lower_cruising_highway": 8.79,
+          "base_urban_bengaluru": 10.00,
+          "upper_severe_congestion": 11.47
+        },
+        "separated_sensitivity": {
+          "diesel_price_sensitivity": {
+            "lower_inr_per_km": 8.89,
+            "base_inr_per_km": 10.00,
+            "upper_inr_per_km": 11.11,
+            "condition": "±15% Retail Diesel (₹75.60 to ₹102.28 / L), holding efficiency (12.0 km/L) and maintenance (₹2.59/km) constant"
+          },
+          "fuel_efficiency_sensitivity": {
+            "lower_inr_per_km": 9.18,
+            "base_inr_per_km": 10.00,
+            "upper_inr_per_km": 11.06,
+            "condition": "Varying efficiency from 13.5 km/L (highway patrol) to 10.5 km/L (dense city patrol)"
+          },
+          "maintenance_sensitivity": {
+            "lower_inr_per_km": 9.35,
+            "base_inr_per_km": 10.00,
+            "upper_inr_per_km": 10.65,
+            "condition": "±25% Maintenance provision (₹1.94 to ₹3.24 / km)"
+          },
+          "combined_operating_scenarios": {
+            "lower_inr_per_km": 8.79,
+            "base_inr_per_km": 10.00,
+            "upper_inr_per_km": 11.47,
+            "condition": "Combined Best Case (cruising highway patrol) vs Worst Case (congested city patrol)"
+          }
+        },
+        "verification_status": "ILLUSTRATIVE_ENGINEERING_DERIVED_ESTIMATE"
+      },
+      "fire_engine": {
+        "category": "fire_station",
+        "vehicle_type": "Heavy Water Tender (Fire Engine)",
+        "representative_chassis": "Ashok Leyland 1618 / Tata 1613 16-Tonne GVW (4,500L Water Tanker, PTO Centrifugal Pump)",
+        "fuel_efficiency_km_l": 2.8,
+        "fuel_cost_per_km_inr": 31.764,
+        "estimated_maintenance_provision_per_km_inr": 10.236,
+        "direct_operating_rate_inr_per_km": 42.00,
+        "composite_rate_inr_per_km": 110.00,
+        "derivation_formula": "R_operating = (88.94 / 2.8) + 10.236 = 42.00 INR/km",
+        "sensitivity_intervals_inr_per_km": {
+          "lower_cruising_highway": 33.91,
+          "base_urban_bengaluru": 42.00,
+          "upper_severe_congestion": 52.43
+        },
+        "separated_sensitivity": {
+          "diesel_price_sensitivity": {
+            "lower_inr_per_km": 37.24,
+            "base_inr_per_km": 42.00,
+            "upper_inr_per_km": 46.76,
+            "condition": "±15% Retail Diesel (₹75.60 to ₹102.28 / L), holding efficiency (2.8 km/L) and maintenance (₹10.24/km) constant"
+          },
+          "fuel_efficiency_sensitivity": {
+            "lower_inr_per_km": 35.65,
+            "base_inr_per_km": 42.00,
+            "upper_inr_per_km": 50.66,
+            "condition": "Varying efficiency from 3.5 km/L (ring road cruising) to 2.2 km/L (heavy idling / PTO pump operation)"
+          },
+          "maintenance_sensitivity": {
+            "lower_inr_per_km": 39.44,
+            "base_inr_per_km": 42.00,
+            "upper_inr_per_km": 44.56,
+            "condition": "±25% Maintenance provision (₹7.68 to ₹12.80 / km)"
+          },
+          "combined_operating_scenarios": {
+            "lower_inr_per_km": 33.91,
+            "base_inr_per_km": 42.00,
+            "upper_inr_per_km": 52.43,
+            "condition": "Combined Best Case (open corridor transit) vs Worst Case (severe urban delay and pumping)"
+          }
+        },
+        "verification_status": "ILLUSTRATIVE_ENGINEERING_DERIVED_ESTIMATE"
+      }
+    }
+  },
+  "unsupported_claims_rejected": [
+    {
+      "claim": "The ₹120.00/km ambulance tariff is the government fleet operating expenditure.",
+      "audit_verdict": "REJECTED",
+      "justification": "The ₹120.00/km rate is a consumer price ceiling reported in secondary media coverage citing a May 2021 order by the Karnataka Department of Health & Family Welfare to cap private commercial ambulance charges during the COVID-19 pandemic. Conflating a private consumer charge with direct internal government fleet mechanical operating expenditure is mathematically and administratively incorrect."
+    },
+    {
+      "claim": "₹12.50/km, ₹10.00/km, and ₹42.00/km are statutory rates published in the Karnataka Government Gazette.",
+      "audit_verdict": "REJECTED",
+      "justification": "No Karnataka Government Gazette order publishes these per-kilometer operating figures. They are engineering estimates derived from fuel economy and diesel benchmark prices, and must strictly be presented as illustrative derived estimates with explicit disclosure of unsupported efficiency/maintenance assumptions."
+    },
+    {
+      "claim": "Emergency response arrival time is the sum of travel times of all responding agencies.",
+      "audit_verdict": "REJECTED",
+      "justification": "All responding agencies are alerted and dispatched concurrently upon incident confirmation. The time to secure the scene is governed by the latest arriving vehicle (max T_j), not the physical fallacy of summing concurrent durations (sum T_j)."
+    },
+    {
+      "claim": "The MST edges represent physically installed telecommunication cables connecting facilities.",
+      "audit_verdict": "REJECTED",
+      "justification": "The MST is a conceptual mathematical communication-backbone model minimizing theoretical interconnectivity distance using straight-line geodesic Haversine edge weights. It does not represent physically trenched fiber-optic or wired telecommunication infrastructure."
+    }
+  ]
+}

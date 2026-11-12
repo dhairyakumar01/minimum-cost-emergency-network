@@ -1,0 +1,410 @@
+{
+  "12.94650,77.58000->12.89060,77.57500": {
+    "road_distance_km": 7.6086,
+    "travel_time_minutes": 9.26,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.97000,77.59000": {
+    "road_distance_km": 0.8715,
+    "travel_time_minutes": 1.07,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.97000,77.59000": {
+    "road_distance_km": 1.4999,
+    "travel_time_minutes": 2.79,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.97000,77.59000": {
+    "road_distance_km": 1.6211,
+    "travel_time_minutes": 2.27,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.95000,77.55000": {
+    "road_distance_km": 5.8888,
+    "travel_time_minutes": 7.71,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.95000,77.55000": {
+    "road_distance_km": 7.258,
+    "travel_time_minutes": 10.06,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.95000,77.55000": {
+    "road_distance_km": 7.2591,
+    "travel_time_minutes": 9.58,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.97160,77.59460": {
+    "road_distance_km": 0.0,
+    "travel_time_minutes": 0.5,
+    "routing_source": "Coincident Location",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.97160,77.59460": {
+    "road_distance_km": 1.0275,
+    "travel_time_minutes": 3.22,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.97160,77.59460": {
+    "road_distance_km": 3.7168,
+    "travel_time_minutes": 5.72,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.97250,77.59550": {
+    "road_distance_km": 0.4197,
+    "travel_time_minutes": 1.25,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.97250,77.59550": {
+    "road_distance_km": 1.1297,
+    "travel_time_minutes": 3.81,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.97250,77.59550": {
+    "road_distance_km": 3.828,
+    "travel_time_minutes": 6.37,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "13.14283,77.67274->13.13765,77.74481": {
+    "road_distance_km": 9.7921,
+    "travel_time_minutes": 10.71,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.89195,77.57997->12.89060,77.57500": {
+    "road_distance_km": 0.7111,
+    "travel_time_minutes": 1.49,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.88384,77.56636->12.89060,77.57500": {
+    "road_distance_km": 1.7744,
+    "travel_time_minutes": 3.31,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87235,77.59881->12.89060,77.57500": {
+    "road_distance_km": 5.6762,
+    "travel_time_minutes": 7.56,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.94583,77.57990->12.94653,77.58004": {
+    "road_distance_km": 0.4936,
+    "travel_time_minutes": 0.62,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.94219,77.57433->12.94653,77.58004": {
+    "road_distance_km": 1.6945,
+    "travel_time_minutes": 2.47,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96250,77.56343->12.94653,77.58004": {
+    "road_distance_km": 3.925,
+    "travel_time_minutes": 5.1,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97869,77.57446->12.97818,77.57218": {
+    "road_distance_km": 1.95,
+    "travel_time_minutes": 3.48,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97448,77.57483->12.97818,77.57218": {
+    "road_distance_km": 0.5803,
+    "travel_time_minutes": 1.35,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.98059,77.57993->12.97818,77.57218": {
+    "road_distance_km": 1.8032,
+    "travel_time_minutes": 2.99,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97626,77.63765->12.97329,77.64047": {
+    "road_distance_km": 0.6221,
+    "travel_time_minutes": 1.7,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97824,77.64043->12.97329,77.64047": {
+    "road_distance_km": 1.649,
+    "travel_time_minutes": 2.04,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97284,77.61026->12.97329,77.64047": {
+    "road_distance_km": 4.0691,
+    "travel_time_minutes": 6.69,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.98290,77.74781->12.99574,77.75795": {
+    "road_distance_km": 2.1844,
+    "travel_time_minutes": 2.94,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.93803,77.74693->12.99574,77.75795": {
+    "road_distance_km": 6.8472,
+    "travel_time_minutes": 7.11,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.98732,77.73211->12.99574,77.75795": {
+    "road_distance_km": 4.8109,
+    "travel_time_minutes": 5.83,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.89147,77.56121->12.88894,77.56270": {
+    "road_distance_km": 0.6376,
+    "travel_time_minutes": 0.83,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.88384,77.56636->12.88894,77.56270": {
+    "road_distance_km": 0.9409,
+    "travel_time_minutes": 1.28,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.88894,77.56270": {
+    "road_distance_km": 3.9243,
+    "travel_time_minutes": 5.29,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.97200,77.59500": {
+    "road_distance_km": 0.2008,
+    "travel_time_minutes": 0.4,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.97200,77.59500": {
+    "road_distance_km": 0.9108,
+    "travel_time_minutes": 2.96,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.97200,77.59500": {
+    "road_distance_km": 3.5204,
+    "travel_time_minutes": 5.61,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97160,77.59460->12.97300,77.59600": {
+    "road_distance_km": 0.4597,
+    "travel_time_minutes": 1.52,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.97500,77.59000->12.97300,77.59600": {
+    "road_distance_km": 1.1697,
+    "travel_time_minutes": 4.07,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96500,77.58500->12.97300,77.59600": {
+    "road_distance_km": 3.4677,
+    "travel_time_minutes": 6.06,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "13.02158,77.71281->13.03574,77.73471": {
+    "road_distance_km": 4.1021,
+    "travel_time_minutes": 3.88,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "13.11514,77.63392->13.14010,77.67043": {
+    "road_distance_km": 6.5138,
+    "travel_time_minutes": 6.24,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.86167,77.52995": {
+    "road_distance_km": 2.8288,
+    "travel_time_minutes": 2.13,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.86167,77.52995": {
+    "road_distance_km": 1.4615,
+    "travel_time_minutes": 1.12,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.86167,77.52995": {
+    "road_distance_km": 7.904,
+    "travel_time_minutes": 7.97,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.86921,77.53996": {
+    "road_distance_km": 2.1224,
+    "travel_time_minutes": 2.7,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.86921,77.53996": {
+    "road_distance_km": 0.7552,
+    "travel_time_minutes": 1.69,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.86921,77.53996": {
+    "road_distance_km": 7.1976,
+    "travel_time_minutes": 8.53,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.87256,77.54133": {
+    "road_distance_km": 1.192,
+    "travel_time_minutes": 1.8,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.87256,77.54133": {
+    "road_distance_km": 1.5149,
+    "travel_time_minutes": 1.98,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.87256,77.54133": {
+    "road_distance_km": 6.2673,
+    "travel_time_minutes": 7.64,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.87557,77.54322": {
+    "road_distance_km": 0.9441,
+    "travel_time_minutes": 0.98,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.87557,77.54322": {
+    "road_distance_km": 1.0792,
+    "travel_time_minutes": 0.91,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.87557,77.54322": {
+    "road_distance_km": 6.0193,
+    "travel_time_minutes": 6.81,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.87858,77.54511": {
+    "road_distance_km": 0.0156,
+    "travel_time_minutes": 0.5,
+    "routing_source": "Coincident Location",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.87858,77.54511": {
+    "road_distance_km": 1.4768,
+    "travel_time_minutes": 1.18,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.87858,77.54511": {
+    "road_distance_km": 5.7941,
+    "travel_time_minutes": 6.61,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87847,77.54502->12.87205,77.55060": {
+    "road_distance_km": 1.6614,
+    "travel_time_minutes": 3.14,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.86895,77.53629->12.87205,77.55060": {
+    "road_distance_km": 2.4441,
+    "travel_time_minutes": 3.7,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.85884,77.56345->12.87205,77.55060": {
+    "road_distance_km": 3.9552,
+    "travel_time_minutes": 7.09,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.88076,77.58417->12.88101,77.58399": {
+    "road_distance_km": 0.0631,
+    "travel_time_minutes": 0.11,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87156,77.57606->12.88101,77.58399": {
+    "road_distance_km": 2.0399,
+    "travel_time_minutes": 3.14,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87235,77.59881->12.88101,77.58399": {
+    "road_distance_km": 3.4869,
+    "travel_time_minutes": 4.29,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.88076,77.58417->12.88042,77.58390": {
+    "road_distance_km": 0.0478,
+    "travel_time_minutes": 0.17,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87156,77.57606->12.88042,77.58390": {
+    "road_distance_km": 1.9799,
+    "travel_time_minutes": 3.08,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.87235,77.59881->12.88042,77.58390": {
+    "road_distance_km": 3.4269,
+    "travel_time_minutes": 4.22,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.96350,77.57369->12.96494,77.57619": {
+    "road_distance_km": 0.6611,
+    "travel_time_minutes": 1.24,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.92920,77.58198->12.92877,77.58034": {
+    "road_distance_km": 0.211,
+    "travel_time_minutes": 0.29,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.92857,77.58137->12.92877,77.58034": {
+    "road_distance_km": 0.1138,
+    "travel_time_minutes": 0.12,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  },
+  "12.92215,77.56118->12.92877,77.58034": {
+    "road_distance_km": 3.8558,
+    "travel_time_minutes": 4.84,
+    "routing_source": "OpenStreetMap OSRM (Car Profile)",
+    "is_approximation": false
+  }
+}

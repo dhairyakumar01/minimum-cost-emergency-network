@@ -1,0 +1,143 @@
+u,v,u_name,v_name,u_type,v_type,weight_km,cross_type
+way/1544830710,way/1544831540,SPS Surgicals,,hospital,hospital,0.0,False
+way/1076618915,node/5157373807,,Altius Hospital,hospital,hospital,0.0002566275276608,False
+way/347236718,node/12956090274,Proteeth Dental,Proteeth Dental,hospital,hospital,0.0003747034823458,False
+way/354497944,node/4509817152,ChanRe Rheumatology And Immunology Center And Research,ChanRe Rheumatology and Immunology Center and Research,hospital,hospital,0.0007072832193487,False
+way/331352075,node/844462412,Indira Nagar Police Station,Indira Nagar Police Station,police_station,police_station,0.0008447142216857,False
+way/1084220447,node/6938690614,,Lakshmi Maternity Home,hospital,hospital,0.0019979947228025,False
+way/335043199,node/2387173532,Greenview Hospital,Greenview Medical Center,hospital,hospital,0.0021198498340502,False
+way/1039760096,node/1471781028,Diacon Hospital,Diacon Hospital,hospital,hospital,0.0026800817855383,False
+way/1353870717,node/12246090205,,Mahadevapura Traffic Police,police_station,police_station,0.0027412610159805,False
+node/625856709,way/1077744680,Manipal Northside Hospital,,hospital,hospital,0.0028636385148614,False
+node/6944437383,node/6944449930,Raksha Multispeciality Hospital,Cambridge Hospital,hospital,hospital,0.0036967242904215,False
+way/1039760097,node/1474819886,Fortis Hospital,Fortis Hospital,hospital,hospital,0.0046403266779183,False
+way/133352357,node/1467969798,Chaitanya Nursing Home,Chaitanya Hospital,hospital,hospital,0.0049719138361014,False
+node/7572526709,node/1778917090,Vidya Eye Hospital,Vijayanagar Police Station,hospital,police_station,0.0050378665402893,True
+way/668612952,node/1918889488,,Hulimavu Police Station,police_station,police_station,0.0050676043185425,False
+node/6944464779,node/7579683220,Saranalaya Hospital,Om Shakthi Hospital,hospital,hospital,0.0051800996103585,False
+node/4446889930,node/7572669024,Spring Leaf Health Care Pvt Ltd,Springleaf Hospital,hospital,hospital,0.0053967062475773,False
+way/1071262161,node/4445356402,Bellandur Traffic Police Station,Bellanduru Traffic Police Station,police_station,police_station,0.0055037185144691,False
+node/4446826362,node/4446833350,Healing Earth Multispeciality Ayurveda Hospital,Global Ayurveda Multispeciality Hospital,hospital,hospital,0.005973559473798,False
+node/307401529,node/10137293053,Apollo Hospital,Apollo Pharmacy,hospital,hospital,0.0068443175501839,False
+node/364629422,node/7579924762,JBS Hospital,Sahasra Hospital,hospital,hospital,0.0075493520512583,False
+node/7579683213,node/7579683225,Amruth Hospital,Shadab Hospital,hospital,hospital,0.0077884679879498,False
+node/11303711371,node/13817067479,Cadabam's Hospitals,"Healing Hands Clinic - J.P Nagar, Bengaluru",hospital,hospital,0.0095449201051767,False
+way/1353870717,node/12246090206,,Office Of The Assistant Commissioner Whitefield Subdivision,police_station,police_station,0.0099031609259227,False
+node/663317752,way/1076398555,Police Headquarters,Police Headquarters,police_station,police_station,0.0103357929067247,False
+node/1474819111,node/6938653696,TSR heart care,Asha Kiran Children & Women Health Care Centre,hospital,hospital,0.0104448233006271,False
+node/7572526753,node/12438173201,Sneha Horizon Hospital,Hiremath Hospital,hospital,hospital,0.0104621179982011,False
+node/4446897063,node/7576958048,Meenakshi Hospital,People Tree Hospitals,hospital,hospital,0.0108485848910393,False
+node/6944577884,node/7577248269,Amrutha Hospital,Eswar Women and Day Care Hospital,hospital,hospital,0.0111573198045896,False
+node/7577248221,node/13065064242,Ovum Birthing Centre,Motherhood,hospital,hospital,0.0113758153394453,False
+node/5915409411,node/6938759412,Apollo Spectra Hospitals,"Nova Specialty Surgery Center, Koramangala",hospital,hospital,0.0114237808126718,False
+way/997923996,node/4446518811,Dr. P.R. Desai Hospital Pvt Ltd,Desai Nursing Home,hospital,hospital,0.0114283608766327,False
+way/1030050639,node/4447422294,Upparpet Traffic Police Station,Upparpet Traffic Police Station,police_station,police_station,0.0115284576281806,False
+node/6944707745,node/7976310624,Chinmaya Narayana Super Specialty Centre,Chinmaya Hrudayalaya,hospital,hospital,0.0118261662651577,False
+node/4609603646,node/7579924780,"Apollo Bengaluru Cradle Limited, Jayanagar",Apollo Cradle Maternity & Children's Hospital,hospital,hospital,0.0120125443259699,False
+way/678066777,node/6947247040,,Vasan Eye Care Hospital,hospital,hospital,0.0121461991043115,False
+way/328758432,node/1436177631,ESI Hospital,ESI Hospital,hospital,hospital,0.0121751199691332,False
+node/12246090205,node/12246090206,Mahadevapura Traffic Police,Office Of The Assistant Commissioner Whitefield Subdivision,police_station,police_station,0.0125315211388955,False
+way/327551781,node/428843493,Cubbon Park Police Station,Cubbon Park Police Station,police_station,police_station,0.0126115624440925,False
+node/4447013195,node/4447015118,Sri Vinayaka Hospital,Shathayu Ayurveda Wellness Centre,hospital,hospital,0.0133701581706997,False
+way/1124828967,node/5229482744,High Grounds Traffic Police Station,High Grounds Traffic Police Station,police_station,police_station,0.0135573612577693,False
+way/631580848,node/13666515767,Sakra World,Sakra World Hospital,hospital,hospital,0.0136528636575498,False
+way/1111108766,node/1118255762,Rajaji Nagar Police Station,Rajaji Nagar Police Station,police_station,police_station,0.0137071090048948,False
+way/549373054,node/6937898160,South City Hospital,"South City Hospital, Bengaluru Urban",hospital,hospital,0.0140348089456241,False
+node/12651764011,node/12651764012,"Shri Mokambika Women's Clinic, Child care and Nethralaya",Suraksha Diagnostic Centre,hospital,hospital,0.0141871359608801,False
+node/1473921774,node/7576958065,Shekar Hospital,Shekhar Hospital,hospital,hospital,0.0148667978657267,False
+way/349794011,node/951203526,Mico Layout Police Station,Mico Layout Police Station,police_station,police_station,0.0155576680183411,False
+way/347497660,way/347497848,Supra Hospital,GM Hospital,hospital,hospital,0.0156061754363673,False
+way/350750824,node/4349443891,Ovum Hospitals,Trilife Hospital,hospital,hospital,0.0163687225021815,False
+node/11295071515,node/11295246682,NIMHANS Department Of Psychiatric and Neuro Rehabilitation,NIMHANS Physiotherapy Center,hospital,hospital,0.0169204396760627,False
+way/1039668732,node/3714125744,"Shifa Hospital, Bengaluru Urban","Shifa Hospital, Bengaluru Urban",hospital,hospital,0.0170022993987386,False
+node/966863252,node/6939108450,RMV Hospital,Raj Mahal Vilas Hospital,hospital,hospital,0.0184086726245009,False
+node/4441670838,node/4441938603,Naadi Ayurveda Center,The Family Doctor & The Family Pharma,hospital,hospital,0.0184758558120394,False
+node/4547191103,node/7579924725,Nagarathna Hospital,Perfetual Help Hospital,hospital,hospital,0.0188732298445217,False
+node/4447097087,node/6944983789,Vijayanagar Global Hospital,Vijayanagar Hospital,hospital,hospital,0.0203995548405457,False
+node/6947662464,node/7572131818,"Suresh Hospital, Bengaluru Urban",R R Hospital,hospital,hospital,0.0205238308438216,False
+node/13666515767,node/14170477502,Sakra World Hospital,Dr Ramesh Dalwai Spine Surgeon,hospital,hospital,0.0208870278274301,False
+node/6938775855,node/7576958060,"Sunetra Eye Hospital, Bengaluru Urban",Verna Hospital,hospital,hospital,0.021017046097694,False
+node/443612463,node/6939311791,Sri Vijayalakshmi Pragathi Hospital,Shree Vijayalakshmi Hospital and Trauma Centre,hospital,hospital,0.0211641106773632,False
+way/1205832181,node/7576958096,,Herige Hospital,hospital,hospital,0.0217936430631811,False
+way/256703169,node/6947915400,P.D. Hinduja Sindhi Hospital,Pd Hinduja Sindhi Hospital,hospital,hospital,0.0218554112895078,False
+node/4441681632,node/4445356402,Kottakkal Arya Vaidya Sala,Bellanduru Traffic Police Station,hospital,police_station,0.0219497911722202,True
+node/4623723101,node/12240737170,"Nethradhama Superspeciality Eye Hospital, Rajajinagar",Netradhama,hospital,hospital,0.0224259084638496,False
+node/1474472859,node/6938777910,NIMHANS OPD,National Institute of Mental Health and Neuro Sciences,hospital,hospital,0.0227411287601301,False
+node/1474449391,node/7579924779,Spurthy Hospital,Spurthy Hospital,hospital,hospital,0.0227814684580638,False
+node/1474511948,node/1474512442,Manjunath Hospital,Karthik Hospital,hospital,hospital,0.0229621244423796,False
+node/1815951927,node/1815951935,Women's Police Station,Thyagaraja Nagar Police Station,police_station,police_station,0.023263851127797,False
+node/7572526708,node/7572526791,Sriprasad Ayurveda,Bengaluru Child Neurology and Rehabilitaion Centre,hospital,hospital,0.0236614251703332,False
+way/535587224,node/4445578787,Life Hospital,Dr. Bhargavi Reddy Women & Children Hospital,hospital,hospital,0.0238745673025572,False
+way/346711854,node/4840185928,Shyamala Hospital,Cambridge Hospital,hospital,hospital,0.0249057103834905,False
+way/1205832181,node/7576958052,,Government Hospital,hospital,hospital,0.02577596799974,False
+node/1101622501,node/6939699617,Government Maternity Hospital,Place Guttahalli Maternity Home,hospital,hospital,0.0270476404569362,False
+node/4441681632,way/1071262161,Kottakkal Arya Vaidya Sala,Bellandur Traffic Police Station,hospital,police_station,0.0270627969317688,True
+node/4447079172,node/7572526763,Saikrupa Hospital For Women's and Surgical Centre,Suhusannidhi Hospital,hospital,hospital,0.0270684322733865,False
+way/327551781,node/12670396699,Cubbon Park Police Station,Cubbon Park Traffic Police Station,police_station,police_station,0.0270957882340419,False
+node/6944392376,node/13164592436,Bangalore Eye Hospital And Retina Centre,Bangalore Orthopeadic And Surgical Hospital,hospital,hospital,0.0273876274304756,False
+node/4446893667,node/7576958025,"Vinayaka Hospital, Hanumantha Nagar",Vinayaka Hospital,hospital,hospital,0.0274689228225835,False
+node/4446900247,node/7576958083,Kusuma Hospital,Drishti Nethralaya,hospital,hospital,0.027625942492981,False
+way/631580848,node/14170477502,Sakra World,Dr Ramesh Dalwai Spine Surgeon,hospital,hospital,0.027899608211364,False
+node/9884952776,node/11869384815,Cloudnine Hospital,Dhee Hospital,hospital,hospital,0.0280044988454404,False
+node/6502980174,node/6939438895,The Eye Surgical Centre,Sidvin Hospital Pvt Ltd,hospital,hospital,0.0280334957518728,False
+node/3100475907,way/1176579523,Konanakunte Government Hospital,Konanakunte Police Station,hospital,police_station,0.0286436567668465,True
+way/1134831512,node/11939010319,Peenya Fire Station,,fire_station,fire_station,0.0288024038572075,False
+way/348287598,node/954623054,Prashanth Hospitals,Sri Vinayaka Poly Clinic,hospital,hospital,0.0290557439808095,False
+way/35133587,node/7976310624,Chinmaya Mission Hospital,Chinmaya Hrudayalaya,hospital,hospital,0.0296762342886333,False
+node/7572526783,node/7572526787,Government Hospital,Shanthakumari Hospital,hospital,hospital,0.0304459927696754,False
+way/1088209015,node/1437213383,Karunalayam Hospital,Karunalayam Hospital,hospital,hospital,0.0308631427967354,False
+node/4445973784,node/6944507681,Parimala Health Care,Parimala Speciality Hospital,hospital,hospital,0.0319322834986518,False
+node/1472808792,node/6944256035,Namratha Hospital,Namratha Nursing And Maternity Home,hospital,hospital,0.0319391250982575,False
+way/35133587,node/6944707745,Chinmaya Mission Hospital,Chinmaya Narayana Super Specialty Centre,hospital,hospital,0.0337508565720131,False
+node/1474819897,node/1474819898,"Vasan Eye Care Hospital, Rajaji Nagar",Ananya Hospital,hospital,hospital,0.0343504930559925,False
+way/347236390,way/347236718,,Proteeth Dental,hospital,hospital,0.0344740288760563,False
+way/347236390,node/12956090274,,Proteeth Dental,hospital,hospital,0.0346073367045237,False
+way/773577275,node/6938775815,Navachethana Hospital,Apple Hospital,hospital,hospital,0.0346526009474008,False
+node/4445955282,node/6944392375,Procare Hospital,Banasawadi Hospital,hospital,hospital,0.0349480362089678,False
+node/519549595,node/4447009524,Chord Road Hospital Pvt Ltd,Pristine Hospital,hospital,hospital,0.0350559765603758,False
+node/4442511855,node/6944290482,Bhagavathi Hospitals Private Limited,Bhagavathi Multi Speciality Hospital,hospital,hospital,0.0362817045534145,False
+node/428843493,node/12670396699,Cubbon Park Police Station,Cubbon Park Traffic Police Station,police_station,police_station,0.0364346604824741,False
+node/7576958066,node/7576958080,Government Hospital,Parameshwari Hospital,hospital,hospital,0.0374005884912863,False
+way/307097150,node/7579924715,"Sevakshetra Hospital, Bengaluru Urban",Sevakshetra Hospital,hospital,hospital,0.0375891020369247,False
+node/1474819898,node/6855409793,Ananya Hospital,Dr. Agrawal's Eye Hospital,hospital,hospital,0.0376155316375652,False
+way/1511814372,node/14266374026,Aster Whitefield Hospital,Aster DM Healthcare,hospital,hospital,0.0378585530539848,False
+node/4446924573,node/6938790393,Surya Diagnostics and Health Services,Varalakshmi Hospital,hospital,hospital,0.037983772892023,False
+node/6947033494,node/13821035120,Pristine Hospital,"Healing Hands Clinic - Rajajinagar, Bengaluru",hospital,hospital,0.0380566747790241,False
+node/530353033,node/6947033494,Pristline Hospital,Pristine Hospital,hospital,hospital,0.0382034806754818,False
+node/6938948962,node/6944105329,"Lakshmi Hospital, Ganganagar","Vasan Eye Care Hospital, R.T.Nagar",hospital,hospital,0.0386269994278951,False
+way/525508983,node/5966255497,Shirdi Sai Hospital,Bangalore Prime Hospital,hospital,hospital,0.039207699504465,False
+node/1778953072,node/7572526757,"Gayathri Hospital, Bengaluru Urban",Kangroo Hospital,hospital,hospital,0.0393688010117683,False
+node/4844865057,node/6947678585,Doctor's diagnostics Centre,Zion Hospital And Research Centre Pvt.Ltd.,hospital,hospital,0.0401264583809147,False
+node/6938775845,node/6938775846,Retina Institute Of Karnataka,The Venlakh Hospital,hospital,hospital,0.0401595631070842,False
+node/4349443891,node/12959840781,Trilife Hospital,Trilife Hospital,hospital,hospital,0.0402171676346411,False
+way/334493050,way/334493056,Sanjay Gandhi Accident and Trauma Hospital,Sanjay Gandhi Accident and Trauma Hospital,hospital,hospital,0.0405582525865598,False
+way/351121389,way/1040899005,,Aster CMI Hospital,hospital,hospital,0.0409422067607679,False
+node/4445955282,node/13065064242,Procare Hospital,Motherhood,hospital,hospital,0.0415762951795039,False
+node/1468908300,node/1835512586,health nest,Cure & Care Dental Clinic Dr. Moumita Mukherjee,hospital,hospital,0.0417502975558708,False
+way/350750824,node/12959840781,Ovum Hospitals,Trilife Hospital,hospital,hospital,0.0418725095038761,False
+node/7576958043,node/7576958096,Corporation Hospital,Herige Hospital,hospital,hospital,0.0422982029782769,False
+way/262198741,node/6938889541,Lions Seva Hospital,Lions Airport City Hospital,hospital,hospital,0.0425729746069174,False
+node/1988322107,node/4445179843,Dhanavantri Hospital,Regal Hospital,hospital,hospital,0.0426592169593473,False
+way/775169696,node/13381419281,High Grounds Police Station,Cybercrime Police Station,police_station,police_station,0.042789324755621,False
+way/1082139631,node/1365797756,Apollo Cradle,Brookefield Hospital(A Unit Of Sanjeevani Hospital),hospital,hospital,0.0429369460362313,False
+way/1362578786,node/10963251389,Klinik Guhen - Dental Clinic,The Local Dentist,hospital,hospital,0.0432486917106796,False
+node/4446849884,node/12508687328,Fj Merrit Hydrotherapy And Wellness,Beams Hospitals Private Limited,hospital,hospital,0.043317245063903,False
+node/1466576385,node/1812673570,DG Hospital,Yogananda Medical and Research Centre,hospital,hospital,0.043445229201761,False
+way/1040899015,way/1244123389,Rainbow Children's Hospital,HCG Hebbal,hospital,hospital,0.0434868074308788,False
+node/295766640,way/1087700050,DCP Bangalore North Traffic Police,Yeshwantpura Police Station,police_station,police_station,0.0439522638707246,False
+way/782014099,way/782014100,Cyber Crime Police Station,Commisioner of Police,police_station,police_station,0.0442778801113047,False
+way/307098232,node/6938727983,Netradhama Hospital,"Nethradhama Superspeciality Eye Hospital, Jayanagar",hospital,hospital,0.0446258209587021,False
+way/1416675134,way/1416675135,Kadugondanahalli Traffic Police Station,Kadugondanahalli Police Station,police_station,police_station,0.0447875102897489,False
+node/4446312027,way/1377007431,Hospital,Bharthinagar Police Station,hospital,police_station,0.044916634562584,True
+node/1474819897,node/6938695148,"Vasan Eye Care Hospital, Rajaji Nagar",ChanRe Rheumatology and Immunology Center and Research,hospital,hospital,0.0451218201511925,False
+way/1272767220,node/5983331355,Brains Hospital,CyteCare,hospital,hospital,0.0451669973177452,False
+node/7579683193,node/7579683247,Valens Hospitals,Sapthagiri Hospital,hospital,hospital,0.0454636501287214,False
+node/1463555571,node/3004275434,Rc Hospital,"Vasan Eye Care Hospital, Rajarajeswari Nagar",hospital,hospital,0.0455710360584955,False
+node/7576958052,node/7576958096,Government Hospital,Herige Hospital,hospital,hospital,0.0460466962765431,False
+way/1072674743,node/14266374026,Aster Women and Children Hospital,Aster DM Healthcare,hospital,hospital,0.0460758372039729,False
+node/940525605,node/1500601533,Jeevan Bhima Nagar Police Station,Indiranagar Traffic Police Station,police_station,police_station,0.0461261237715605,False
+node/1471737564,node/1471738635,Suprabha Hospital,Sangolli Nursing Home,hospital,hospital,0.0465484397173615,False
+way/1307949928,node/5716797221,Rangadore Memorial Hospital,Sri Shankara Cancer Hospital And Research Centre (A Service Unit Of Sscf),hospital,hospital,0.0465742637557314,False
+node/4447105332,node/6945348721,Padmashree Nursing Home and Maternity Home,"Divya Drishti Eye Hospital, Vijayanagar",hospital,hospital,0.0477072250882787,False
+node/3773028057,node/6939048258,HCG Cancer Hospital,HCG,hospital,hospital,0.0485939845367167,False
+node/5265649228,node/11295829642,"Emergency Block , NIMHANS",NIMHANS Police Outpost,hospital,police_station,0.0486881967217499,True

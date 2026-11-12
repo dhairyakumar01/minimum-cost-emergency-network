@@ -1,0 +1,37 @@
+{
+  "node_count": 1255,
+  "candidate_edge_count": 786885,
+  "expected_mst_edges": 1254,
+  "prim_edge_count": 1254,
+  "kruskal_edge_count": 1254,
+  "prim_total_km": 480.1783984126185,
+  "kruskal_total_km": 480.17839841261844,
+  "absolute_total_difference_km": 5.684341886080802e-14,
+  "prim_runtime_seconds": 5.1676,
+  "kruskal_runtime_seconds": 1.5836,
+  "edge_generation_seconds": 1.4326,
+  "prim_checks": {
+    "edge_count_is_V_minus_1": true,
+    "endpoints_are_valid_facility_ids": true,
+    "no_self_loops": true,
+    "weights_finite_and_nonnegative": true,
+    "no_duplicate_edges": true,
+    "acyclic": true,
+    "connected_and_spans_all_facilities": true,
+    "stored_weights_match_haversine": true
+  },
+  "kruskal_checks": {
+    "edge_count_is_V_minus_1": true,
+    "endpoints_are_valid_facility_ids": true,
+    "no_self_loops": true,
+    "weights_finite_and_nonnegative": true,
+    "no_duplicate_edges": true,
+    "acyclic": true,
+    "connected_and_spans_all_facilities": true,
+    "stored_weights_match_haversine": true
+  },
+  "totals_agree": true,
+  "validation_passed": true,
+  "weight_definition": "Haversine straight-line distance in kilometres",
+  "caveat": "Not road distance, travel time, actual financial cost, or emergency response time."
+}

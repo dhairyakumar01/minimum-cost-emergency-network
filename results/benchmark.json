@@ -1,0 +1,20 @@
+{
+  "runs": 10,
+  "node_count": 1255,
+  "candidate_edge_count": 786885,
+  "prim_seconds": {
+    "min": 4.9383,
+    "median": 5.0293,
+    "mean": 5.0494,
+    "stdev": 0.077
+  },
+  "kruskal_seconds": {
+    "min": 1.5609,
+    "median": 1.5811,
+    "mean": 1.5834,
+    "stdev": 0.0168
+  },
+  "python": "3.14.7",
+  "platform": "macOS-26.3-arm64-arm-64bit-Mach-O",
+  "note": "Edge generation excluded. Timings depend on this machine and its load at the time; they are not general performance claims."
+}

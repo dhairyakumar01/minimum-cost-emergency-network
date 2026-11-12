@@ -1,0 +1,29 @@
+{
+  "total_facilities": 1255,
+  "by_type": {
+    "hospital": 1097,
+    "police_station": 138,
+    "fire_station": 20
+  },
+  "missing_names": 24,
+  "records_sharing_exact_coordinates": 2,
+  "records_sharing_name_and_type": 162,
+  "outside_provisional_rectangle": 1,
+  "pairs_closer_than_km": {
+    "10m": 24,
+    "25m": 70,
+    "50m": 142
+  },
+  "prim_mst_edges_at_or_below_km": {
+    "10m": 24,
+    "25m": 69,
+    "50m": 134
+  },
+  "prim_mst_edge_length_km": {
+    "min": 0.0,
+    "median": 0.27197727270360583,
+    "mean": 0.3829173831041614,
+    "max": 7.825584999668021
+  },
+  "note": "Exploratory checks only. Close pairs may be separate buildings of one campus, duplicate OSM mappings, or genuinely distinct facilities; this script cannot tell which. No records were removed."
+}
