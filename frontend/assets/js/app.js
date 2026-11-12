@@ -474,6 +474,14 @@
       incidentMarker = null;
     }
     State.incident.isSet = false;
+    State.incident.lat = null;
+    State.incident.lon = null;
+    State.incident.label = null;
+
+    const latInp = document.getElementById("incident-lat-input");
+    const lonInp = document.getElementById("incident-lon-input");
+    if (latInp) latInp.value = "";
+    if (lonInp) lonInp.value = "";
 
     const pill = document.getElementById("incident-status-pill");
     if (pill) {
@@ -490,6 +498,7 @@
     if (distBox) distBox.style.display = "none";
 
     setIncidentSelectMode(false);
+    updateSimulationUI();
   }
 
   function showFacilityDetailsCard(fac) {
@@ -667,11 +676,19 @@
 
   function updateSimulationUI() {
     // Sync incident info
-    setText(
-      "sim-incident-coords",
-      `${State.incident.lat.toFixed(5)}° N, ${State.incident.lon.toFixed(5)}° E (${State.incident.label})`
-    );
-    setText("sum-incident", `${State.incident.label} (${State.incident.lat.toFixed(4)}°N, ${State.incident.lon.toFixed(4)}°E)`);
+    if (State.incident.isSet && State.incident.lat != null && State.incident.lon != null) {
+      setText(
+        "sim-incident-coords",
+        `${State.incident.lat.toFixed(5)}° N, ${State.incident.lon.toFixed(5)}° E (${State.incident.label || "Custom Point"})`
+      );
+      setText("sum-incident", `${State.incident.label || "Custom Point"} (${State.incident.lat.toFixed(4)}°N, ${State.incident.lon.toFixed(4)}°E)`);
+    } else {
+      setText(
+        "sim-incident-coords",
+        "No incident location configured. Please drop a pin on the Facilities Map or select a landmark preset below."
+      );
+      setText("sum-incident", "No incident configured");
+    }
 
     // Sync candidate count
     updateSimulationCandidateCount();
@@ -679,6 +696,13 @@
 
   function updateSimulationCandidateCount() {
     if (!State.facilities.length) return;
+
+    if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
+      setText("sim-candidate-count", "Select an incident location to evaluate candidate facilities.");
+      setText("sim-radius-display", `${State.simRadiusKm.toFixed(1)} km`);
+      setText("sum-radius", `${State.simRadiusKm.toFixed(1)} km`);
+      return;
+    }
 
     const lat = State.incident.lat;
     const lon = State.incident.lon;
@@ -774,6 +798,12 @@
 
       if (!resultsContainer || !listEl) return;
 
+      if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
+        if (statusEl) statusEl.textContent = "Please place or select an incident location on the Facilities Map first.";
+        resultsContainer.style.display = "none";
+        return;
+      }
+
       const lat = State.incident.lat;
       const lon = State.incident.lon;
       const radius = State.simRadiusKm;
@@ -794,7 +824,7 @@
         return;
       }
 
-      // Rank by distance (straight-line proxy for Stage 1.5, to be replaced by full OSRM in Phase 2/3)
+      // Rank by distance (straight-line proxy for Stage 1.5 preview, to be replaced by full OSRM in Phase 2/3)
       candidates.sort((a, b) => a._dist - b._dist);
       const top3 = candidates.slice(0, 3);
 
@@ -815,7 +845,7 @@
             </div>
           </div>
           <div class="ranked-metrics">
-            <div class="ranked-dist">${distKm.toFixed(2)} km</div>
+            <div class="ranked-dist">${distKm.toFixed(2)} km (Haversine)</div>
             <div class="ranked-cost">₹${estCost.toFixed(2)} &bull; ~${estTimeMin.toFixed(1)} min</div>
           </div>
         `;
@@ -823,7 +853,7 @@
       });
 
       resultsContainer.style.display = "block";
-      statusEl.textContent = `Optimization complete: ${candidates.length} candidates evaluated, top 3 staged.`;
+      statusEl.textContent = `Preliminary preview complete: ${candidates.length} candidates evaluated, top 3 staged (straight-line Haversine proxy).`;
     },
   };
 

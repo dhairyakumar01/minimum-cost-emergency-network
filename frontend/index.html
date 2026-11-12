@@ -397,7 +397,7 @@
               <span class="mst-pill"><strong>Edges:</strong> 1,254</span>
               <span class="mst-pill highlight"><strong>Total Tree Length:</strong> 480.1784 km</span>
               <span class="mst-pill"><strong>Min Edge:</strong> 0.0000 km</span>
-              <span class="mst-pill"><strong>Max Edge:</strong> 5.7336 km</span>
+              <span class="mst-pill"><strong>Max Edge:</strong> 7.8256 km</span>
             </div>
           </div>
 
@@ -660,10 +660,10 @@
 
                 <div style="margin-top:16px; display:flex; align-items:center; gap:12px;">
                   <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()" style="padding:12px 24px; font-size:1.0rem;">
-                    🚀 Run Optimization & Response Dispatch
+                    🚀 Run Dispatch Preview & Staging
                   </button>
                   <span id="sim-exec-status" style="font-size:0.85rem; color:var(--text-muted);">
-                    Ready for dispatch execution
+                    Ready for staging preview
                   </span>
                 </div>
 
@@ -671,8 +671,8 @@
                 <div id="sim-results-output" style="display:none; margin-top:20px;">
                   <div class="card" style="border-left:4px solid var(--primary); background:#f8fafc;">
                     <div class="card-header">
-                      <h3 class="card-title">Top 3 Recommended Response Facilities</h3>
-                      <p class="card-subtitle">Ranked by minimum traversal cost within candidate boundary.</p>
+                      <h3 class="card-title">Top 3 Recommended Facilities (Preliminary Haversine Preview)</h3>
+                      <p class="card-subtitle">Ranked by straight-line Haversine distance. (Full OSRM road-network routing & incident-specific MST dispatch scheduled for subsequent phases).</p>
                     </div>
                     <div id="sim-ranked-facilities-list">
                       <!-- Populated dynamically -->

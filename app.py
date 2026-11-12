@@ -477,7 +477,7 @@ def find_clicked_edge(click_lat: float, click_lon: float, edges_df: pd.DataFrame
     dlon = np.radians(click_lon - proj_lon)
     a = np.sin(dlat / 2.0) ** 2 + np.cos(np.radians(click_lat)) * np.cos(np.radians(proj_lat)) * np.sin(dlon / 2.0) ** 2
     c = 2.0 * np.arcsin(np.sqrt(np.clip(a, 0.0, 1.0)))
-    dist_km = 6371.0 * c
+    dist_km = 6371.0088 * c
 
     best_idx = int(dist_km.argmin())
     if dist_km[best_idx] <= max_dist_km:
