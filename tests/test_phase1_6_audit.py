@@ -240,3 +240,4 @@ def test_earth_radius_consistency():
     one_deg = haversine_km(0.0, 0.0, 1.0, 0.0)
     expected = (math.pi / 180.0) * 6371.0088
     assert one_deg == pytest.approx(expected, rel=1e-7)
+
