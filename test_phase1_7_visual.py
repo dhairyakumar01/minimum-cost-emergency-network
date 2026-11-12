@@ -138,3 +138,4 @@ async def run_visual_audit():
 
 if __name__ == "__main__":
     asyncio.run(run_visual_audit())
+

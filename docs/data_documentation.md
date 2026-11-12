@@ -109,3 +109,4 @@ During the mathematical audit of the complete graph's 786,885 edges, exactly **o
    Police Hoysala patrol vehicles are assigned to stationary police station vertices. The dataset does not incorporate real-time GPS telemetry from mobile cruisers on active patrol.
 4. **Centroid Approximation:**
    Large hospital campuses (e.g., Victoria Hospital, NIMHANS, Manipal Hospital) are represented by a single geographic centroid coordinate rather than individual building gates or emergency ambulance bays.
+

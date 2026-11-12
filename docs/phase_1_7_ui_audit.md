@@ -81,3 +81,4 @@ A comprehensive inspection of the existing Phase 1.6 frontend (`frontend/index.h
    - Comprehensive comparative telemetry, algorithm runtime metrics, optimization mode matrix, and clean SVG/CSS analytical charts.
 6. **Unified Help & Methodology Center:**
    - Organized into 7 clean expandable `<details>` modules covering Graph Theory, Metrics, Optimization Modes, Invariants, LCA Verification, Statutory Fuel Model, and Limitations.
+

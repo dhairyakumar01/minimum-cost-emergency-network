@@ -208,3 +208,4 @@ Implemented in `backend/flask_app.py` and `backend/config.py`:
 - Local OpenStreetMap / OSRM routing interface with persistent JSON disk caching (`data/cache/routes_cache.json`).
 - Prevents external rate-limiting and guarantees 100% offline demonstration stability.
 - Enforces strict topological bounding: validates that physical road distance is never shorter than spherical Haversine distance ($D_{\text{road}} \ge D_{\text{haversine}}$).
+

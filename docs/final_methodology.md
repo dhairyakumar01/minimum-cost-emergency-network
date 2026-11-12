@@ -258,3 +258,4 @@ where $\tau = 10^{-9}\text{ km}$ accounts for IEEE 754 floating-point precision.
 - Verified violations: **0**
 - Equal-weight alternatives: **1**
 - Mathematical conclusion: Tree $T^*$ is an exact, certified Minimum Spanning Tree of $K_{1255}$.
+

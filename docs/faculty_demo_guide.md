@@ -156,3 +156,4 @@ Open **`http://127.0.0.1:5000`** in Chrome, Microsoft Edge, or Firefox.
 
 ### Q5: "How do you mathematically prove that your MST is optimal without relying on Prim or Kruskal's own code?"
 **Answer:** We implemented an independent optimality verifier using the Fundamental Cycle Property. For all 785,631 non-tree edges $(u, v)$, we query the maximum edge on the tree path between $u$ and $v$ using binary-lifting Lowest Common Ancestor tables. The cycle property requires $w(u, v) \ge \max_{e \in P} w(e)$. Across all 785,631 non-tree edges, zero violations were detected at $10^{-9}\text{ km}$ tolerance.
+

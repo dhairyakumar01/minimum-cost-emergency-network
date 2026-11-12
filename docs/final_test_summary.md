@@ -124,3 +124,4 @@ All test screenshots are archived in `screenshots/phase1_5/`:
 - `05_project_analysis.png`: Comparative audit table comparing Prim vs. Kruskal and zero-weight edge explanation.
 - `06_help_methodology.png`: Consolidated methodology with statutory fuel rate benchmark table.
 - `07_mobile_view.png`: Fully responsive layout at mobile viewport (375×667).
+

@@ -146,3 +146,4 @@ To mathematically certify tree optimality without circular reliance on the algor
 3. **Cycle Property Inequality:** For every non-tree edge $e = (u, v) \in E \setminus E_T$:
    $$w(u, v) \ge \max_{e' \in P_T(u, v)} w(e') - 10^{-9}$$
 4. **Result:** Across all **785,631 non-tree edges**, exactly **0 violations** were detected. This certifies global optimality under DMGT principles.
+

@@ -142,3 +142,4 @@ The following working functionality was preserved with zero breaking changes:
 1. **Schematic Straight-Line Representation:** Global MST lines represent theoretical communication links over $K_{1255}$, not vehicular road routes.
 2. **Simulation Straight-Line Proxy:** Candidate filtering and dispatch preview in this phase utilize spherical Haversine distances pending Phase 2 OSRM routing integration.
 3. **Single Agency Scope:** Dispatches are evaluated for one emergency agency at a time, preserving mathematical comparability.
+
