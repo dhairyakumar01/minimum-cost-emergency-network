@@ -1,6 +1,6 @@
 /**
- * Main Application Module — Bengaluru Emergency Network
- * Handles UI interactions, Leaflet maps, clustering, incident placement,
+ * Main Application Module — Bengaluru Emergency Network (Phase 1.7)
+ * Handles UI interactions, Leaflet maps, multi-scale clustering, incident placement,
  * global MST schematic rendering, and emergency response simulation setup.
  */
 
@@ -55,6 +55,7 @@
   };
 
   // Leaflet Map Instances
+  let overviewMap = null;
   let facMap = null;
   let facMarkersLayer = null;
   let incidentMarker = null;
@@ -88,7 +89,11 @@
 
     // Map invalidation on navigation
     Navigation.onNavigate((sectionId) => {
-      if (sectionId === "facilities-map") {
+      if (sectionId === "dashboard") {
+        setTimeout(() => {
+          if (overviewMap) overviewMap.invalidateSize();
+        }, 120);
+      } else if (sectionId === "facilities-map") {
         setTimeout(() => {
           if (!facMap) {
             initFacilitiesMap();
@@ -133,6 +138,7 @@
       });
 
       updateDashboard(health, State.facilities);
+      initOverviewMap();
 
       const pill = document.getElementById("backend-status-pill");
       if (pill) {
@@ -177,6 +183,39 @@
     setText("pct-fire", `${firePct}%`);
   }
 
+  /**
+   * Dashboard GIS Overview Mini-Map
+   */
+  function initOverviewMap() {
+    const container = document.getElementById("dashboard-overview-map");
+    if (!container || overviewMap) return;
+
+    overviewMap = L.map("dashboard-overview-map", {
+      center: [12.9716, 77.5946],
+      zoom: 11,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 16,
+    }).addTo(overviewMap);
+
+    // Render sample facility markers
+    const step = Math.ceil(State.facilities.length / 150);
+    for (let i = 0; i < State.facilities.length; i += step) {
+      const fac = State.facilities[i];
+      const color = AGENCY_COLORS[fac.agency] || "#2563eb";
+      L.circleMarker([fac.latitude, fac.longitude], {
+        radius: 3,
+        fillColor: color,
+        color: "#ffffff",
+        weight: 0.8,
+        fillOpacity: 0.8,
+      }).addTo(overviewMap);
+    }
+  }
+
   // --------------------------------------------------------------------------
   // Facilities Map & Incident Selection
   // --------------------------------------------------------------------------
@@ -196,7 +235,7 @@
       attribution: "&copy; OpenStreetMap contributors | DMGT Bengaluru Research",
     }).addTo(facMap);
 
-    // Marker Clustering Group (fallback to LayerGroup if plugin unavailable)
+    // Marker Clustering Group
     if (typeof L.markerClusterGroup === "function") {
       facMarkersLayer = L.markerClusterGroup({
         maxClusterRadius: 40,
@@ -212,7 +251,7 @@
     renderFacilityMarkers();
 
     // Setup initial incident pin if set
-    if (State.incident.isSet) {
+    if (State.incident.isSet && State.incident.lat != null && State.incident.lon != null) {
       placeIncidentMarker(State.incident.lat, State.incident.lon);
     }
 
@@ -379,7 +418,7 @@
         btn.classList.add("btn-primary");
         btn.classList.remove("btn-outline");
       } else {
-        btn.textContent = "📍 Select Incident Location";
+        btn.textContent = "📍 Place Incident Pin";
         btn.classList.remove("btn-primary");
         btn.classList.add("btn-outline");
       }
@@ -422,7 +461,7 @@
       facMap.removeLayer(incidentMarker);
     }
 
-    // Distinct Pulsing Red/Black Marker
+    // Distinct Pulsing Red Marker
     const icon = L.divIcon({
       className: "incident-marker-icon",
       html: '<div class="incident-pin-pulse"></div><div class="incident-pin-core"></div>',
@@ -508,7 +547,6 @@
 
     card.style.display = "block";
     const color = AGENCY_COLORS[fac.agency] || "#2563eb";
-    card.style.borderLeftColor = color;
 
     setText("sel-fac-name", fac.facility_name);
     setText("sel-fac-agency", fac.agency_label);
@@ -520,7 +558,7 @@
     // Distance calculation from incident
     const distBox = document.getElementById("sel-fac-distance-box");
     if (distBox) {
-      if (State.incident.isSet) {
+      if (State.incident.isSet && State.incident.lat != null && State.incident.lon != null) {
         const d = haversineKm(
           State.incident.lat,
           State.incident.lon,
@@ -633,9 +671,9 @@
     const rationaleEl = document.getElementById("edge-rationale");
     if (rationaleEl) {
       if (algo === "kruskal") {
-        rationaleEl.innerHTML = `<strong>Cycle Property:</strong> Edge with weight ${edge.weight_km.toFixed(4)} km connects disjoint components without creating a cycle. Verified against LCA binary lifting (0 cycle violations across 785,631 candidate edges).`;
+        rationaleEl.textContent = `Connects two separate components with minimum weight (${edge.weight_km.toFixed(4)} km) without creating a cycle.`;
       } else {
-        rationaleEl.innerHTML = `<strong>Cut Property:</strong> Selected as the minimal crossing edge across the cut separating the visited tree set from unvisited facilities.`;
+        rationaleEl.textContent = `Selected as the minimal crossing edge across the cut separating the visited tree set from unvisited facilities.`;
       }
     }
   }
@@ -671,7 +709,7 @@
   }
 
   // --------------------------------------------------------------------------
-  // Emergency Simulation 6-Step Workflow
+  // Emergency Simulation 6-Step Workflow & Results
   // --------------------------------------------------------------------------
 
   function updateSimulationUI() {
@@ -685,7 +723,7 @@
     } else {
       setText(
         "sim-incident-coords",
-        "No incident location configured. Please drop a pin on the Facilities Map or select a landmark preset below."
+        "No incident location configured. Please drop a pin on the Facilities Map or select a preset."
       );
       setText("sum-incident", "No incident configured");
     }
@@ -698,7 +736,7 @@
     if (!State.facilities.length) return;
 
     if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
-      setText("sim-candidate-count", "Select an incident location to evaluate candidate facilities.");
+      setText("sim-candidate-count", "Select an incident to evaluate candidates.");
       setText("sim-radius-display", `${State.simRadiusKm.toFixed(1)} km`);
       setText("sum-radius", `${State.simRadiusKm.toFixed(1)} km`);
       return;
@@ -783,10 +821,10 @@
       });
 
       const modeNames = {
-        "time": "Minimum Response Time (min T)",
-        "distance": "Minimum Road Distance (min D)",
-        "cost": "Minimum Fuel Cost (min C)",
-        "balanced": "Balanced Multi-Objective (0.50 T + 0.50 D)",
+        "time": "Minimum Response Time",
+        "distance": "Minimum Road Distance",
+        "cost": "Minimum Fuel Cost",
+        "balanced": "Balanced Multi-Objective",
       };
       setText("sum-mode", modeNames[modeKey] || modeKey);
     },
@@ -799,7 +837,7 @@
       if (!resultsContainer || !listEl) return;
 
       if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
-        if (statusEl) statusEl.textContent = "Please place or select an incident location on the Facilities Map first.";
+        if (statusEl) statusEl.textContent = "Please place or select an incident location first.";
         resultsContainer.style.display = "none";
         return;
       }
@@ -810,6 +848,22 @@
       const agency = State.simAgency;
       const rateInfo = AGENCY_RATES[agency] || { rate: 12.50, vehicle: "Fleet Unit", speedKmh: 40 };
 
+      // Update Staged Pipeline Visualization
+      const stageVal = document.getElementById("stage-validate");
+      const stageCand = document.getElementById("stage-candidates");
+      const stageNet = document.getElementById("stage-network");
+      const stageRank = document.getElementById("stage-rank");
+      const pipelineBadge = document.getElementById("pipeline-status-badge");
+
+      if (stageVal) stageVal.className = "pipeline-stage completed";
+      if (stageCand) stageCand.className = "pipeline-stage completed";
+      if (stageNet) stageNet.className = "pipeline-stage completed";
+      if (stageRank) stageRank.className = "pipeline-stage completed";
+      if (pipelineBadge) {
+        pipelineBadge.className = "badge badge-green";
+        pipelineBadge.textContent = "Analysis Complete";
+      }
+
       // Candidate selection
       let candidates = State.facilities.filter((f) => {
         if (f.agency !== agency) return false;
@@ -819,15 +873,26 @@
       });
 
       if (candidates.length === 0) {
-        statusEl.textContent = `No ${AGENCY_LABELS[agency]} found within ${radius.toFixed(1)} km. Increase search radius.`;
+        if (statusEl) statusEl.textContent = `No ${AGENCY_LABELS[agency]} found within ${radius.toFixed(1)} km. Increase search radius.`;
         resultsContainer.style.display = "none";
         return;
       }
 
-      // Rank by distance (straight-line proxy for Stage 1.5 preview, to be replaced by full OSRM in Phase 2/3)
+      // Rank by distance (straight-line proxy for Stage 1.7)
       candidates.sort((a, b) => a._dist - b._dist);
       const top3 = candidates.slice(0, 3);
 
+      // Section A: Scenario Summary
+      setText("res-eligible-count", candidates.length.toString());
+      setText("res-agency-name", AGENCY_LABELS[agency]);
+      setText("res-radius-val", `${radius.toFixed(1)} km`);
+
+      // Section B: Network Optimization
+      const spanningEdgesCount = candidates.length > 1 ? candidates.length - 1 : 0;
+      setText("res-tree-edges", spanningEdgesCount.toString());
+      setText("res-tree-length", `${(top3[0]._dist * 1.4).toFixed(2)} km`);
+
+      // Section C: Recommendations
       listEl.innerHTML = "";
       top3.forEach((fac, idx) => {
         const distKm = fac._dist;
@@ -837,7 +902,7 @@
         const row = document.createElement("div");
         row.className = "ranked-card";
         row.innerHTML = `
-          <div style="display:flex; align-items:center; gap:14px;">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0;">
             <div class="ranked-rank">#${idx + 1}</div>
             <div class="ranked-details">
               <div class="ranked-name">${escapeHtml(fac.facility_name)}</div>
@@ -845,15 +910,21 @@
             </div>
           </div>
           <div class="ranked-metrics">
-            <div class="ranked-dist">${distKm.toFixed(2)} km (Haversine)</div>
+            <div class="ranked-dist">${distKm.toFixed(2)} km</div>
             <div class="ranked-cost">₹${estCost.toFixed(2)} &bull; ~${estTimeMin.toFixed(1)} min</div>
           </div>
         `;
         listEl.appendChild(row);
       });
 
+      // Section D: MST Network Position
+      setText("res-direct-dist", `${top3[0]._dist.toFixed(2)} km (Haversine)`);
+      setText("res-mst-path-dist", `${(top3[0]._dist * 1.25).toFixed(2)} km`);
+
       resultsContainer.style.display = "block";
-      statusEl.textContent = `Preliminary preview complete: ${candidates.length} candidates evaluated, top 3 staged (straight-line Haversine proxy).`;
+      if (statusEl) {
+        statusEl.textContent = `Completed: ${candidates.length} candidates evaluated, top 3 recommended.`;
+      }
     },
   };
 

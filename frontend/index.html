@@ -13,7 +13,7 @@
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-  <!-- Leaflet MarkerCluster CSS (Local Vendor with CDN fallback) -->
+  <!-- Leaflet MarkerCluster CSS -->
   <link rel="stylesheet" href="/assets/vendor/MarkerCluster.css" />
   <link rel="stylesheet" href="/assets/vendor/MarkerCluster.Default.css" />
 
@@ -33,9 +33,9 @@
     <!-- Sidebar Navigation -->
     <aside id="sidebar">
       <div class="brand-header">
-        <span class="brand-badge">Discrete Optimization &bull; DMGT</span>
+        <span class="brand-badge">DMGT &bull; Spatial Optimization</span>
         <h1 class="brand-title">🚨 Bengaluru MST</h1>
-        <p class="brand-subtitle">Emergency Network Architecture</p>
+        <p class="brand-subtitle">Emergency Network Platform</p>
       </div>
 
       <ul class="nav-menu">
@@ -78,11 +78,11 @@
       </ul>
 
       <div class="sidebar-footer">
-        <div style="display:flex; align-items:center; margin-bottom:4px;">
+        <div class="status-row">
           <span class="status-indicator"></span>
-          <span style="font-weight:600; color:#fff;">System Online</span>
+          <span>System Operational</span>
         </div>
-        <div>1,255 Verified Facilities &bull; K₁₂₅₅ Graph</div>
+        <div>1,255 Verified Facilities &bull; <i>K</i>₁₂₅₅</div>
         <div style="margin-top:2px; font-size:0.70rem; color:#94a3b8;">BBMP Municipal Corporation</div>
       </div>
     </aside>
@@ -109,161 +109,205 @@
             <span style="font-size:1.2rem;">⚠️</span>
             <span id="api-error-message">Unable to reach backend service.</span>
           </div>
-          <button class="btn btn-outline btn-retry-connection" style="border-color:#f87171; color:#991b1b;">
+          <button class="btn btn-outline btn-sm btn-retry-connection" style="border-color:#f87171; color:#991b1b;">
             🔄 Retry Connection
           </button>
         </div>
 
         <!-- ================================================================= -->
-        <!-- SECTION 1: DASHBOARD -->
+        <!-- SECTION 1: DASHBOARD (Operational Overview) -->
         <!-- ================================================================= -->
         <section id="section-dashboard" class="view-section">
-          <div class="section-hero">
+          <!-- Operational Hero Banner -->
+          <div class="dashboard-hero">
             <div>
-              <h2 class="hero-title">Minimum-Cost Emergency Communication Network</h2>
-              <p class="hero-subtitle">
-                Discrete Optimization & Minimum Spanning Tree Infrastructure &bull; Bruhat Bengaluru Mahanagara Palike (BBMP)
+              <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
+              <p class="dash-subtitle">
+                Minimum Spanning Tree Optimization & Geospatial Public Safety Planning &bull; BBMP Area
               </p>
             </div>
-            <div class="hero-actions">
-              <button class="btn btn-primary" onclick="Navigation.navigateTo('facilities-map')">
-                🗺️ Explore Facilities Map
+            <div class="dash-actions">
+              <button class="btn btn-primary" onclick="Navigation.navigateTo('simulation')">
+                🚨 Start Emergency Simulation
+              </button>
+              <button class="btn btn-outline" onclick="Navigation.navigateTo('facilities-map')">
+                🗺️ Facilities Map
               </button>
               <button class="btn btn-outline" onclick="Navigation.navigateTo('mst-network')">
-                🕸️ View Global MST
+                🕸️ Global MST
               </button>
             </div>
           </div>
 
-          <!-- Primary Metric Cards -->
+          <!-- 6 Primary Metric Cards -->
           <div class="metrics-grid">
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Verified active BBMP registry</div>
+              <div class="metric-subtext">Verified BBMP registry nodes</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span style="color:#dc2626;">🔴</span> Hospitals & Clinics</div>
               <div class="metric-value" id="metric-hospitals">1,097</div>
-              <div class="metric-subtext">Trauma & acute triage centers</div>
+              <div class="metric-subtext">Acute care & trauma triage</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span style="color:#2563eb;">🔵</span> Police Stations</div>
               <div class="metric-value" id="metric-police">138</div>
-              <div class="metric-subtext">Law enforcement & Hoysala patrol</div>
+              <div class="metric-subtext">Law enforcement & Hoysala</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span style="color:#ea580c;">🟠</span> Fire Stations</div>
               <div class="metric-value" id="metric-fire">20</div>
-              <div class="metric-subtext">KSFES firefighting & extrication</div>
+              <div class="metric-subtext">KSFES rescue & extrication</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🔗</span> MST Connections</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
-              <div class="metric-subtext">Exact Cayley invariant (|V| - 1)</div>
+              <div class="metric-subtext">Cayley invariant (|V| - 1)</div>
             </div>
             <div class="metric-card highlight-card">
-              <div class="metric-label"><span>📏</span> Global MST Total Length (Haversine)</div>
+              <div class="metric-label"><span>📏</span> Global MST Length</div>
               <div class="metric-value" id="metric-mst-length">480.1784 km</div>
-              <div class="metric-subtext">Sum of 1,254 selected tree edges (not complete graph)</div>
+              <div class="metric-subtext">Sum of 1,254 selected links</div>
             </div>
           </div>
 
-          <!-- Two-Layer Architecture Card -->
-          <div class="card" style="margin-top:20px;">
-            <div class="card-header">
-              <h3 class="card-title">Dual-Layer Infrastructure Model</h3>
-              <p class="card-subtitle">Separation of physical transmission backbone from emergency vehicular response routing.</p>
-            </div>
-            <div class="layer-grid">
-              <div class="layer-box layer-mst">
-                <div class="layer-badge">Layer 1 &bull; Communication Topology</div>
-                <h4 class="layer-title">Minimum Spanning Tree (MST) Backbone</h4>
-                <p class="layer-desc">
-                  An optical-fiber / emergency RF transmission network connecting all 1,255 emergency facilities across Bengaluru with exactly 1,254 physical communication links. Computed over the complete undirected graph <i>K</i><sub>1255</sub> (786,885 candidate edges) using spherical Haversine distances to minimize municipal capital expenditure.
-                </p>
-                <div class="layer-specs">
-                  <span><strong>Total Length:</strong> 480.1784 km</span>
-                  <span><strong>Topology:</strong> Acyclic Spanning Tree</span>
-                  <span><strong>Invariance:</strong> Unique MST</span>
+          <!-- Dashboard Two-Column Operations Layout -->
+          <div class="dashboard-grid">
+            <!-- Left: Bengaluru GIS Overview Map -->
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Geospatial Distribution Overview</h3>
+                  <p class="card-subtitle">BBMP Municipal Boundary &bull; Interactive spatial cluster preview</p>
                 </div>
+                <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
+                  Open Full GIS Map &rarr;
+                </button>
               </div>
-              <div class="layer-box layer-road">
-                <div class="layer-badge">Layer 2 &bull; Vehicular Transit</div>
-                <h4 class="layer-title">Physical Road Transit Network</h4>
-                <p class="layer-desc">
-                  The actual surface roadway network traversed by emergency response vehicles (ambulances, police cruisers, fire engines). Road distances (<i>D</i><sub>road</sub>) are constrained by topology, one-way systems, and junctions (<i>D</i><sub>road</sub> &ge; <i>D</i><sub>haversine</sub>). Evaluated during incident simulation for response dispatch.
-                </p>
-                <div class="layer-specs">
-                  <span><strong>Routing Engine:</strong> OSRM Road Topology</span>
-                  <span><strong>Constraint:</strong> Directional &ge; Haversine</span>
-                  <span><strong>Dispatch:</strong> Single Agency per Incident</span>
+              <div class="overview-map-container">
+                <div id="dashboard-overview-map" class="overview-map-el"></div>
+              </div>
+            </div>
+
+            <!-- Right: Operational Status & System Invariants -->
+            <div class="card dash-status-card" style="margin-bottom:0;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">System Status & Invariants</h3>
+                  <p class="card-subtitle">Verified mathematical certifications</p>
                 </div>
+                <span class="badge badge-green">Ready</span>
+              </div>
+
+              <div class="system-status-item">
+                <div class="status-left">
+                  <span>🏛️</span>
+                  <div>
+                    <div>Dual-Layer Model</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
+                      Separates Layer 1 physical communication backbone from Layer 2 road transit.
+                    </div>
+                  </div>
+                </div>
+                <span class="badge badge-blue">Verified</span>
+              </div>
+
+              <div class="system-status-item">
+                <div class="status-left">
+                  <span>🔍</span>
+                  <div>
+                    <div>Cycle Property LCA Audit</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
+                      785,631 non-tree candidate edges verified against tree path maximums.
+                    </div>
+                  </div>
+                </div>
+                <span class="badge badge-green">0 Violations</span>
+              </div>
+
+              <div class="system-status-item">
+                <div class="status-left">
+                  <span>⚖️</span>
+                  <div>
+                    <div>Balanced Optimization Mode</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
+                      Proved single-agency scalar equivalence: <i>C</i><sup>norm</sup> &equiv; <i>D</i><sup>norm</sup>.
+                    </div>
+                  </div>
+                </div>
+                <span class="badge badge-blue">Proved</span>
+              </div>
+
+              <div class="system-status-item">
+                <div class="status-left">
+                  <span>⛽</span>
+                  <div>
+                    <div>Fleet Fuel Rate Benchmark</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
+                      Karnataka Gazette FD 31 CSL 2024 diesel benchmark (₹88.94/L).
+                    </div>
+                  </div>
+                </div>
+                <span class="badge badge-green">₹88.94 / L</span>
               </div>
             </div>
           </div>
 
-          <!-- Balanced Optimization Disclosure Card -->
-          <div class="card" style="margin-top:20px;">
+          <!-- Facility Distribution Breakdown -->
+          <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Mathematical Rigor & Balanced Optimization Equivalence</h3>
-              <p class="card-subtitle">Formal disclosure of the single-agency transit cost proportionality theorem.</p>
-            </div>
-            <div style="font-size:0.90rem; color:#334155; line-height:1.75;">
-              <p style="margin-bottom:10px;">
-                In the Emergency Response Simulation, vehicle transit fuel cost is modeled strictly by:
-              </p>
-              <div class="math-callout">
-                <i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>
-              </div>
-              <p style="margin-bottom:10px;">
-                where <i>D<sub>ij</sub></i> is the road transit distance in kilometers and <i>R<sub>a</sub></i> is the statutory fuel consumption rate (Ambulance: ₹12.50/km, Police: ₹6.25/km, Fire: ₹18.00/km) based on Government of Karnataka Notification No. FD 31 CSL 2024 diesel benchmark at ₹88.94/L.
-              </p>
-              <p style="margin-bottom:10px;">
-                <strong>Mathematical Equivalence Theorem:</strong> Because <i>R<sub>a</sub></i> is an invariant scalar for any single-agency dispatch run, min-max normalization yields identical values for normalized distance and normalized cost:
-              </p>
-              <div class="math-callout">
-                <i>C</i><sup>norm</sup> = <i>D</i><sup>norm</sup> &implies; 
-                <i>W<sub>ij</sub></i><sup>balanced</sup> = 0.50 <i>T</i><sup>norm</sup> + 0.25 <i>D</i><sup>norm</sup> + 0.25 <i>C</i><sup>norm</sup> = <strong>0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup></strong>
-              </div>
-              <p style="font-size:0.84rem; color:var(--text-muted); margin-top:6px;">
-                This formal equivalence is presented in technical demonstrations and faculty review to guarantee mathematical honesty.
-              </p>
-            </div>
-          </div>
-
-          <!-- Distribution Breakdown Card -->
-          <div class="card" style="margin-top:20px;">
-            <div class="card-header">
-              <h3 class="card-title">Facility Distribution by Emergency Agency</h3>
-              <p class="card-subtitle">Verified inventory across healthcare, law enforcement, and fire rescue.</p>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:16px;">
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.86rem; font-weight:600; margin-bottom:6px;">
-                  <span style="color:#dc2626;">🔴 Hospitals & Clinics (1,097 facilities)</span>
+                <h3 class="card-title">Emergency Response Fleet & Facilities Breakdown</h3>
+                <p class="card-subtitle">Operational inventory across Bengaluru's three primary first-response agencies</p>
+              </div>
+            </div>
+            
+            <div class="agency-dist-grid">
+              <div class="agency-dist-box box-hospital">
+                <div class="dist-box-title">Hospitals & Clinics</div>
+                <div class="dist-box-val">1,097 <span style="font-size:0.85rem; color:#dc2626; font-weight:600;">(87.4%)</span></div>
+                <div class="dist-box-meta">Ambulance Fleet &bull; BLS / ALS Units &bull; Rate: ₹12.50 / km</div>
+              </div>
+              <div class="agency-dist-box box-police">
+                <div class="dist-box-title">Police Stations</div>
+                <div class="dist-box-val">138 <span style="font-size:0.85rem; color:#2563eb; font-weight:600;">(11.0%)</span></div>
+                <div class="dist-box-meta">Law Enforcement &bull; Hoysala Patrol &bull; Rate: ₹6.25 / km</div>
+              </div>
+              <div class="agency-dist-box box-fire">
+                <div class="dist-box-title">Fire Stations</div>
+                <div class="dist-box-val">20 <span style="font-size:0.85rem; color:#ea580c; font-weight:600;">(1.6%)</span></div>
+                <div class="dist-box-meta">Rescue & HazMat &bull; Fire Appliance &bull; Rate: ₹18.00 / km</div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Healthcare (1,097)</span>
                   <span id="pct-hospitals">87.4%</span>
                 </div>
-                <div class="progress-track">
-                  <div id="bar-hospitals" class="progress-bar" style="width:87.4%; background:#dc2626;"></div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-hospitals" style="height:100%; width:87.4%; background:#dc2626;"></div>
                 </div>
               </div>
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.86rem; font-weight:600; margin-bottom:6px;">
-                  <span style="color:#2563eb;">🔵 Police Stations (138 stations)</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Police (138)</span>
                   <span id="pct-police">11.0%</span>
                 </div>
-                <div class="progress-track">
-                  <div id="bar-police" class="progress-bar" style="width:11.0%; background:#2563eb;"></div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-police" style="height:100%; width:11.0%; background:#2563eb;"></div>
                 </div>
               </div>
               <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.86rem; font-weight:600; margin-bottom:6px;">
-                  <span style="color:#ea580c;">🟠 Fire Stations (20 stations)</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Fire Rescue (20)</span>
                   <span id="pct-fire">1.6%</span>
                 </div>
-                <div class="progress-track">
-                  <div id="bar-fire" class="progress-bar" style="width:1.6%; background:#ea580c;"></div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-fire" style="height:100%; width:1.6%; background:#ea580c;"></div>
                 </div>
               </div>
             </div>
@@ -271,52 +315,60 @@
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 2: FACILITIES MAP -->
+        <!-- SECTION 2: FACILITIES MAP (Map-First GIS Experience) -->
         <!-- ================================================================= -->
         <section id="section-facilities-map" class="view-section" style="display:none;">
-          <!-- Controls Row -->
-          <div class="map-controls-row">
-            <div class="filter-group">
-              <button class="filter-btn active" data-agency="all">All Agencies (1,255)</button>
-              <button class="filter-btn" data-agency="hospital">🔴 Hospitals (1,097)</button>
-              <button class="filter-btn" data-agency="police_station">🔵 Police (138)</button>
-              <button class="filter-btn" data-agency="fire_station">🟠 Fire (20)</button>
+          <!-- Compact GIS Toolbar -->
+          <div class="gis-toolbar">
+            <div class="gis-toolbar-left">
+              <div class="filter-group">
+                <button class="filter-btn active" data-agency="all">All (1,255)</button>
+                <button class="filter-btn" data-agency="hospital">🔴 Hospitals (1,097)</button>
+                <button class="filter-btn" data-agency="police_station">🔵 Police (138)</button>
+                <button class="filter-btn" data-agency="fire_station">🟠 Fire (20)</button>
+              </div>
+              <div class="search-input-wrap">
+                <span class="search-icon-placeholder">🔍</span>
+                <input type="text" id="facility-map-search" class="search-input" placeholder="Search facility name or ID..." />
+              </div>
+              <span id="rendered-facilities-count" class="badge badge-gray">
+                Displaying 1,255 facilities
+              </span>
             </div>
-            <div class="search-input-wrap">
-              <input type="text" id="facility-map-search" class="search-input" placeholder="🔍 Search facility by name or ID..." />
+
+            <div class="gis-toolbar-right">
+              <button id="btn-toggle-incident-mode" class="btn btn-outline" style="border-color:#dc2626; color:#dc2626;">
+                📍 Place Incident Pin
+              </button>
             </div>
           </div>
 
-          <!-- Incident Selection Toolbar -->
+          <!-- Incident Selection Drawer / Bar -->
           <div class="incident-bar">
             <div class="incident-bar-top">
-              <div style="display:flex; align-items:center; gap:10px;">
-                <button id="btn-toggle-incident-mode" class="btn btn-outline" style="border-color:#dc2626; color:#dc2626; font-weight:600;">
-                  📍 Select Incident Location
-                </button>
+              <div style="display:flex; align-items:center; gap:8px;">
                 <span id="incident-status-pill" class="badge badge-gray">No incident placed</span>
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
-                <button id="btn-confirm-incident" class="btn btn-success" style="display:none;">
-                  ✓ Confirm Location
+                <button id="btn-confirm-incident" class="btn btn-success btn-sm" style="display:none;">
+                  ✓ Confirm Pin
                 </button>
-                <button id="btn-clear-incident" class="btn btn-outline" style="display:none;">
+                <button id="btn-clear-incident" class="btn btn-outline btn-sm" style="display:none;">
                   ✕ Clear Pin
                 </button>
-                <button id="btn-send-to-sim" class="btn btn-primary" style="display:none;">
+                <button id="btn-send-to-sim" class="btn btn-primary btn-sm" style="display:none;">
                   🚨 Send to Simulation &rarr;
                 </button>
               </div>
             </div>
             
-            <!-- Coordinates & Quick Landmarks Bar -->
             <div class="incident-coords-row" id="incident-coords-bar" style="display:none;">
               <div class="coord-field">
-                <label>Latitude:</label>
+                <label>Lat:</label>
                 <input type="number" id="incident-lat-input" step="0.00001" placeholder="12.9716" />
               </div>
               <div class="coord-field">
-                <label>Longitude:</label>
+                <label>Lon:</label>
                 <input type="number" id="incident-lon-input" step="0.00001" placeholder="77.5946" />
               </div>
               <div class="landmarks-list">
@@ -331,356 +383,439 @@
             </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0;">
-            <span id="rendered-facilities-count" style="font-size:0.82rem; font-weight:600; color:var(--text-muted);">
-              Displaying 1,255 facilities (multi-scale clustering active)
-            </span>
-            <span style="font-size:0.75rem; color:#64748b;">
-              Zoom in to expand clusters &bull; Click any marker to inspect
-            </span>
-          </div>
-
           <!-- Leaflet Map Container -->
           <div id="map-container">
             <div id="leaflet-map"></div>
-          </div>
 
-          <!-- Selected Facility Inspection Card -->
-          <div id="selected-facility-card" class="card" style="display:none; margin-top:16px; border-left:4px solid var(--primary);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <span id="sel-fac-agency" style="font-size:0.76rem; font-weight:700; text-transform:uppercase;">Agency</span>
-                <h4 id="sel-fac-name" style="font-size:1.15rem; font-weight:700; margin:4px 0;">Facility Name</h4>
-                <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
-                  ID: <code id="sel-fac-id">ID</code> &bull; Coordinates: <span id="sel-fac-coords">0.0, 0.0</span>
-                </div>
-                <div id="sel-fac-distance-box" style="display:none; margin-top:8px; font-size:0.85rem; font-weight:600; color:#0b1329; background:#eff6ff; padding:6px 12px; border-radius:6px; border:1px solid #bfdbfe;">
-                  📏 Distance from selected incident: <span id="sel-fac-dist-val">0.00 km</span>
-                </div>
+            <!-- Floating Facility Details Panel -->
+            <div id="selected-facility-card" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                <span id="sel-fac-agency" style="font-size:0.72rem; font-weight:700; text-transform:uppercase;">Agency</span>
+                <button class="btn-icon" id="btn-close-facility-card">✕</button>
               </div>
-              <button class="btn btn-outline" id="btn-close-facility-card" style="padding:4px 10px; font-size:0.80rem;">
-                ✕ Close
-              </button>
+              <h4 id="sel-fac-name" style="font-size:0.96rem; font-weight:700; color:var(--text-main); margin-bottom:4px;">Facility Name</h4>
+              <div style="font-size:0.76rem; color:var(--text-muted); line-height:1.4;">
+                ID: <code id="sel-fac-id">ID</code><br/>
+                Coordinates: <span id="sel-fac-coords" style="font-family:var(--font-mono);">0.0, 0.0</span>
+              </div>
+              <div id="sel-fac-distance-box" style="display:none; margin-top:10px; font-size:0.80rem; font-weight:600; color:#1d4ed8; background:#eff6ff; padding:6px 10px; border-radius:4px; border:1px solid #bfdbfe;">
+                📏 Haversine Straight-Line Distance: <span id="sel-fac-dist-val">0.00 km</span>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: MST NETWORK VISUALIZATION -->
+        <!-- SECTION 3: MST NETWORK (Visualization First) -->
         <!-- ================================================================= -->
         <section id="section-mst-network" class="view-section" style="display:none;">
-          <!-- Warning & Architecture Banner -->
-          <div class="alert-banner alert-warning" style="margin-bottom:14px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:1.4rem;">⚠️</span>
-              <div>
-                <strong>Schematic MST Network Edges — Not Vehicular Road Geometry:</strong>
-                <div style="font-size:0.82rem; color:#78350f; margin-top:2px;">
-                  The lines below represent the 1,254 global minimum-cost communication/optical links computed over <i>K</i><sub>1255</sub>. They depict physical network topology, not drivable street paths. Click or hover any edge to inspect mathematical decision logic.
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Controls Bar -->
           <div class="mst-controls-row">
             <div class="algo-toggle-group">
               <button class="algo-btn active" id="btn-mst-kruskal" data-algo="kruskal">
-                Kruskal's Algorithm (Standard)
+                Kruskal's Algorithm
               </button>
               <button class="algo-btn" id="btn-mst-prim" data-algo="prim">
-                Prim's Algorithm (Standard)
+                Prim's Algorithm
               </button>
             </div>
+            
             <div class="mst-stats-pills">
               <span class="mst-pill"><strong>Vertices:</strong> 1,255</span>
               <span class="mst-pill"><strong>Edges:</strong> 1,254</span>
               <span class="mst-pill highlight"><strong>Total Tree Length:</strong> 480.1784 km</span>
               <span class="mst-pill"><strong>Min Edge:</strong> 0.0000 km</span>
               <span class="mst-pill"><strong>Max Edge:</strong> 7.8256 km</span>
+              <span class="badge badge-gray" style="font-weight:400;">Schematic Links &bull; Topology Only</span>
             </div>
           </div>
 
           <!-- MST Leaflet Map Container -->
-          <div id="mst-map-container" style="height:620px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
+          <div id="mst-map-container" style="height:calc(100vh - 170px); min-height:560px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
             <div id="mst-leaflet-map" style="height:100%; width:100%;"></div>
             
-            <!-- Floating Edge Inspector Card -->
+            <!-- Floating Edge Inspector Panel -->
             <div id="mst-edge-detail-card" class="edge-inspector-card" style="display:none;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span class="edge-badge">Selected Tree Edge</span>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="edge-badge">Selected Tree Link</span>
                 <button class="btn-icon" id="btn-close-edge-card">✕</button>
               </div>
               <div class="edge-endpoints">
                 <div class="endpoint">
-                  <span class="ep-label">Vertex U</span>
+                  <span class="ep-label">Endpoint U</span>
                   <div class="ep-name" id="edge-u-name">Facility U</div>
                   <div class="ep-id" id="edge-u-id">ID</div>
                 </div>
                 <div class="edge-arrow">⟷</div>
                 <div class="endpoint">
-                  <span class="ep-label">Vertex V</span>
+                  <span class="ep-label">Endpoint V</span>
                   <div class="ep-name" id="edge-v-name">Facility V</div>
                   <div class="ep-id" id="edge-v-id">ID</div>
                 </div>
               </div>
               <div class="edge-metrics-row">
-                <div><strong>Weight (Haversine):</strong> <span id="edge-weight">0.0000 km</span></div>
+                <div><strong>Weight (Haversine):</strong> <span id="edge-weight" style="font-family:var(--font-mono); font-weight:700;">0.0000 km</span></div>
                 <div><strong>Algorithm:</strong> <span id="edge-algo">Kruskal</span></div>
               </div>
+              
+              <!-- Operational explanation -->
               <div class="edge-rationale" id="edge-rationale">
-                Edge selected because it connects disjoint components with minimum weight without creating a cycle.
+                Connects two separate components with minimal weight without creating a cycle.
               </div>
+
+              <!-- Expandable mathematical detail -->
+              <details class="edge-details-toggle" style="margin-top:8px;">
+                <summary style="cursor:pointer; color:var(--primary); font-size:0.75rem; font-weight:600;">
+                  Why was this edge selected? (Mathematical Optimality)
+                </summary>
+                <div style="margin-top:6px; font-size:0.74rem; color:var(--text-muted); line-height:1.45;">
+                  Under the Cycle Property, any non-tree chord closing a cycle with this path has weight &ge; this link. Verified via LCA binary lifting (0 violations across 785,631 candidate edges).
+                </div>
+              </details>
             </div>
           </div>
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: EMERGENCY SIMULATION WORKFLOW -->
+        <!-- SECTION 4: EMERGENCY SIMULATION (Progressive Workspace) -->
         <!-- ================================================================= -->
         <section id="section-simulation" class="view-section" style="display:none;">
-          <div class="section-hero">
-            <div>
-              <h2 class="hero-title">Emergency Response Simulation & Dispatch Setup</h2>
-              <p class="hero-subtitle">
-                Configure incident location, single-agency constraint, candidate radius, and optimization criteria.
-              </p>
-            </div>
-          </div>
-
-          <!-- 6-Step Workflow Container -->
-          <div class="simulation-stepper">
+          <div class="simulation-layout">
             
-            <!-- Step 1: Incident Location Selection -->
-            <div class="step-card" id="sim-step-1">
-              <div class="step-header">
-                <span class="step-number">1</span>
-                <div>
-                  <h3 class="step-title">Incident Location Selection</h3>
-                  <p class="step-desc">Establish the precise geographic origin of the emergency in Bengaluru.</p>
-                </div>
-              </div>
-              <div class="step-body">
-                <div class="sim-incident-box">
-                  <div class="sim-incident-info">
-                    <span id="sim-incident-coords" style="font-family:var(--font-mono); font-size:1.05rem; font-weight:700; color:#0f172a;">
-                      12.97810° N, 77.56960° E (Majestic / KSR Railway Station)
-                    </span>
-                    <span id="sim-incident-badge" class="badge badge-blue">Preset Location</span>
+            <!-- Left Column: 6-Step Workflow Configuration -->
+            <div class="sim-workflow-column">
+              
+              <!-- Step 1: Incident Location Selection -->
+              <div class="step-card" id="sim-step-1">
+                <div class="step-header">
+                  <span class="step-number">1</span>
+                  <div>
+                    <h3 class="step-title">Incident Location Origin</h3>
+                    <p class="step-desc">Establish emergency coordinates across the BBMP region.</p>
                   </div>
-                  <div style="display:flex; gap:10px;">
-                    <button class="btn btn-outline" onclick="Navigation.navigateTo('facilities-map')">
-                      📍 Adjust on Facilities Map
+                </div>
+                <div class="step-body">
+                  <div class="sim-incident-box">
+                    <div class="sim-incident-info">
+                      <span id="sim-incident-coords" style="font-family:var(--font-mono); font-size:0.86rem; font-weight:700; color:#0f172a;">
+                        12.97810° N, 77.56960° E (Majestic / KSR Railway Station)
+                      </span>
+                      <span id="sim-incident-badge" class="badge badge-blue">Preset Location</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
+                      📍 Pick on Map
                     </button>
                   </div>
-                </div>
 
-                <div style="margin-top:12px;">
-                  <span style="font-size:0.80rem; font-weight:600; color:var(--text-muted);">Quick Landmark Selection:</span>
-                  <div class="landmarks-list" style="margin-top:6px;">
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9781, 77.5696, 'Majestic (KSR Railway Station)')">Majestic</button>
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9298, 77.5835, 'Jayanagar 4th Block')">Jayanagar</button>
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9719, 77.6412, 'Indiranagar 100ft Road')">Indiranagar</button>
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9155, 77.5736, 'Banashankari Metro')">Banashankari</button>
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9866, 77.7348, 'Whitefield ITPL')">Whitefield</button>
-                    <button class="landmark-pill" onclick="App.setIncidentLocation(12.9507, 77.5848, 'Lalbagh Botanical Garden')">Lalbagh</button>
+                  <div style="margin-top:10px;">
+                    <div class="landmarks-list">
+                      <span class="landmark-label">Presets:</span>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9781, 77.5696, 'Majestic (KSR Railway Station)')">Majestic</button>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9298, 77.5835, 'Jayanagar 4th Block')">Jayanagar</button>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9719, 77.6412, 'Indiranagar 100ft Road')">Indiranagar</button>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9155, 77.5736, 'Banashankari Metro')">Banashankari</button>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9866, 77.7348, 'Whitefield ITPL')">Whitefield</button>
+                      <button class="landmark-pill" onclick="App.setIncidentLocation(12.9507, 77.5848, 'Lalbagh Botanical Garden')">Lalbagh</button>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Step 2: Emergency Category Context -->
+              <div class="step-card" id="sim-step-2">
+                <div class="step-header">
+                  <span class="step-number">2</span>
+                  <div>
+                    <h3 class="step-title">Emergency Category</h3>
+                    <p class="step-desc">Select incident type to match agency fleet context.</p>
+                  </div>
+                </div>
+                <div class="step-body">
+                  <div class="category-cards-grid">
+                    <div class="category-card active" data-category="medical" onclick="App.selectCategory('medical')">
+                      <span class="cat-icon">🚑</span>
+                      <div class="cat-name">Medical Emergency</div>
+                      <div class="cat-desc">Cardiac, trauma, acute triage</div>
+                    </div>
+                    <div class="category-card" data-category="fire" onclick="App.selectCategory('fire')">
+                      <span class="cat-icon">🚒</span>
+                      <div class="cat-name">Structural Fire / HazMat</div>
+                      <div class="cat-desc">Blaze, chemical spill, extrication</div>
+                    </div>
+                    <div class="category-card" data-category="police" onclick="App.selectCategory('police')">
+                      <span class="cat-icon">🚓</span>
+                      <div class="cat-name">Public Safety / Crime</div>
+                      <div class="cat-desc">Disturbance, security response</div>
+                    </div>
+                    <div class="category-card" data-category="traffic" onclick="App.selectCategory('traffic')">
+                      <span class="cat-icon">🚗</span>
+                      <div class="cat-name">Road Traffic Accident</div>
+                      <div class="cat-desc">Arterial crash, pileup rescue</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: Single Response Agency -->
+              <div class="step-card" id="sim-step-3">
+                <div class="step-header">
+                  <span class="step-number">3</span>
+                  <div>
+                    <h3 class="step-title">Response Agency</h3>
+                    <p class="step-desc">Single agency dispatched per simulation run.</p>
+                  </div>
+                </div>
+                <div class="step-body">
+                  <div class="agency-selection-grid">
+                    <div class="agency-card active" id="sim-agency-hospital" onclick="App.selectAgency('hospital')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-red">Healthcare & Ambulance</span>
+                        </div>
+                        <div class="agency-vehicle">Ambulance Fleet (BLS / ALS)</div>
+                        <div class="agency-meta">1,097 Facilities &bull; Force Traveller / Winger</div>
+                      </div>
+                      <div class="agency-rate">₹12.50 / km</div>
+                    </div>
+
+                    <div class="agency-card" id="sim-agency-police" onclick="App.selectAgency('police_station')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-blue">Law Enforcement</span>
+                        </div>
+                        <div class="agency-vehicle">Police Patrol (Hoysala)</div>
+                        <div class="agency-meta">138 Stations &bull; Mahindra Bolero</div>
+                      </div>
+                      <div class="agency-rate">₹6.25 / km</div>
+                    </div>
+
+                    <div class="agency-card" id="sim-agency-fire" onclick="App.selectAgency('fire_station')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-orange">Fire & Rescue Services</span>
+                        </div>
+                        <div class="agency-vehicle">Fire Engine Appliance</div>
+                        <div class="agency-meta">20 Stations &bull; Heavy Water Tender</div>
+                      </div>
+                      <div class="agency-rate">₹18.00 / km</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4: Search Radius -->
+              <div class="step-card" id="sim-step-4">
+                <div class="step-header">
+                  <span class="step-number">4</span>
+                  <div>
+                    <h3 class="step-title">Search Radius (<i>R<sub>s</sub></i>)</h3>
+                    <p class="step-desc">Filter eligible facilities around the incident origin.</p>
+                  </div>
+                </div>
+                <div class="step-body">
+                  <div class="radius-control-box">
+                    <div class="radius-slider-wrap">
+                      <input type="range" id="sim-radius-slider" min="2" max="15" step="0.5" value="5.0" oninput="App.onRadiusChange(this.value)" />
+                      <div class="radius-ticks">
+                        <span>2 km</span>
+                        <span>5 km</span>
+                        <span>8 km</span>
+                        <span>12 km</span>
+                        <span>15 km</span>
+                      </div>
+                    </div>
+                    <div class="radius-stat-box">
+                      <div class="radius-val" id="sim-radius-display">5.0 km</div>
+                      <div class="radius-sub" id="sim-candidate-count">Evaluating...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 5: Optimization Mode -->
+              <div class="step-card" id="sim-step-5">
+                <div class="step-header">
+                  <span class="step-number">5</span>
+                  <div>
+                    <h3 class="step-title">Optimization Objective Mode</h3>
+                    <p class="step-desc">Define criterion for evaluating response facility candidates.</p>
+                  </div>
+                </div>
+                <div class="step-body">
+                  <div class="mode-cards-grid">
+                    <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
+                      <div class="mode-icon">⏱️</div>
+                      <div class="mode-title">Minimum Response Time</div>
+                      <div class="mode-desc">Minimizes estimated travel duration.</div>
+                    </div>
+                    <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
+                      <div class="mode-icon">📏</div>
+                      <div class="mode-title">Minimum Road Distance</div>
+                      <div class="mode-desc">Minimizes physical transit distance.</div>
+                    </div>
+                    <div class="mode-card" data-mode="cost" onclick="App.selectMode('cost')">
+                      <div class="mode-icon">💰</div>
+                      <div class="mode-title">Minimum Fuel Cost</div>
+                      <div class="mode-desc">Minimizes estimated vehicle fuel expenditure.</div>
+                    </div>
+                    <div class="mode-card" data-mode="balanced" onclick="App.selectMode('balanced')">
+                      <div class="mode-icon">⚖️</div>
+                      <div class="mode-title">Balanced Multi-Objective</div>
+                      <div class="mode-desc">Combines normalized time and distance criteria.</div>
+                    </div>
+                  </div>
+                  <div style="font-size:0.72rem; color:var(--text-light); margin-top:8px;">
+                    ℹ️ Note: Minimum Cost and Minimum Distance yield identical rankings under the fixed single-agency rate model.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 6: Dispatch Execution Summary -->
+              <div class="step-card" id="sim-step-6">
+                <div class="step-header">
+                  <span class="step-number">6</span>
+                  <div>
+                    <h3 class="step-title">Dispatch Staging & Execution</h3>
+                    <p class="step-desc">Review parameters and trigger analysis pipeline.</p>
+                  </div>
+                </div>
+                <div class="step-body">
+                  <div class="dispatch-summary-box">
+                    <div class="summary-item">
+                      <span class="sum-lbl">Incident Location:</span>
+                      <span class="sum-val" id="sum-incident">Majestic (12.9781°N, 77.5696°E)</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="sum-lbl">Agency Fleet:</span>
+                      <span class="sum-val" id="sum-agency">Healthcare & Ambulance</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="sum-lbl">Search Radius:</span>
+                      <span class="sum-val" id="sum-radius">5.0 km</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="sum-lbl">Objective Mode:</span>
+                      <span class="sum-val" id="sum-mode">Minimum Response Time</span>
+                    </div>
+                  </div>
+
+                  <div style="margin-top:14px; display:flex; align-items:center; gap:12px;">
+                    <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()" style="padding:10px 20px;">
+                      🚀 Run Dispatch Analysis
+                    </button>
+                    <span id="sim-exec-status" style="font-size:0.80rem; color:var(--text-muted);">
+                      Ready for analysis
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
-            <!-- Step 2: Emergency Category Context -->
-            <div class="step-card" id="sim-step-2">
-              <div class="step-header">
-                <span class="step-number">2</span>
-                <div>
-                  <h3 class="step-title">Emergency Category Context</h3>
-                  <p class="step-desc">Classify the incident nature to contextualize dispatch urgency.</p>
+            <!-- Right Column: Staged Progress & Simulation Results Workspace -->
+            <div class="sim-results-column">
+              
+              <!-- Staged Execution Pipeline Visualizer -->
+              <div class="execution-pipeline">
+                <div class="pipeline-header">
+                  <span>Execution Pipeline Stages</span>
+                  <span class="badge badge-blue" id="pipeline-status-badge">Standby</span>
                 </div>
-              </div>
-              <div class="step-body">
-                <div class="category-cards-grid">
-                  <div class="category-card active" data-category="medical" onclick="App.selectCategory('medical')">
-                    <span class="cat-icon">🚑</span>
-                    <h4 class="cat-name">Medical Emergency</h4>
-                    <p class="cat-desc">Cardiac arrest, trauma injury, respiratory collapse, acute stroke triage.</p>
+                <div class="pipeline-stages">
+                  <div class="pipeline-stage" id="stage-validate">
+                    <span class="stage-dot"></span>
+                    <span>1. Validating Incident Coordinates & Boundary</span>
                   </div>
-                  <div class="category-card" data-category="fire" onclick="App.selectCategory('fire')">
-                    <span class="cat-icon">🚒</span>
-                    <h4 class="cat-name">Structural Fire & HazMat</h4>
-                    <p class="cat-desc">Building blaze, chemical spill, gas leak, building collapse extrication.</p>
+                  <div class="pipeline-stage" id="stage-candidates">
+                    <span class="stage-dot"></span>
+                    <span>2. Evaluating Facility Candidates in Search Radius</span>
                   </div>
-                  <div class="category-card" data-category="police" onclick="App.selectCategory('police')">
-                    <span class="cat-icon">🚓</span>
-                    <h4 class="cat-name">Crime & Public Safety</h4>
-                    <p class="cat-desc">Active armed disturbance, robbery, riot control, perimeter lockdown.</p>
+                  <div class="pipeline-stage" id="stage-network">
+                    <span class="stage-dot"></span>
+                    <span>3. Constructing Subgraph & Spanning Backbone</span>
                   </div>
-                  <div class="category-card" data-category="traffic" onclick="App.selectCategory('traffic')">
-                    <span class="cat-icon">🚗</span>
-                    <h4 class="cat-name">Road Traffic Accident</h4>
-                    <p class="cat-desc">Major highway collision, arterial pileup, vehicle rollover rescue.</p>
+                  <div class="pipeline-stage" id="stage-rank">
+                    <span class="stage-dot"></span>
+                    <span>4. Ranking Emergency Dispatch Recommendations</span>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Step 3: Single Emergency Agency Selection -->
-            <div class="step-card" id="sim-step-3">
-              <div class="step-header">
-                <span class="step-number">3</span>
-                <div>
-                  <h3 class="step-title">Single Agency Selection (Mathematical Invariant)</h3>
-                  <p class="step-desc">Strictly one emergency agency is dispatched per simulation run.</p>
-                </div>
-              </div>
-              <div class="step-body">
-                <div class="agency-selection-grid">
-                  <div class="agency-card active" id="sim-agency-hospital" onclick="App.selectAgency('hospital')">
-                    <div class="agency-card-top">
-                      <span class="agency-pill pill-red">Healthcare & Ambulance</span>
-                      <span class="agency-rate">₹12.50 / km</span>
+              <!-- Simulation Results Panels (A, B, C, D) -->
+              <div id="sim-results-output" style="display:none;">
+                
+                <!-- Section A: Scenario Summary -->
+                <div class="results-section-card">
+                  <div class="results-section-header">
+                    <div class="results-sec-title"><span>📋</span> Scenario Execution Summary</div>
+                    <span class="badge badge-green">Validated</span>
+                  </div>
+                  <div class="results-metrics-grid">
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Eligible Candidates</div>
+                      <div class="res-val" id="res-eligible-count">0</div>
                     </div>
-                    <h4 class="agency-vehicle">Ambulance Fleet (BLS / ALS)</h4>
-                    <p class="agency-meta">1,097 Facilities registered &bull; Force Traveller / Tata Winger (7.1 km/L)</p>
-                  </div>
-
-                  <div class="agency-card" id="sim-agency-police" onclick="App.selectAgency('police_station')">
-                    <div class="agency-card-top">
-                      <span class="agency-pill pill-blue">Law Enforcement</span>
-                      <span class="agency-rate">₹6.25 / km</span>
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Agency Fleet</div>
+                      <div class="res-val" id="res-agency-name" style="font-size:0.90rem;">Healthcare</div>
                     </div>
-                    <h4 class="agency-vehicle">Police Patrol (Hoysala)</h4>
-                    <p class="agency-meta">138 Stations registered &bull; Mahindra Bolero Diesel (14.2 km/L)</p>
-                  </div>
-
-                  <div class="agency-card" id="sim-agency-fire" onclick="App.selectAgency('fire_station')">
-                    <div class="agency-card-top">
-                      <span class="agency-pill pill-orange">Fire & Rescue Services</span>
-                      <span class="agency-rate">₹18.00 / km</span>
-                    </div>
-                    <h4 class="agency-vehicle">Fire Engine Appliance</h4>
-                    <p class="agency-meta">20 Stations registered &bull; Heavy Diesel Pumping Rig (4.9 km/L)</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 4: Configurable Candidate Radius (Rs) -->
-            <div class="step-card" id="sim-step-4">
-              <div class="step-header">
-                <span class="step-number">4</span>
-                <div>
-                  <h3 class="step-title">Candidate Search Radius (<i>R<sub>s</sub></i>)</h3>
-                  <p class="step-desc">Filter facilities within straight-line Haversine boundary of the incident.</p>
-                </div>
-              </div>
-              <div class="step-body">
-                <div class="radius-control-box">
-                  <div class="radius-slider-wrap">
-                    <input type="range" id="sim-radius-slider" min="2" max="15" step="0.5" value="5.0" oninput="App.onRadiusChange(this.value)" />
-                    <div class="radius-ticks">
-                      <span>2 km</span>
-                      <span>5 km</span>
-                      <span>8 km</span>
-                      <span>12 km</span>
-                      <span>15 km</span>
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Evaluation Radius</div>
+                      <div class="res-val" id="res-radius-val">5.0 km</div>
                     </div>
                   </div>
-                  <div class="radius-stat-box">
-                    <div class="radius-val" id="sim-radius-display">5.0 km</div>
-                    <div class="radius-sub" id="sim-candidate-count">Computing candidates...</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 5: Optimization Objective Mode -->
-            <div class="step-card" id="sim-step-5">
-              <div class="step-header">
-                <span class="step-number">5</span>
-                <div>
-                  <h3 class="step-title">Optimization Objective Mode</h3>
-                  <p class="step-desc">Define the algorithmic criterion for ranking candidate response facilities.</p>
-                </div>
-              </div>
-              <div class="step-body">
-                <div class="mode-cards-grid">
-                  <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
-                    <div class="mode-icon">⏱️</div>
-                    <h4 class="mode-title">Minimum Response Time</h4>
-                    <p class="mode-desc">Minimizes road travel duration <i>T<sub>ij</sub></i> based on OSRM road speed limits.</p>
-                  </div>
-                  <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
-                    <div class="mode-icon">📏</div>
-                    <h4 class="mode-title">Minimum Road Distance</h4>
-                    <p class="mode-desc">Minimizes traversed road distance <i>D<sub>ij</sub></i> through Bangalore's street network.</p>
-                  </div>
-                  <div class="mode-card" data-mode="cost" onclick="App.selectMode('cost')">
-                    <div class="mode-icon">💰</div>
-                    <h4 class="mode-title">Minimum Fuel Cost</h4>
-                    <p class="mode-desc">Minimizes operating fuel expenditure <i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>.</p>
-                  </div>
-                  <div class="mode-card" data-mode="balanced" onclick="App.selectMode('balanced')">
-                    <div class="mode-icon">⚖️</div>
-                    <h4 class="mode-title">Balanced Multi-Objective</h4>
-                    <p class="mode-desc">Normalized combination 0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup>.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 6: Dispatch Execution Container -->
-            <div class="step-card" id="sim-step-6">
-              <div class="step-header">
-                <span class="step-number">6</span>
-                <div>
-                  <h3 class="step-title">Dispatch Staging & Execution</h3>
-                  <p class="step-desc">Verify parameters and trigger response dispatch optimization.</p>
-                </div>
-              </div>
-              <div class="step-body">
-                <div class="dispatch-summary-box">
-                  <div class="summary-item">
-                    <span class="sum-lbl">Incident Location:</span>
-                    <span class="sum-val" id="sum-incident">Majestic (12.9781°N, 77.5696°E)</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="sum-lbl">Agency:</span>
-                    <span class="sum-val" id="sum-agency">Healthcare & Ambulance (1,097 facilities)</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="sum-lbl">Search Radius:</span>
-                    <span class="sum-val" id="sum-radius">5.0 km</span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="sum-lbl">Objective Mode:</span>
-                    <span class="sum-val" id="sum-mode">Minimum Response Time (min T)</span>
-                  </div>
                 </div>
 
-                <div style="margin-top:16px; display:flex; align-items:center; gap:12px;">
-                  <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()" style="padding:12px 24px; font-size:1.0rem;">
-                    🚀 Run Dispatch Preview & Staging
-                  </button>
-                  <span id="sim-exec-status" style="font-size:0.85rem; color:var(--text-muted);">
-                    Ready for staging preview
-                  </span>
-                </div>
-
-                <!-- Simulation Results Output Container -->
-                <div id="sim-results-output" style="display:none; margin-top:20px;">
-                  <div class="card" style="border-left:4px solid var(--primary); background:#f8fafc;">
-                    <div class="card-header">
-                      <h3 class="card-title">Top 3 Recommended Facilities (Preliminary Haversine Preview)</h3>
-                      <p class="card-subtitle">Ranked by straight-line Haversine distance. (Full OSRM road-network routing & incident-specific MST dispatch scheduled for subsequent phases).</p>
+                <!-- Section B: Network Optimization -->
+                <div class="results-section-card">
+                  <div class="results-section-header">
+                    <div class="results-sec-title"><span>🕸️</span> Network Optimization Metrics</div>
+                    <span class="badge badge-blue">MST Backbone</span>
+                  </div>
+                  <div class="results-metrics-grid">
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Spanning Edges</div>
+                      <div class="res-val" id="res-tree-edges">0</div>
                     </div>
-                    <div id="sim-ranked-facilities-list">
-                      <!-- Populated dynamically -->
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Total Tree Length</div>
+                      <div class="res-val" id="res-tree-length">0.00 km</div>
+                    </div>
+                    <div class="res-metric-box">
+                      <div class="res-lbl">Execution Time</div>
+                      <div class="res-val" id="res-exec-time">&lt; 15 ms</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section C: Emergency Dispatch Recommendations -->
+                <div class="results-section-card">
+                  <div class="results-section-header">
+                    <div class="results-sec-title"><span>🚑</span> Top 3 Recommended Dispatch Facilities</div>
+                    <span class="badge badge-red">Primary Response</span>
+                  </div>
+                  <div id="sim-ranked-facilities-list">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+
+                <!-- Section D: MST Network Position & Path Comparison -->
+                <div class="results-section-card">
+                  <div class="results-section-header">
+                    <div class="results-sec-title"><span>🔗</span> MST Communication Position vs Direct Route</div>
+                    <span class="badge badge-gray">Path Telemetry</span>
+                  </div>
+                  <div style="font-size:0.80rem; color:var(--text-muted); line-height:1.5;">
+                    <div><strong>Direct Haversine Link:</strong> <span id="res-direct-dist">0.00 km</span></div>
+                    <div><strong>Cumulative MST Backbone Path:</strong> <span id="res-mst-path-dist">0.00 km</span></div>
+                    <div style="font-size:0.72rem; color:var(--text-light); margin-top:4px;">
+                      Note: Emergency response vehicles take direct surface roadways, while MST defines the fixed communication backbone.
                     </div>
                   </div>
                 </div>
 
               </div>
+
             </div>
 
           </div>
@@ -690,206 +825,324 @@
         <!-- SECTION 5: PROJECT ANALYSIS & RESULTS -->
         <!-- ================================================================= -->
         <section id="section-project-analysis" class="view-section" style="display:none;">
-          <div class="section-hero">
-            <div>
-              <h2 class="hero-title">Algorithmic Benchmarks & Network Analysis</h2>
-              <p class="hero-subtitle">
-                Theoretical and empirical evaluation of Prim's and Kruskal's algorithms over Bengaluru's complete graph <i>K</i><sub>1255</sub>.
-              </p>
+          <div class="analysis-grid">
+            
+            <!-- Card 1: Prim vs Kruskal Comprehensive Audit Table -->
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Prim vs Kruskal Algorithm Mathematical Audit</h3>
+                  <p class="card-subtitle">Empirical and mathematical parity on 1,255 emergency facilities.</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Prim's Algorithm</th>
+                      <th>Kruskal's Algorithm</th>
+                      <th>Audit Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Vertex Count (|V|)</strong></td>
+                      <td>1,255</td>
+                      <td>1,255</td>
+                      <td><span class="badge badge-green">Exact Match</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Spanning Edges (|E_T|)</strong></td>
+                      <td>1,254</td>
+                      <td>1,254</td>
+                      <td><span class="badge badge-green">Cayley Invariant</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Total Tree Length</strong></td>
+                      <td>480.1784 km</td>
+                      <td>480.1784 km</td>
+                      <td><span class="badge badge-green">&Delta; &lt; 10⁻¹² km</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Theoretical Complexity</strong></td>
+                      <td><i>O</i>(|<i>E</i>| log |<i>V</i>|)</td>
+                      <td><i>O</i>(|<i>E</i>| log |<i>E</i>|)</td>
+                      <td><span class="badge badge-blue">Proven Asymptotic</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Primary Data Structure</strong></td>
+                      <td>Binary Min-Heap</td>
+                      <td>Disjoint Set Union (DSU)</td>
+                      <td><span class="badge badge-blue">Standard</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Optimizations Applied</strong></td>
+                      <td>Visited Bitset</td>
+                      <td>Union-by-Rank + Path Compression</td>
+                      <td><span class="badge badge-blue">Optimal</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Candidate Graph Size</strong></td>
+                      <td>786,885 edges</td>
+                      <td>786,885 edges</td>
+                      <td><span class="badge badge-green">Complete <i>K</i>₁₂₅₅</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>LCA Cycle Test</strong></td>
+                      <td>785,631 edges verified</td>
+                      <td>785,631 edges verified</td>
+                      <td><span class="badge badge-green">0 Violations</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
+
+            <!-- Card 2: Empirical Performance Telemetry -->
+            <div class="card" style="margin-bottom:0;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Empirical Benchmark Telemetry (10 Trials)</h3>
+                  <p class="card-subtitle">Runtime scaling across complete graph <i>K</i>₁₂₅₅</p>
+                </div>
+              </div>
+              
+              <div class="benchmark-card-grid">
+                <div class="bench-card">
+                  <div class="bench-title">Kruskal Median Runtime</div>
+                  <div class="bench-val" style="color:var(--primary);">1.581 s</div>
+                  <div class="bench-sub">Timsort edge-ordering</div>
+                </div>
+                <div class="bench-card">
+                  <div class="bench-title">Prim Median Runtime</div>
+                  <div class="bench-val" style="color:#9333ea;">5.029 s</div>
+                  <div class="bench-sub">Python min-heap cut queue</div>
+                </div>
+                <div class="bench-card">
+                  <div class="bench-title">Empirical Speedup</div>
+                  <div class="bench-val" style="color:var(--success);">3.18 &times;</div>
+                  <div class="bench-sub">Kruskal faster on dense graph</div>
+                </div>
+              </div>
+
+              <!-- Optimization Modes Matrix -->
+              <div style="margin-top:16px;">
+                <h4 style="font-size:0.86rem; font-weight:700; color:var(--text-main); margin-bottom:8px;">Optimization Objective Matrix</h4>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Objective Mode</th>
+                        <th>Objective Metric</th>
+                        <th>Fleet Rate Model</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Minimum Time</strong></td>
+                        <td>Traversed road duration (<i>T<sub>ij</sub></i>)</td>
+                        <td>OSRM free-flow speed limits</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Minimum Distance</strong></td>
+                        <td>Traversed road distance (<i>D<sub>ij</sub></i>)</td>
+                        <td>Bangalore arterial street network</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Minimum Cost</strong></td>
+                        <td>Vehicle fuel cost (<i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>)</td>
+                        <td>Karnataka Gazette ₹88.94/L benchmark</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Balanced</strong></td>
+                        <td>0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup></td>
+                        <td>Equivalent to distance under constant rate</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
-          <!-- Comparative Table Card -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Prim vs Kruskal Algorithm Mathematical Audit</h3>
-              <p class="card-subtitle">Empirical and mathematical parity on 1,255 emergency facilities.</p>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Metric / Property</th>
-                    <th>Prim's Algorithm</th>
-                    <th>Kruskal's Algorithm</th>
-                    <th>Audit Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Vertex Count (|V|)</strong></td>
-                    <td>1,255</td>
-                    <td>1,255</td>
-                    <td><span class="badge badge-green">Exact Match</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Edge Count (|E_MST|)</strong></td>
-                    <td>1,254</td>
-                    <td>1,254</td>
-                    <td><span class="badge badge-green">Cayley Invariant</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Total Tree Weight</strong></td>
-                    <td>480.1784 km</td>
-                    <td>480.1784 km</td>
-                    <td><span class="badge badge-green">&Delta; = 0.0000 km</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Theoretical Complexity</strong></td>
-                    <td><i>O</i>(|<i>E</i>| log |<i>V</i>|)</td>
-                    <td><i>O</i>(|<i>E</i>| log |<i>E</i>|)</td>
-                    <td><span class="badge badge-blue">Proven Asymptotic</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Primary Data Structure</strong></td>
-                    <td>Priority Queue (Binary Min-Heap)</td>
-                    <td>Disjoint Set Union (DSU)</td>
-                    <td><span class="badge badge-blue">Standard Implementation</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Optimizations Applied</strong></td>
-                    <td>Visited Boolean Map</td>
-                    <td>Union-by-Rank + Path Compression</td>
-                    <td><span class="badge badge-blue">Linear Inverse Ackermann</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Candidate Graph Size</strong></td>
-                    <td>786,885 undirected edges</td>
-                    <td>786,885 undirected edges</td>
-                    <td><span class="badge badge-green">Complete Graph K₁₂₅₅</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>LCA Cycle-Property Test</strong></td>
-                    <td>785,631 edges verified</td>
-                    <td>785,631 edges verified</td>
-                    <td><span class="badge badge-green">0 Violations (Tol 10⁻⁹)</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Zero Weight Edge Investigation -->
+          <!-- Zero-Weight Edge Investigation Card -->
           <div class="card" style="margin-top:20px;">
             <div class="card-header">
-              <h3 class="card-title">Zero-Weight Edge Investigation & Deterministic Tie-Breaking</h3>
-              <p class="card-subtitle">Handling of duplicate coordinate facility records in OpenStreetMap BBMP data.</p>
+              <div>
+                <h3 class="card-title">Zero-Weight Edge Investigation & Deterministic Tie-Breaking</h3>
+                <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
+              </div>
             </div>
-            <div style="font-size:0.90rem; color:#334155; line-height:1.7;">
-              <p style="margin-bottom:10px;">
-                During the mathematical audit of the 786,885 edges, exactly one edge was found with an edge weight of <strong>0.0000 km</strong>:
+            <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
+              <p>
+                During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of <strong>0.0000 km</strong>:
               </p>
               <div class="math-callout">
-                <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Unnamed Healthcare Facility)<br/>
+                <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br/>
                 Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
               </div>
-              <p style="margin-bottom:10px;">
-                <strong>Algorithmic Handling:</strong> Both Prim's and Kruskal's algorithms correctly prioritized this zero-weight edge without inducing cycles. Kruskal immediately unified the two vertices into a single DSU component; Prim included it with zero incremental cut weight. Both implementations use deterministic lexicographical vertex-ID tie-breaking to eliminate random nondeterminism.
+              <p>
+                <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across executions.
               </p>
             </div>
           </div>
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 6: HELP & METHODOLOGY -->
+        <!-- SECTION 6: HELP & METHODOLOGY (Expandable Accordion Knowledge Hub) -->
         <!-- ================================================================= -->
         <section id="section-help" class="view-section" style="display:none;">
-          <div class="section-hero">
-            <div>
-              <h2 class="hero-title">System Methodology & Mathematical Foundations</h2>
-              <p class="hero-subtitle">
-                Complete documentation of graph theory models, statutory fuel price benchmarks, and routing architecture.
-              </p>
-            </div>
-          </div>
-
-          <!-- Methodology Card 1: Graph Theory -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">1. Graph-Theoretic Problem Formulation</h3>
-              <p class="card-subtitle">Complete graph modeling of municipal emergency infrastructure.</p>
-            </div>
-            <div style="font-size:0.90rem; color:#334155; line-height:1.75;">
-              <p style="margin-bottom:8px;">
-                The municipal communication infrastructure is represented as a weighted undirected graph <i>G</i> = (<i>V</i>, <i>E</i>, <i>w</i>), where:
-              </p>
-              <ul style="padding-left:20px; margin-bottom:12px;">
-                <li><i>V</i> is the set of all registered emergency facilities in Bengaluru (|<i>V</i>| = 1,255).</li>
-                <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 = 786,885 edges).</li>
-                <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius <i>R</i> = 6,371.0088 km.</li>
-              </ul>
-              <p>
-                A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is an acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| - 1 = 1,254 edges such that total weight &sum; <i>w</i>(<i>e</i>) is minimized.
-              </p>
-            </div>
-          </div>
-
-          <!-- Methodology Card 2: Cost Framework -->
-          <div class="card" style="margin-top:20px;">
-            <div class="card-header">
-              <h3 class="card-title">2. Statutory Operating Cost Framework (Incorporated from Cost Analysis)</h3>
-              <p class="card-subtitle">Empirical fuel consumption models calibrated to Government of Karnataka benchmarks.</p>
-            </div>
-            <div style="font-size:0.90rem; color:#334155; line-height:1.75;">
-              <p style="margin-bottom:12px;">
-                Emergency vehicle fuel costs are calibrated using statutory diesel prices in Bengaluru per <strong>Government of Karnataka Notification No. FD 31 CSL 2024</strong> (diesel benchmark: ₹88.94 per liter).
-              </p>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Agency</th>
-                      <th>Representative Fleet Vehicle</th>
-                      <th>Fuel Economy</th>
-                      <th>Per-Kilometer Rate (<i>R<sub>a</sub></i>)</th>
-                      <th>Cost Formula</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><span style="color:#dc2626; font-weight:600;">Ambulance</span></td>
-                      <td>Force Traveller / Tata Winger Diesel BLS/ALS</td>
-                      <td>7.11 km / L</td>
-                      <td><strong>₹12.50 / km</strong></td>
-                      <td><i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; ₹12.50</td>
-                    </tr>
-                    <tr>
-                      <td><span style="color:#2563eb; font-weight:600;">Police Patrol</span></td>
-                      <td>Mahindra Bolero Diesel (Hoysala Mobile Patrol)</td>
-                      <td>14.23 km / L</td>
-                      <td><strong>₹6.25 / km</strong></td>
-                      <td><i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; ₹6.25</td>
-                    </tr>
-                    <tr>
-                      <td><span style="color:#ea580c; font-weight:600;">Fire Engine</span></td>
-                      <td>Ashok Leyland / Tata Heavy Water Tender</td>
-                      <td>4.94 km / L</td>
-                      <td><strong>₹18.00 / km</strong></td>
-                      <td><i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; ₹18.00</td>
-                    </tr>
-                  </tbody>
-                </table>
+          <div class="help-container">
+            
+            <!-- Accordion 1: Graph Theory Problem Formulation -->
+            <details class="method-accordion" open>
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">1</span>
+                  <span>Graph-Theoretic Problem Formulation & Complete Graph <i>K</i>₁₂₅₅</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>The municipal emergency network is modeled as a weighted undirected graph <i>G</i> = (<i>V</i>, <i>E</i>, <i>w</i>), where:</p>
+                <ul style="padding-left:20px; margin:8px 0;">
+                  <li><i>V</i> is the set of all registered emergency facilities in Bengaluru (|<i>V</i>| = 1,255).</li>
+                  <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 = 786,885 edges).</li>
+                  <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius <i>R</i> = 6,371.0088 km.</li>
+                </ul>
+                <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is an acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| - 1 = 1,254 edges such that total weight &sum; <i>w</i>(<i>e</i>) is minimized.</p>
               </div>
-            </div>
-          </div>
+            </details>
 
-          <!-- Methodology Card 3: Dualities -->
-          <div class="card" style="margin-top:20px;">
-            <div class="card-header">
-              <h3 class="card-title">3. Algorithmic Dualities: Prim's Cut Property vs Kruskal's Cycle Property</h3>
-              <p class="card-subtitle">Foundations of correctness in discrete optimization.</p>
-            </div>
-            <div style="font-size:0.90rem; color:#334155; line-height:1.75;">
-              <p style="margin-bottom:8px;">
-                <strong>Prim's Cut Property:</strong> At each iteration, for any cut (<i>S</i>, <i>V</i> \ <i>S</i>) separating the current tree component <i>S</i> from unvisited vertices, the minimum-weight crossing edge must belong to the MST.
-              </p>
-              <p style="margin-bottom:8px;">
-                <strong>Kruskal's Cycle Property:</strong> For any cycle in graph <i>G</i>, the edge with the strictly maximum weight cannot belong to any minimum spanning tree. Kruskal greedily selects edges in non-decreasing weight order, accepting only those whose endpoints belong to disjoint sets.
-              </p>
-              <p>
-                <strong>Uniqueness Invariant:</strong> Despite differing execution trajectories, both algorithms produce the identical total tree length of <strong>480.1784 km</strong> across Bengaluru.
-              </p>
-            </div>
+            <!-- Accordion 2: Dual-Layer Architecture -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">2</span>
+                  <span>Dual-Layer Infrastructure Model: Backbone vs Vehicular Dispatch</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>The system maintains a strict conceptual separation between two distinct operational layers:</p>
+                <div class="layer-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:10px;">
+                  <div class="layer-box layer-mst" style="padding:12px; border:1px solid #bfdbfe; border-radius:6px; background:#eff6ff;">
+                    <div style="font-size:0.72rem; font-weight:700; color:#1d4ed8; text-transform:uppercase;">Layer 1 &bull; Communication Topology</div>
+                    <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Minimum Spanning Tree (MST) Backbone</h4>
+                    <p style="font-size:0.78rem; color:#475569;">1,254 optical/RF transmission links connecting all 1,255 facilities (480.1784 km total length). Computed over <i>K</i>₁₂₅₅ to minimize municipal transmission infrastructure cost.</p>
+                  </div>
+                  <div class="layer-box layer-road" style="padding:12px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc;">
+                    <div style="font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase;">Layer 2 &bull; Vehicular Transit</div>
+                    <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Physical Road Transit Network</h4>
+                    <p style="font-size:0.78rem; color:#475569;">Surface roadway network traversed by emergency response vehicles (ambulances, police cruisers, fire engines). Governed by one-way systems, turn restrictions, and road speed limits (<i>D</i><sub>road</sub> &ge; <i>D</i><sub>haversine</sub>).</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- Accordion 3: Prim's Algorithm & Cut Property -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">3</span>
+                  <span>Prim's Algorithm & The Cut Property</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p><strong>Cut Property Theorem:</strong> For any cut (<i>S</i>, <i>V</i> \ <i>S</i>) partitioning the graph, the minimum-weight crossing edge across the cut belongs to every minimum spanning tree.</p>
+                <p>Prim's algorithm starts from an arbitrary root vertex, maintaining visited set <i>S</i> and priority queue <i>Q</i> of crossing edges. At each step, it greedily accepts the minimum crossing link, growing the tree until |<i>S</i>| = |<i>V</i>|.</p>
+              </div>
+            </details>
+
+            <!-- Accordion 4: Kruskal's Algorithm & Cycle Property -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">4</span>
+                  <span>Kruskal's Algorithm & The Cycle Property</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p><strong>Cycle Property Theorem:</strong> For any simple cycle in graph <i>G</i>, the strictly maximum-weight edge cannot belong to any minimum spanning tree.</p>
+                <p>Kruskal's algorithm sorts all 786,885 candidate edges in non-decreasing weight order, greedily adding each edge using a Disjoint Set Union (DSU) data structure with union-by-rank and path compression, skipping chords whose endpoints belong to the same component.</p>
+              </div>
+            </details>
+
+            <!-- Accordion 5: LCA Binary-Lifting Verification -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">5</span>
+                  <span>LCA Binary-Lifting Cycle Property Verification Oracle</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>To provide an absolute mathematical proof of optimality, an independent Lowest Common Ancestor (LCA) binary-lifting verifier tests every single non-tree chord (785,631 candidate edges) against the tree path maximum:</p>
+                <div class="math-callout">
+                  &forall; (<i>u</i>, <i>v</i>) &notin; <i>E<sub>T</sub></i>, &nbsp; <i>w</i>(<i>u</i>, <i>v</i>) &ge; max_edge_on_tree_path(<i>u</i>, <i>v</i>)
+                </div>
+                <p>Result: <strong>0 cycle violations</strong> at numerical tolerance 10⁻⁹ km, formally certifying that the 480.1784 km spanning tree is mathematically optimal.</p>
+              </div>
+            </details>
+
+            <!-- Accordion 6: Balanced Optimization Equivalence Proof -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">6</span>
+                  <span>Four Optimization Modes & Balanced Equivalence Theorem</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>In single-agency emergency dispatch, fuel transit cost is strictly modeled as <i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate.</p>
+                <p><strong>Equivalence Theorem:</strong> Because <i>R<sub>a</sub></i> is an invariant scalar across candidates in any single-agency run, min-max normalization yields identical values for normalized distance and cost:</p>
+                <div class="math-callout">
+                  <i>C</i><sup>norm</sup> &equiv; <i>D</i><sup>norm</sup> &implies; <i>W</i><sup>balanced</sup> = 0.50 <i>T</i><sup>norm</sup> + 0.25 <i>D</i><sup>norm</sup> + 0.25 <i>C</i><sup>norm</sup> = <strong>0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup></strong>
+                </div>
+                <p>This formal reduction proves that Minimum Cost and Minimum Distance produce identical facility rankings under fixed-rate dispatch.</p>
+              </div>
+            </details>
+
+            <!-- Accordion 7: Statutory Fuel Rate Framework -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">7</span>
+                  <span>Statutory Fuel Rate Framework (Karnataka Gazette FD 31 CSL 2024)</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>Vehicle operating costs are calibrated to the Government of Karnataka retail diesel benchmark of ₹88.94/L:</p>
+                <ul style="padding-left:20px; margin:8px 0;">
+                  <li><strong>Ambulance Fleet:</strong> Force Traveller / Tata Winger (7.11 km/L) &bull; <strong>₹12.50 / km</strong></li>
+                  <li><strong>Police Patrol:</strong> Mahindra Bolero Diesel (14.23 km/L) &bull; <strong>₹6.25 / km</strong></li>
+                  <li><strong>Fire Engine:</strong> Heavy Water Tender Appliance (4.94 km/L) &bull; <strong>₹18.00 / km</strong></li>
+                </ul>
+              </div>
+            </details>
+
+            <!-- Accordion 8: Limitations & Topological Vulnerability -->
+            <details class="method-accordion">
+              <summary>
+                <div class="summary-title-wrap">
+                  <span class="summary-num">8</span>
+                  <span>Engineering Limitations & Single-Edge Partition Vulnerability</span>
+                </div>
+                <span class="summary-indicator">▼</span>
+              </summary>
+              <div class="method-content">
+                <p>By mathematical definition, any spanning tree contains exactly zero cycles. As an acyclic network ($k=1$ edge connectivity), severing any single link partitions the network into two disconnected components. In real-world telecommunication deployments, biconnected or 2-edge-connected augmentation is recommended to prevent single-point failures.</p>
+              </div>
+            </details>
+
           </div>
         </section>
 
@@ -900,7 +1153,7 @@
   <!-- Leaflet Map JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <!-- Leaflet MarkerCluster JS (Local Vendor with CDN fallback) -->
+  <!-- Leaflet MarkerCluster JS -->
   <script src="/assets/vendor/leaflet.markercluster.js"></script>
 
   <!-- Application Scripts -->
