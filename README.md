@@ -1,49 +1,53 @@
 # Minimum-Cost Emergency Communication Network Using Minimum Spanning Tree (MST)
 
 **Study Area:** Bruhat Bengaluru Mahanagara Palike (BBMP), Karnataka, India  
-**Academic Focus:** Discrete Mathematics and Graph Theory (DMGT) Experiential Learning  
-**Backend:** Python 3.11 + Flask REST Architecture  
-**Frontend:** HTML5 + CSS3 + Vanilla JavaScript + Leaflet.js (Multi-Scale MarkerCluster)  
-**Fallback Baseline:** Streamlit GIS Application (Port 8501)  
+**Academic Domain:** Discrete Mathematics and Graph Theory (DMGT) Experiential Learning  
+**Backend:** Python 3.11 + Flask REST Framework  
+**Frontend:** HTML5 + CSS3 + Vanilla ES6 JavaScript + Leaflet.js (Multi-Scale MarkerCluster)  
+**Routing Engine:** Open Source Routing Machine (OSRM) + SQLite Persistent Route Cache  
+**Test Suite:** 89 Automated Tests Passed / 89 Total (100% Pass Rate)
 
 ---
 
-## 1. Project Overview
+## 1. Executive Summary
 
-This project models and optimizes a regional emergency communication network linking **1,255 public safety and acute healthcare facilities** across the metropolitan area of Bengaluru using Minimum Spanning Tree (MST) algorithms.
+This project implements a decision-support and network-planning web application for the metropolitan area of Bengaluru, Karnataka, India. The system addresses two fundamentally distinct graph-theoretical problems:
+1. **Network Backbone Topology (Layer 1):** Designing a minimum-cost, fault-resilient communication/interconnection backbone connecting critical emergency facilities (spanning all 1,255 facilities globally, or an incident-specific candidate cluster).
+2. **First-Response Dispatch Routing (Layer 2):** Determining the optimal dispatch ranking of emergency vehicles from existing stations directly to an incident scene over the directed urban road network.
 
-The network models 1,097 hospitals and clinics, 138 police stations, and 20 fire stations as an undirected complete graph $K_{1255}$ containing **786,885 candidate transmission links**. Edge weights are defined as spherical great-circle geographic distances computed via the Haversine formula ($R = 6,371.0088\text{ km}$).
-
-Custom, self-contained implementations of **Prim's** and **Kruskal's** algorithms converge on an identical total network distance of **480.1784 km** across exactly **1,254 spanning edges** ($|V| - 1$ Cayley tree invariant), differing by only $5.68 \times 10^{-14}\text{ km}$ due to floating-point rounding.
-
----
-
-## 2. Dual-Layer Infrastructure Architecture
-
-The project strictly segregates two distinct operational layers:
-- **Layer 1: Communication Backbone (Minimum Spanning Tree):**
-  An acyclic spanning tree connecting all 1,255 facilities with 1,254 links totaling **480.1784 km**. Represents a municipal microwave RF / optical fiber coordination backbone minimizing capital deployment outlay.
-- **Layer 2: Vehicular Transit Network (Physical Road Routing):**
-  The actual urban roadway network traversed by emergency vehicles (ambulances, police cruisers, fire engines), governed by one-way restrictions, speed limits, and street topology ($D_{\text{road}} \ge D_{\text{haversine}}$).
+These two objectives are strictly decoupled in the architecture and user interface.
 
 ---
 
-## 3. Web Application Modules (Six Single-Page Views)
+## 2. Core Features & Capabilities
 
-1. **📊 System Dashboard (`#dashboard`):** Real-time metrics (1,255 facilities, 1,254 MST connections, 480.1784 km), dual-layer model overview, agency distribution bars, and the mathematical proof of balanced optimization equivalence.
-2. **🗺️ Facilities Map (`#facilities-map`):** Interactive Leaflet GIS map with multi-scale marker clustering, agency filter toggles, fuzzy text search, draggable pulsating incident selection pin, live coordinate tracking, landmark presets, and live incident-to-facility Haversine distance inspection.
-3. **🕸️ MST Network (`#mst-network`):** Geospatial visualization of all 1,254 precomputed global MST links with Kruskal/Prim toggles, prominent architectural disclaimer, and an interactive floating Edge Inspector card detailing Cut/Cycle Property rationales.
-4. **🚨 Emergency Simulation Setup (`#simulation`):** A 6-step interactive workflow covering incident coordinates, emergency category, single-agency dispatch constraint, configurable radius slider ($R_s = 2.0 - 15.0\text{ km}$), optimization mode selection, and a top-3 candidate dispatch staging preview.
-5. **📈 Project Analysis & Results (`#project-analysis`):** Comparative mathematical audit table (Prim vs. Kruskal), algorithmic complexity analysis, zero-weight edge investigation, and the 785,631-edge LCA optimality certificate.
-6. **❓ Help & Methodology (`#help`):** Complete documentation of graph formulations, statutory fuel benchmarks (GOK Notification No. FD 31 CSL 2024 at ₹88.94/L), agency fleet rates (Ambulance ₹12.50/km, Police ₹6.25/km, Fire ₹18.00/km), and the balanced equivalence proof.
+- **1,255 BBMP Emergency Facilities:** Verified registry containing 1,097 hospitals and clinics, 138 police stations, and 20 fire stations with 0 coordinate errors (SHA-256: `293930b3db46e55910f68494a3c7bd6652a9af0ff7fa06a761f94d9bec78d943`).
+- **Global Haversine MST:** Precomputed 1,254-edge minimal spanning tree on $K_{1255}$ ($786,885$ candidate links) using integer millimetre edge weights $w = \operatorname{round\_half\_up}(d_{\text{km}} \times 10^6)$ and strict tie-breaking $(w, \min(u,v), \max(u,v))$. Kruskal and Prim achieve exact weight parity: **480,178,397 mm** (480.1784 km).
+- **LCA Binary-Lifting Optimality Oracle:** Complete tree verification testing all 785,631 non-tree candidate chords against tree path maximums ($O(\log V)$ per query), proving 0 cycle property violations.
+- **8-Stage Road-Routing Scenario Pipeline:**
+  - Snaps incident coordinates and candidate facilities to the OpenStreetMap road network.
+  - Queries OSRM Table API with failover to local or public endpoints.
+  - Formulates symmetric undirected edges $S_T(i, j) = T(i, j) + T(j, i)$ and $S_D(i, j) = D(i, j) + D(j, i)$.
+  - Supports **3 discrete optimization modes**:
+    1. **Mode 1: Minimum Response Time** ($S_T$)
+    2. **Mode 2: Minimum Road Distance** ($S_D$)
+    3. **Mode 3: Compromise Multi-Objective** ($N_e = k S_T D^* + (10 - k) S_D T^*$) with trade-off curve and regrets.
+  - *Proof of Cost Mode Exclusion:* Proves that under Karnataka Gazette FD 31 CSL 2024 diesel benchmarks (₹88.94/L), single-agency fuel cost scaling is strictly isomorphic to road distance, rendering a 4th mode mathematically redundant.
+- **Independent Dispatch Ranking:** Facilities ranked strictly by direct travel time $(T(F \to I), D(F \to I), \text{facility\_id})$ with assumed fuel expenditure, detour ratios, and vehicle specifications.
+- **4-Tab Simulation Workspace:**
+  1. *Tab 1: Dispatch Ranking* (Default view with Top 3 cards and complete ranking table)
+  2. *Tab 2: Network Backbone* (MST/Forest edges, $V-1$ invariant, Kendall $\tau_b$ correlation, stretch ratios)
+  3. *Tab 3: Mathematical Validation* (Structural tree check, LCA cycle property optimality, Prim/Kruskal parity)
+  4. *Tab 4: Candidates & Exclusions* (Documented reconciliation of every BBMP facility with reason codes)
+- **SQLite Persistent Caching:** Automatic decisecond/decimetre route caching in `data/cache/routes.db` and scenario storage in `data/scenarios.db`.
 
 ---
 
-## 4. Quickstart & Execution
+## 3. Quickstart & Installation
 
-### 4.1 Prerequisites & Installation
+### Step 1: Environment Setup
 ```powershell
-# Navigate to project directory
+# Navigate to repository root
 cd minimum_cost_emergency_network
 
 # Activate Python 3.11 virtual environment
@@ -51,64 +55,53 @@ cd minimum_cost_emergency_network
 
 # Install dependencies
 pip install -r requirements.txt
-pip install -r requirements-dev.txt
 ```
 
-### 4.2 Starting the Web Application (Primary Production Interface)
+### Step 2: Start Flask Web Server (Primary Interface)
 ```powershell
 python backend/flask_app.py
 ```
-Open **`http://127.0.0.1:5000`** in your browser.
+Open **`http://127.0.0.1:5000`** in your web browser.
 
-### 4.3 Starting the Streamlit Baseline (Fallback Reference)
+### Step 3: Run Legacy Streamlit Server (Optional Baseline)
 ```powershell
-python -m streamlit run app.py --server.headless true --server.port 8501
+streamlit run app.py --server.port 8501
 ```
-Open **`http://localhost:8501`** in your browser.
-
-### 4.4 Running Automated Verification Test Suites
-```powershell
-# Run complete 87-test pytest suite
-python -m pytest tests/
-
-# Run headless Playwright browser verification
-python test_phase1_5_browser.py
-```
+Open **`http://127.0.0.1:8501`** in your browser.
 
 ---
 
-## 5. Verified Results & Performance Metrics
+## 4. Running the Automated Test Suite
 
-| Metric | Kruskal's Algorithm | Prim's Algorithm | Parity / Invariant |
+The test suite covers unit testing, graph invariants, routing failover, and end-to-end scenario pipeline execution:
+
+```powershell
+pytest tests/ -v
+```
+All **89 tests pass in ~13 seconds**.
+
+---
+
+## 5. Mathematical & Algorithmic Results
+
+| Metric | Kruskal's Algorithm | Prim's Algorithm | Verification Status |
 | :--- | :--- | :--- | :--- |
 | **Vertices ($|V|$)** | 1,255 | 1,255 | Exact match |
-| **Complete Graph Edges ($|E|$)** | 786,885 | 786,885 | $V(V-1)/2$ |
+| **Complete Graph Edges ($|E|$)** | 786,885 | 786,885 | $\binom{1255}{2}$ |
 | **MST Spanning Edges ($|E_T|$)** | 1,254 | 1,254 | Exact Cayley invariant ($|V| - 1$) |
-| **Total Tree Length** | 480.1783984126 km | 480.1783984126 km | $\Delta = 5.68 \times 10^{-14}\text{ km}$ |
-| **Minimum Edge** | 0.0000 km | 0.0000 km | Co-located facility pair |
-| **Maximum Edge** | 7.8256 km | 7.8256 km | Budigere Hosp $\leftrightarrow$ Vikrant Hosp |
-| **Median Runtime (10 runs)** | **1.5811 s** (3.18× faster) | **5.0293 s** | Native mergesort vs. Python heap |
-| **Cycle Property Test** | 0 violations (785,631 edges) | 0 violations | LCA binary-lifting certificate |
+| **Total Tree Integer Weight** | 480,178,397 mm | 480,178,397 mm | **Exact Parity** |
+| **Total Tree Metric Length** | 480.178397 km | 480.178397 km | **Exact Parity** |
+| **Cycle Property Chords Tested** | 785,631 | 785,631 | 0 Violations (100% Optimal) |
 
 ---
 
-## 6. Technical Documentation Index
+## 6. Documentation Directory Index
 
-Detailed engineering reports and demonstration scripts are located in the [`docs/`](docs/) directory:
-- [`docs/final_methodology.md`](docs/final_methodology.md): Full mathematical formulation, graph theory definitions, distance metrics, and balanced equivalence proof.
-- [`docs/system_architecture.md`](docs/system_architecture.md): Architectural block diagrams, sequence diagrams, REST API specs, and data layer specifications.
-- [`docs/algorithm_analysis.md`](docs/algorithm_analysis.md): Theoretical and empirical evaluation of Prim vs. Kruskal, mergesort vs. binary heap, scaling curves, and LCA verification.
-- [`docs/data_documentation.md`](docs/data_documentation.md): OpenStreetMap provenance, coordinate validation, duplicate coordinate investigation, and data boundaries.
-- [`docs/limitations.md`](docs/limitations.md): Explicit disclosure of traffic, routing, facility capacity, and network survivability limitations.
-- [`docs/faculty_demo_guide.md`](docs/faculty_demo_guide.md): 15-step faculty presentation protocol with talking points and anticipated defense Q&A.
-- [`docs/final_test_summary.md`](docs/final_test_summary.md): Test execution logs, Playwright output, and 12-case mathematical audit matrix.
-- [`docs/final_completion_report.md`](docs/final_completion_report.md): Final executive handover report.
-
----
-
-## 7. Methodological Limitations
-
-- **Conceptual Model:** The global MST represents a theoretical communication backbone, not a civil engineering trenching blueprint or vehicular response route.
-- **Topological Redundancy:** As an acyclic tree ($k=1$), severing any single link partitions the network.
-- **Traffic Speeds:** Road transit durations reflect free-flow speed limits, not live time-varying congestion.
-- **Fuel-Only Cost:** Operating cost ($C = D \times R_a$) models marginal diesel consumption under the ₹88.94/L statutory benchmark, excluding capital depreciation and crew payroll.
+Detailed technical reports and mathematical proofs are located in [`docs/`](docs/):
+- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md): Mathematical formulations, integer arithmetic, OSRM routing, 3 optimization modes, proof of cost-mode exclusion, and LCA oracle.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): Multi-tier system architecture, Flask blueprints, database schemas, and API documentation.
+- [`docs/VERIFICATION_REPORT.md`](docs/VERIFICATION_REPORT.md): Cryptographic dataset audit, global MST parity proof, and 89-test verification summary.
+- [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md): Operations manual, environment setup, WSGI configuration, and OSRM deployment options.
+- [`docs/KNOWN_LIMITATIONS.md`](docs/KNOWN_LIMITATIONS.md): Bounding box constraints, traffic model assumptions, and fleet rate constraints.
+- [`docs/FINAL_IMPLEMENTATION_INVENTORY.md`](docs/FINAL_IMPLEMENTATION_INVENTORY.md): Comprehensive inventory of code assets, tests, and deliverables.
+- [`reports/benchmarks/benchmark_summary.json`](reports/benchmarks/benchmark_summary.json): Measured performance numbers, memory footprint, and execution runtimes.

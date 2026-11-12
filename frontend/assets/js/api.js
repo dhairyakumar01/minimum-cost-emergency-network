@@ -20,6 +20,7 @@ const API = (function () {
         signal: controller.signal,
         headers: {
           "Accept": "application/json",
+          "Content-Type": "application/json",
           ...(options.headers || {}),
         },
       });
@@ -43,7 +44,7 @@ const API = (function () {
         throw err;
       }
 
-      return data?.data || data;
+      return data?.data !== undefined ? data.data : data;
     } catch (err) {
       clearTimeout(timer);
       if (err.name === "AbortError") {
@@ -56,16 +57,22 @@ const API = (function () {
   }
 
   return {
-    /**
-     * Retrieve system health and dataset status.
-     */
     async getHealth() {
       return request("/api/health", { method: "GET" }, 4000);
     },
 
-    /**
-     * Retrieve emergency facilities with optional agency filter and search.
-     */
+    async getAudit() {
+      return request("/api/dataset/audit", { method: "GET" }, 6000);
+    },
+
+    async getBenchmarks() {
+      return request("/api/benchmarks", { method: "GET" }, 4000);
+    },
+
+    async getManifest() {
+      return request("/api/methodology/manifest", { method: "GET" }, 5000);
+    },
+
     async getFacilities({ agency = null, search = null, page = null, perPage = null } = {}) {
       const params = new URLSearchParams();
       if (agency) params.append("agency", agency);
@@ -78,22 +85,45 @@ const API = (function () {
       return request(endpoint, { method: "GET" }, 8000);
     },
 
-    /**
-     * Retrieve a single facility by ID.
-     */
     async getFacility(facilityId) {
       return request(`/api/facilities/${encodeURIComponent(facilityId)}`, { method: "GET" });
     },
 
-    /**
-     * Retrieve the precomputed global MST.
-     */
     async getFullMST(algo = "kruskal") {
-      return request(`/api/mst/full?algo=${encodeURIComponent(algo)}`, { method: "GET" }, 6000);
+      return request(`/api/global-mst?algo=${encodeURIComponent(algo)}`, { method: "GET" }, 6000);
+    },
+
+    async geocode(query) {
+      return request(`/api/geocode?q=${encodeURIComponent(query)}`, { method: "GET" }, 5000);
+    },
+
+    async createScenario(payload) {
+      return request("/api/scenarios", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }, 10000);
+    },
+
+    async getScenarioStatus(scenarioId) {
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/status`, { method: "GET" }, 4000);
+    },
+
+    async getScenarioResult(scenarioId) {
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/result`, { method: "GET" }, 8000);
+    },
+
+    async listScenarios() {
+      return request("/api/scenarios", { method: "GET" }, 4000);
+    },
+
+    async getTradeoff(scenarioId) {
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/tradeoff`, { method: "GET" }, 5000);
+    },
+
+    async getTrace(scenarioId) {
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/trace`, { method: "GET" }, 5000);
     },
   };
 })();
 
-// Attach to window
 window.API = API;
-

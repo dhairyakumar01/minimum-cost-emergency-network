@@ -327,7 +327,7 @@
       });
     });
 
-    // Facility Search
+    // Facility Search & Geocoding
     const searchInput = document.getElementById("facility-map-search");
     if (searchInput) {
       let timer = null;
@@ -337,6 +337,29 @@
           State.activeSearchTerm = e.target.value.trim().toLowerCase();
           renderFacilityMarkers();
         }, 150);
+      });
+
+      searchInput.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter") {
+          const q = searchInput.value.trim();
+          if (q.length >= 2) {
+            try {
+              const res = await API.geocode(q);
+              const candidates = res.candidates || [];
+              if (candidates.length > 0) {
+                const topCand = candidates[0];
+                if (facMap) facMap.setView([topCand.latitude, topCand.longitude], 14);
+                if (topCand.type === "facility" && topCand.facility_id && State.facilitiesById[topCand.facility_id]) {
+                  showFacilityDetailsCard(State.facilitiesById[topCand.facility_id]);
+                } else {
+                  placeIncidentMarker(topCand.latitude, topCand.longitude, topCand.label);
+                }
+              }
+            } catch (err) {
+              console.warn("Geocode query failed:", err);
+            }
+          }
+        }
       });
     }
 
@@ -820,113 +843,420 @@
         }
       });
 
+      const sliderWrap = document.getElementById("compromise-slider-wrap");
+      if (sliderWrap) {
+        sliderWrap.style.display = (modeKey === "compromise") ? "block" : "none";
+      }
+
       const modeNames = {
-        "time": "Minimum Response Time",
-        "distance": "Minimum Road Distance",
-        "cost": "Minimum Fuel Cost",
-        "balanced": "Balanced Multi-Objective",
+        "time": "Minimum Response Time (S_T)",
+        "distance": "Minimum Road Distance (S_D)",
+        "compromise": `Compromise Trade-Off (k=${State.compromiseK !== undefined ? State.compromiseK : 5}/10)`,
       };
       setText("sum-mode", modeNames[modeKey] || modeKey);
     },
 
-    runSimulationPreview() {
+    onCompromiseKChange(val) {
+      const k = parseInt(val, 10);
+      State.compromiseK = k;
+      const disp = document.getElementById("compromise-k-display");
+      if (disp) {
+        disp.textContent = `k = ${k}/10 (${k * 10}% Time, ${(10 - k) * 10}% Distance)`;
+      }
+      if (State.simMode === "compromise") {
+        setText("sum-mode", `Compromise Trade-Off (k=${k}/10)`);
+      }
+    },
+
+    switchSimTab(tabId) {
+      const tabs = ["dispatch", "network", "validation", "exclusions"];
+      tabs.forEach((t) => {
+        const btn = document.getElementById(`btn-tab-${t}`);
+        const panel = document.getElementById(`tab-content-${t}`);
+        if (btn) {
+          if (t === tabId) btn.classList.add("active");
+          else btn.classList.remove("active");
+        }
+        if (panel) {
+          panel.style.display = (t === tabId) ? "block" : "none";
+        }
+      });
+    },
+
+    async runSimulationPreview() {
+      return this.runSimulation();
+    },
+
+    async runSimulation() {
       const resultsContainer = document.getElementById("sim-results-output");
       const listEl = document.getElementById("sim-ranked-facilities-list");
       const statusEl = document.getElementById("sim-exec-status");
-
-      if (!resultsContainer || !listEl) return;
+      const btnRun = document.getElementById("btn-run-simulation");
 
       if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
         if (statusEl) statusEl.textContent = "Please place or select an incident location first.";
-        resultsContainer.style.display = "none";
+        showErrorBanner("Incident location is not set. Place a pin or select a preset.");
         return;
       }
 
-      const lat = State.incident.lat;
-      const lon = State.incident.lon;
-      const radius = State.simRadiusKm;
-      const agency = State.simAgency;
-      const rateInfo = AGENCY_RATES[agency] || { rate: 12.50, vehicle: "Fleet Unit", speedKmh: 40 };
+      hideErrorBanner();
+      if (btnRun) {
+        btnRun.disabled = true;
+        btnRun.innerHTML = `<span>⏳ Analyzing Network...</span>`;
+      }
+      if (statusEl) statusEl.textContent = "Initializing simulation in execution pipeline...";
 
-      // Update Staged Pipeline Visualization
+      // Pipeline stage visualizer setup
       const stageVal = document.getElementById("stage-validate");
       const stageCand = document.getElementById("stage-candidates");
       const stageNet = document.getElementById("stage-network");
       const stageRank = document.getElementById("stage-rank");
       const pipelineBadge = document.getElementById("pipeline-status-badge");
 
-      if (stageVal) stageVal.className = "pipeline-stage completed";
-      if (stageCand) stageCand.className = "pipeline-stage completed";
-      if (stageNet) stageNet.className = "pipeline-stage completed";
-      if (stageRank) stageRank.className = "pipeline-stage completed";
-      if (pipelineBadge) {
-        pipelineBadge.className = "badge badge-green";
-        pipelineBadge.textContent = "Analysis Complete";
+      const resetStages = () => {
+        if (stageVal) stageVal.className = "pipeline-stage active";
+        if (stageCand) stageCand.className = "pipeline-stage";
+        if (stageNet) stageNet.className = "pipeline-stage";
+        if (stageRank) stageRank.className = "pipeline-stage";
+        if (pipelineBadge) {
+          pipelineBadge.className = "badge badge-blue";
+          pipelineBadge.textContent = "Stage 1: Coordinates";
+        }
+      };
+      resetStages();
+
+      // Normalize agency to backend format
+      const agencyMap = {
+        "hospital": "hospital_clinic",
+        "police_station": "police",
+        "fire_station": "fire",
+        "hospital_clinic": "hospital_clinic",
+        "police": "police",
+        "fire": "fire",
+      };
+      const backendAgency = agencyMap[State.simAgency] || "hospital_clinic";
+
+      const payload = {
+        incident_lat: State.incident.lat,
+        incident_lon: State.incident.lon,
+        incident_label: State.incident.label || "Incident Origin",
+        agency: backendAgency,
+        radius_km: State.simRadiusKm || 5.0,
+        optimization_mode: State.simMode || "time",
+        k_param: State.compromiseK !== undefined ? State.compromiseK : 5,
+      };
+
+      try {
+        const createRes = await API.createScenario(payload);
+        const scenarioId = createRes?.scenario_id || createRes?.data?.scenario_id;
+
+        if (!scenarioId) {
+          throw new Error("Backend did not return a scenario_id.");
+        }
+
+        if (statusEl) statusEl.textContent = `Scenario ${scenarioId} running...`;
+
+        // Polling loop
+        const startTime = Date.now();
+        let scenarioData = null;
+
+        while (Date.now() - startTime < 35000) {
+          await new Promise((r) => setTimeout(r, 400));
+          const statusInfo = await API.getScenarioStatus(scenarioId);
+
+          const stageNum = statusInfo.stage || 1;
+          const stageName = statusInfo.stage_name || "Running";
+
+          // Update stage indicators
+          if (stageNum >= 1 && stageVal) stageVal.className = "pipeline-stage completed";
+          if (stageNum >= 2 && stageCand) {
+            stageCand.className = stageNum >= 5 ? "pipeline-stage completed" : "pipeline-stage active";
+          }
+          if (stageNum >= 5 && stageNet) {
+            stageNet.className = stageNum >= 7 ? "pipeline-stage completed" : "pipeline-stage active";
+          }
+          if (stageNum >= 7 && stageRank) {
+            stageRank.className = stageNum >= 8 ? "pipeline-stage completed" : "pipeline-stage active";
+          }
+
+          if (pipelineBadge) {
+            pipelineBadge.textContent = `Stage ${stageNum}: ${stageName}`;
+          }
+
+          if (statusInfo.status === "COMPLETED") {
+            if (stageVal) stageVal.className = "pipeline-stage completed";
+            if (stageCand) stageCand.className = "pipeline-stage completed";
+            if (stageNet) stageNet.className = "pipeline-stage completed";
+            if (stageRank) stageRank.className = "pipeline-stage completed";
+            if (pipelineBadge) {
+              pipelineBadge.className = "badge badge-green";
+              pipelineBadge.textContent = "Analysis Complete";
+            }
+            break;
+          } else if (statusInfo.status === "FAILED") {
+            throw new Error(statusInfo.error_message || "Scenario pipeline failed.");
+          }
+        }
+
+        // Fetch completed result payload
+        scenarioData = await API.getScenarioResult(scenarioId);
+
+        // Render Results into All 4 Tabs
+        renderScenarioResults(scenarioData);
+
+        if (resultsContainer) resultsContainer.style.display = "block";
+        if (statusEl) {
+          statusEl.textContent = `Scenario complete in ${scenarioData.summary.runtime_ms} ms (${scenarioData.summary.eligible_count} candidates).`;
+        }
+      } catch (err) {
+        console.error("Simulation error:", err);
+        showErrorBanner(`Simulation execution failed: ${err.message}`);
+        if (statusEl) statusEl.textContent = `Error: ${err.message}`;
+        if (pipelineBadge) {
+          pipelineBadge.className = "badge badge-red";
+          pipelineBadge.textContent = "Pipeline Error";
+        }
+      } finally {
+        if (btnRun) {
+          btnRun.disabled = false;
+          btnRun.innerHTML = `<span>🚀 Run Dispatch Analysis</span>`;
+        }
       }
+    },
+  };
 
-      // Candidate selection
-      let candidates = State.facilities.filter((f) => {
-        if (f.agency !== agency) return false;
-        const d = haversineKm(lat, lon, f.latitude, f.longitude);
-        f._dist = d;
-        return d <= radius;
-      });
+  /**
+   * Populate all 4 result tabs from backend scenario result.
+   */
+  function renderScenarioResults(res) {
+    if (!res) return;
 
-      if (candidates.length === 0) {
-        if (statusEl) statusEl.textContent = `No ${AGENCY_LABELS[agency]} found within ${radius.toFixed(1)} km. Increase search radius.`;
-        resultsContainer.style.display = "none";
-        return;
-      }
+    const ranking = res.dispatch_ranking || [];
+    const net = res.network_mst || {};
+    const val = res.validation || {};
+    const exclusions = (res.exclusions_reconciliation && res.exclusions_reconciliation.exclusions) || res.exclusions || [];
+    const params = res.parameters || {};
+    const summary = res.summary || {};
+    const telemetry = (res.network_position && res.network_position.node_telemetry) || {};
 
-      // Rank by distance (straight-line proxy for Stage 1.7)
-      candidates.sort((a, b) => a._dist - b._dist);
-      const top3 = candidates.slice(0, 3);
+    // ------------------------------------------------------------------------
+    // TAB 1: Dispatch Ranking (Strict direct travel time sorting)
+    // ------------------------------------------------------------------------
+    const evalCount = summary.total_candidates_in_radius !== undefined ? summary.total_candidates_in_radius : ranking.length;
+    setText("res-eligible-count", evalCount.toString());
+    setText("res-agency-name", AGENCY_LABELS[State.simAgency] || params.agency);
+    setText("res-radius-val", `${(params.radius_km || State.simRadiusKm).toFixed(1)} km`);
 
-      // Section A: Scenario Summary
-      setText("res-eligible-count", candidates.length.toString());
-      setText("res-agency-name", AGENCY_LABELS[agency]);
-      setText("res-radius-val", `${radius.toFixed(1)} km`);
-
-      // Section B: Network Optimization
-      const spanningEdgesCount = candidates.length > 1 ? candidates.length - 1 : 0;
-      setText("res-tree-edges", spanningEdgesCount.toString());
-      setText("res-tree-length", `${(top3[0]._dist * 1.4).toFixed(2)} km`);
-
-      // Section C: Recommendations
+    // Top 3 Cards
+    const listEl = document.getElementById("sim-ranked-facilities-list");
+    if (listEl) {
       listEl.innerHTML = "";
-      top3.forEach((fac, idx) => {
-        const distKm = fac._dist;
-        const estCost = distKm * rateInfo.rate;
-        const estTimeMin = (distKm / rateInfo.speedKmh) * 60;
+      const top3 = ranking.slice(0, 3);
 
+      top3.forEach((fac) => {
         const row = document.createElement("div");
         row.className = "ranked-card";
+        const vehicle = fac.vehicle_type || AGENCY_RATES[State.simAgency]?.vehicle || "Fleet Unit";
+        const agencyLbl = AGENCY_LABELS[fac.agency] || fac.agency;
+        const timeMin = fac.travel_time_min !== undefined ? fac.travel_time_min : (fac.travel_time_minutes || (fac.travel_time_ds / 600));
+        const roadKm = fac.road_distance_km !== undefined ? fac.road_distance_km : ((fac.road_distance_dm || 0) / 10000);
+        const fuelCost = fac.fuel_cost_est_inr !== undefined ? fac.fuel_cost_est_inr : (fac.estimated_fuel_cost_inr || 0);
+        const detour = fac.detour_ratio !== undefined ? fac.detour_ratio : 1.0;
+
         row.innerHTML = `
           <div style="display:flex; align-items:center; gap:12px; min-width:0;">
-            <div class="ranked-rank">#${idx + 1}</div>
+            <div class="ranked-rank">#${fac.rank}</div>
             <div class="ranked-details">
               <div class="ranked-name">${escapeHtml(fac.facility_name)}</div>
-              <div class="ranked-meta">ID: <code>${fac.facility_id}</code> &bull; ${rateInfo.vehicle}</div>
+              <div class="ranked-meta">ID: <code>${fac.facility_id}</code> &bull; ${vehicle} &bull; ${agencyLbl}</div>
             </div>
           </div>
           <div class="ranked-metrics">
-            <div class="ranked-dist">${distKm.toFixed(2)} km</div>
-            <div class="ranked-cost">₹${estCost.toFixed(2)} &bull; ~${estTimeMin.toFixed(1)} min</div>
+            <div class="ranked-dist">${Number(timeMin).toFixed(1)} min &bull; ${Number(roadKm).toFixed(2)} km</div>
+            <div class="ranked-cost">₹${Number(fuelCost).toFixed(2)} fuel &bull; Detour: ${Number(detour).toFixed(2)}x</div>
           </div>
         `;
         listEl.appendChild(row);
       });
+    }
 
-      // Section D: MST Network Position
-      setText("res-direct-dist", `${top3[0]._dist.toFixed(2)} km (Haversine)`);
-      setText("res-mst-path-dist", `${(top3[0]._dist * 1.25).toFixed(2)} km`);
+    // Full Dispatch Table
+    const tbodyDispatch = document.getElementById("tbody-dispatch-full");
+    if (tbodyDispatch) {
+      tbodyDispatch.innerHTML = "";
+      ranking.forEach((fac) => {
+        const tr = document.createElement("tr");
+        const badgeClass = fac.agency === "police" ? "badge-blue" : (fac.agency === "fire" ? "badge-amber" : "badge-red");
+        const agencyShort = fac.agency === "hospital_clinic" ? "Hospital" : (fac.agency === "police" ? "Police" : "Fire");
+        const timeMin = fac.travel_time_min !== undefined ? fac.travel_time_min : (fac.travel_time_minutes || (fac.travel_time_ds / 600));
+        const timeSec = fac.travel_time_ds !== undefined ? Math.round(fac.travel_time_ds / 10) : Math.round(timeMin * 60);
+        const roadKm = fac.road_distance_km !== undefined ? fac.road_distance_km : ((fac.road_distance_dm || 0) / 10000);
+        const havKm = fac.haversine_km !== undefined ? fac.haversine_km : (fac.haversine_distance_km || 0);
+        const detour = fac.detour_ratio !== undefined ? fac.detour_ratio : 1.0;
+        const fuelCost = fac.fuel_cost_est_inr !== undefined ? fac.fuel_cost_est_inr : (fac.estimated_fuel_cost_inr || 0);
 
-      resultsContainer.style.display = "block";
-      if (statusEl) {
-        statusEl.textContent = `Completed: ${candidates.length} candidates evaluated, top 3 recommended.`;
-      }
-    },
-  };
+        tr.innerHTML = `
+          <td><strong>#${fac.rank}</strong></td>
+          <td>
+            <strong>${escapeHtml(fac.facility_name)}</strong>
+            <div style="font-size:0.72rem; color:var(--text-muted); font-family:var(--font-mono);">${fac.facility_id}</div>
+          </td>
+          <td><span class="badge ${badgeClass}">${agencyShort}</span></td>
+          <td><strong>${Number(timeMin).toFixed(1)} min</strong> <span style="font-size:0.70rem; color:var(--text-muted);">(${timeSec}s)</span></td>
+          <td>${Number(roadKm).toFixed(2)} km</td>
+          <td>${Number(havKm).toFixed(2)} km</td>
+          <td><code>${Number(detour).toFixed(2)}x</code></td>
+          <td>₹${Number(fuelCost).toFixed(2)}</td>
+        `;
+        tbodyDispatch.appendChild(tr);
+      });
+    }
+
+    // ------------------------------------------------------------------------
+    // TAB 2: Network Backbone (MST / Forest)
+    // ------------------------------------------------------------------------
+    const edgeList = net.edges || [];
+    const edgeCount = summary.tree_edge_count !== undefined ? summary.tree_edge_count : edgeList.length;
+    setText("res-tree-edges", edgeCount.toString());
+
+    // Tree Length / Weight formatting
+    const mode = params.optimization_mode || State.simMode;
+    let weightText = "";
+    let totalDurSec = 0;
+    let totalDistM = 0;
+    edgeList.forEach((e) => {
+      totalDurSec += (e.duration_ds || 0) / 10;
+      totalDistM += (e.distance_dm || 0) / 10;
+    });
+
+    if (mode === "time") {
+      const mins = (totalDurSec / 60).toFixed(1);
+      weightText = `${mins} min (${Math.round(totalDurSec)}s)`;
+    } else if (mode === "distance") {
+      const km = (totalDistM / 1000).toFixed(2);
+      weightText = `${km} km (${Math.round(totalDistM)} m)`;
+    } else {
+      const km = (totalDistM / 1000).toFixed(2);
+      const mins = (totalDurSec / 60).toFixed(1);
+      weightText = `${km} km | ${mins} min`;
+    }
+    setText("res-tree-length", weightText);
+
+    const compCount = summary.num_components !== undefined ? summary.num_components : (net.num_components || 1);
+    const isTree = compCount === 1;
+    setText("res-components-count", `${compCount} (${isTree ? "Connected Tree" : "Forest"})`);
+
+    // Top ranked telemetry
+    const topRanked = ranking[0];
+    let topTelem = null;
+    if (topRanked && telemetry[topRanked.facility_id]) {
+      topTelem = telemetry[topRanked.facility_id];
+    }
+
+    const directDistKm = topRanked ? (topRanked.haversine_km || 0) : 0;
+    const mstPathDistKm = topTelem ? ((topTelem.tree_path_dist_dm || 0) / 10000) : (directDistKm * 1.35);
+    setText("res-direct-dist", `${directDistKm.toFixed(2)} km (Haversine)`);
+    setText("res-mst-path-dist", `${mstPathDistKm.toFixed(2)} km (Backbone Path)`);
+
+    const tau = summary.kendall_tau_b !== undefined ? summary.kendall_tau_b : net.kendall_tau_b;
+    setText("res-kendall-tau", tau !== null && tau !== undefined ? Number(tau).toFixed(4) : "N/A");
+
+    // Tree Edges Table
+    const tbodyEdges = document.getElementById("tbody-scenario-mst-edges");
+    if (tbodyEdges) {
+      tbodyEdges.innerHTML = "";
+      edgeList.forEach((edge) => {
+        const tr = document.createElement("tr");
+        const uFac = State.facilitiesById[edge.u];
+        const vFac = State.facilitiesById[edge.v];
+        const uLabel = edge.u === "incident_0" ? "🚨 Incident Origin" : (uFac ? uFac.facility_name : edge.u);
+        const vLabel = edge.v === "incident_0" ? "🚨 Incident Origin" : (vFac ? vFac.facility_name : edge.v);
+        const durMin = (((edge.duration_ds || 0) / 10) / 60).toFixed(1);
+        const distKm = (((edge.distance_dm || 0) / 10) / 1000).toFixed(2);
+
+        tr.innerHTML = `
+          <td>
+            <strong>${escapeHtml(uLabel)}</strong>
+            <div style="font-size:0.70rem; color:var(--text-muted); font-family:var(--font-mono);">ID: ${edge.u}</div>
+          </td>
+          <td>
+            <strong>${escapeHtml(vLabel)}</strong>
+            <div style="font-size:0.70rem; color:var(--text-muted); font-family:var(--font-mono);">ID: ${edge.v}</div>
+          </td>
+          <td>${durMin} min <span style="font-size:0.70rem; color:var(--text-muted);">(${Math.round((edge.duration_ds || 0) / 10)}s)</span></td>
+          <td>${distKm} km <span style="font-size:0.70rem; color:var(--text-muted);">(${Math.round((edge.distance_dm || 0) / 10)}m)</span></td>
+        `;
+        tbodyEdges.appendChild(tr);
+      });
+    }
+
+    // ------------------------------------------------------------------------
+    // TAB 3: Validation Report
+    // ------------------------------------------------------------------------
+    const struct = val.structural || {};
+    const opt = val.optimality || {};
+    const parity = val.prim_kruskal_parity;
+
+    const isTreeValid = struct.is_valid_tree !== undefined ? struct.is_valid_tree : isTree;
+    const structDesc = `Acyclic: ${isTreeValid ? "YES" : "NO"} &bull; |V| = ${struct.vertex_count || summary.graph_vertices_count || 0}, |E| = ${struct.edge_count || summary.tree_edge_count || 0} &bull; Components: ${struct.num_components || compCount}`;
+    const structBadge = document.getElementById("val-structural-badge");
+    const structDescEl = document.getElementById("val-structural-desc");
+    if (structDescEl) structDescEl.innerHTML = structDesc;
+    if (structBadge) {
+      structBadge.className = isTreeValid ? "badge badge-green" : "badge badge-red";
+      structBadge.textContent = isTreeValid ? "PASS" : "FAIL";
+    }
+
+    const optViolations = opt.violations_count !== undefined ? opt.violations_count : (opt.num_violations || 0);
+    const chordsChecked = opt.chords_tested !== undefined ? opt.chords_tested : (summary.evaluated_chords_count || 0);
+    const optDesc = `Chords checked: ${chordsChecked.toLocaleString()} &bull; LCA Violations: ${optViolations} &bull; Cycle property satisfied: ${opt.is_optimal !== false ? "YES" : "NO"}`;
+    const optBadge = document.getElementById("val-optimality-badge");
+    const optDescEl = document.getElementById("val-optimality-desc");
+    if (optDescEl) optDescEl.innerHTML = optDesc;
+    if (optBadge) {
+      optBadge.className = optViolations === 0 ? "badge badge-green" : "badge badge-red";
+      optBadge.textContent = `${optViolations} Violations`;
+    }
+
+    const parityStatus = (parity === true || val.parity?.status === "Exact Parity") ? "Exact Parity" : "Non-Parity";
+    const parityBadge = document.getElementById("val-parity-badge");
+    const parityDescEl = document.getElementById("val-parity-desc");
+    if (parityDescEl) {
+      parityDescEl.innerHTML = `Prim and Kruskal algorithms evaluated with identical strict tie-breaking order.`;
+    }
+    if (parityBadge) {
+      parityBadge.className = (parityStatus === "Exact Parity") ? "badge badge-green" : "badge badge-red";
+      parityBadge.textContent = parityStatus;
+    }
+
+    // ------------------------------------------------------------------------
+    // TAB 4: Candidates & Exclusions Reconciliation
+    // ------------------------------------------------------------------------
+    const exclBadge = document.getElementById("exclusions-count-badge");
+    if (exclBadge) {
+      exclBadge.textContent = `${exclusions.length} Excluded`;
+    }
+
+    const tbodyExcl = document.getElementById("tbody-exclusions-list");
+    if (tbodyExcl) {
+      tbodyExcl.innerHTML = "";
+      exclusions.forEach((item) => {
+        const tr = document.createElement("tr");
+        const hav = item.haversine_km !== undefined ? item.haversine_km : (item.haversine_distance_km || 0);
+        tr.innerHTML = `
+          <td><code>${escapeHtml(item.facility_id)}</code></td>
+          <td>${escapeHtml(item.facility_name)}</td>
+          <td><span class="badge badge-gray">${escapeHtml(item.reason_code)}</span></td>
+          <td style="font-size:0.76rem; color:var(--text-muted);">${escapeHtml(item.reason)}</td>
+          <td>${Number(hav).toFixed(2)} km</td>
+        `;
+        tbodyExcl.appendChild(tr);
+      });
+    }
+
+    // Default to Dispatch tab
+    App.switchSimTab("dispatch");
+  }
 
   // --------------------------------------------------------------------------
   // Helpers

@@ -12,7 +12,7 @@ if str(BASE_DIR) not in sys.path:
 from flask import Flask, jsonify, request, send_from_directory
 
 from backend.config import Config
-from backend.routes import health_bp, facilities_bp, network_bp
+from backend.routes import health_bp, facilities_bp, network_bp, scenarios_bp
 
 
 def create_app(config: Config = None) -> Flask:
@@ -31,6 +31,7 @@ def create_app(config: Config = None) -> Flask:
     app.register_blueprint(health_bp)
     app.register_blueprint(facilities_bp)
     app.register_blueprint(network_bp)
+    app.register_blueprint(scenarios_bp)
 
     # Server timing header middleware
     @app.before_request

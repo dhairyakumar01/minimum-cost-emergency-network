@@ -638,34 +638,44 @@
                   <span class="step-number">5</span>
                   <div>
                     <h3 class="step-title">Optimization Objective Mode</h3>
-                    <p class="step-desc">Define criterion for evaluating response facility candidates.</p>
+                    <p class="step-desc">Three discrete modes for network backbone evaluation (No independent fuel-cost mode).</p>
                   </div>
                 </div>
                 <div class="step-body">
-                  <div class="mode-cards-grid">
+                  <div class="mode-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
                       <div class="mode-icon">⏱️</div>
-                      <div class="mode-title">Minimum Response Time</div>
-                      <div class="mode-desc">Minimizes estimated travel duration.</div>
+                      <div class="mode-title">Mode 1: Min Time</div>
+                      <div class="mode-desc">Minimizes total road duration (<i>S<sub>T</sub></i>).</div>
                     </div>
                     <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
                       <div class="mode-icon">📏</div>
-                      <div class="mode-title">Minimum Road Distance</div>
-                      <div class="mode-desc">Minimizes physical transit distance.</div>
+                      <div class="mode-title">Mode 2: Min Distance</div>
+                      <div class="mode-desc">Minimizes total road distance (<i>S<sub>D</sub></i>).</div>
                     </div>
-                    <div class="mode-card" data-mode="cost" onclick="App.selectMode('cost')">
-                      <div class="mode-icon">💰</div>
-                      <div class="mode-title">Minimum Fuel Cost</div>
-                      <div class="mode-desc">Minimizes estimated vehicle fuel expenditure.</div>
-                    </div>
-                    <div class="mode-card" data-mode="balanced" onclick="App.selectMode('balanced')">
+                    <div class="mode-card" data-mode="compromise" onclick="App.selectMode('compromise')">
                       <div class="mode-icon">⚖️</div>
-                      <div class="mode-title">Balanced Multi-Objective</div>
-                      <div class="mode-desc">Combines normalized time and distance criteria.</div>
+                      <div class="mode-title">Mode 3: Compromise</div>
+                      <div class="mode-desc">Integer composite <i>N<sub>e</sub></i> = <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.</div>
                     </div>
                   </div>
+                  
+                  <!-- Compromise k-parameter slider -->
+                  <div id="compromise-slider-wrap" style="display:none; margin-top:12px; padding:10px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span style="font-size:0.76rem; font-weight:700; color:var(--text-main);">Compromise Weight (<i>k</i> / 10):</span>
+                      <span id="compromise-k-display" style="font-family:var(--font-mono); font-weight:800; color:var(--primary); font-size:0.86rem;">k = 5 (λ = 0.5)</span>
+                    </div>
+                    <input type="range" id="sim-compromise-k-slider" min="0" max="10" step="1" value="5" oninput="App.onCompromiseKChange(this.value)" style="width:100%; accent-color:var(--primary);" />
+                    <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-light); margin-top:3px;">
+                      <span>k=0 (Pure Distance)</span>
+                      <span>k=5 (Balanced)</span>
+                      <span>k=10 (Pure Time)</span>
+                    </div>
+                  </div>
+
                   <div style="font-size:0.72rem; color:var(--text-light); margin-top:8px;">
-                    ℹ️ Note: Minimum Cost and Minimum Distance yield identical rankings under the fixed single-agency rate model.
+                    ℹ️ Note: Vehicle operating cost is strictly proportional to distance under any single-agency run (<i>C = D × R<sub>a</sub></i>), so cost-minimization is mathematically isomorphic to distance-minimization and does not form an independent MST mode.
                   </div>
                 </div>
               </div>
@@ -741,18 +751,36 @@
                 </div>
               </div>
 
-              <!-- Simulation Results Panels (A, B, C, D) -->
+              <!-- 4-Tab Simulation Results Workspace -->
               <div id="sim-results-output" style="display:none;">
                 
-                <!-- Section A: Scenario Summary -->
-                <div class="results-section-card">
-                  <div class="results-section-header">
-                    <div class="results-sec-title"><span>📋</span> Scenario Execution Summary</div>
-                    <span class="badge badge-green">Validated</span>
+                <!-- Results Tab Bar -->
+                <div class="results-tab-bar">
+                  <button class="results-tab-btn active" id="btn-tab-dispatch" onclick="App.switchSimTab('dispatch')">
+                    🚑 1. Dispatch Ranking
+                  </button>
+                  <button class="results-tab-btn" id="btn-tab-network" onclick="App.switchSimTab('network')">
+                    🕸️ 2. Network Backbone (MST)
+                  </button>
+                  <button class="results-tab-btn" id="btn-tab-validation" onclick="App.switchSimTab('validation')">
+                    ✅ 3. Validation
+                  </button>
+                  <button class="results-tab-btn" id="btn-tab-exclusions" onclick="App.switchSimTab('exclusions')">
+                    📋 4. Candidates & Exclusions
+                  </button>
+                </div>
+
+                <!-- TAB 1: Dispatch Ranking (Default Tab) -->
+                <div id="tab-content-dispatch" class="sim-tab-panel">
+                  <div class="tab-notice-banner tab-notice-blue">
+                    <span>🚑</span>
+                    <span>Facilities ranked strictly by estimated direct travel time to the incident. (Independent of MST backbone).</span>
                   </div>
-                  <div class="results-metrics-grid">
+
+                  <!-- Scenario Summary KPI Row -->
+                  <div class="results-metrics-grid" style="margin-bottom:12px;">
                     <div class="res-metric-box">
-                      <div class="res-lbl">Eligible Candidates</div>
+                      <div class="res-lbl">Evaluated Candidates</div>
                       <div class="res-val" id="res-eligible-count">0</div>
                     </div>
                     <div class="res-metric-box">
@@ -760,56 +788,146 @@
                       <div class="res-val" id="res-agency-name" style="font-size:0.90rem;">Healthcare</div>
                     </div>
                     <div class="res-metric-box">
-                      <div class="res-lbl">Evaluation Radius</div>
+                      <div class="res-lbl">Candidate Radius</div>
                       <div class="res-val" id="res-radius-val">5.0 km</div>
                     </div>
                   </div>
+
+                  <!-- Top 3 Recommendations -->
+                  <div class="card" style="padding:14px; margin-bottom:12px; border-left:4px solid var(--primary);">
+                    <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:8px;">Top 3 Dispatch Recommendations</h4>
+                    <div id="sim-ranked-facilities-list">
+                      <!-- Dynamically Populated -->
+                    </div>
+                  </div>
+
+                  <!-- Full Dispatch Table -->
+                  <div class="table-responsive">
+                    <table class="data-table" id="table-dispatch-full">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Facility Name</th>
+                          <th>Agency</th>
+                          <th>Travel Time</th>
+                          <th>Road Dist</th>
+                          <th>Haversine</th>
+                          <th>Detour</th>
+                          <th>Est Fuel</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbody-dispatch-full">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
-                <!-- Section B: Network Optimization -->
-                <div class="results-section-card">
-                  <div class="results-section-header">
-                    <div class="results-sec-title"><span>🕸️</span> Network Optimization Metrics</div>
-                    <span class="badge badge-blue">MST Backbone</span>
+                <!-- TAB 2: Network Backbone (MST / Forest) -->
+                <div id="tab-content-network" class="sim-tab-panel" style="display:none;">
+                  <div class="tab-notice-banner tab-notice-purple">
+                    <span>🕸️</span>
+                    <span>Minimum-weight connecting backbone connecting incident and eligible facilities. This is NOT a dispatch ranking.</span>
                   </div>
-                  <div class="results-metrics-grid">
+
+                  <div class="results-metrics-grid" style="margin-bottom:12px;">
                     <div class="res-metric-box">
                       <div class="res-lbl">Spanning Edges</div>
                       <div class="res-val" id="res-tree-edges">0</div>
                     </div>
                     <div class="res-metric-box">
-                      <div class="res-lbl">Total Tree Length</div>
+                      <div class="res-lbl">Total Tree Weight</div>
                       <div class="res-val" id="res-tree-length">0.00 km</div>
                     </div>
                     <div class="res-metric-box">
-                      <div class="res-lbl">Execution Time</div>
-                      <div class="res-val" id="res-exec-time">&lt; 15 ms</div>
+                      <div class="res-lbl">Connected Components</div>
+                      <div class="res-val" id="res-components-count">1 (Tree)</div>
+                    </div>
+                  </div>
+
+                  <!-- MST Position & Stretch Ratio Analysis -->
+                  <div class="card" style="padding:14px; margin-bottom:12px;">
+                    <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:6px;">MST Network Position & Stretch Summary</h4>
+                    <div style="font-size:0.80rem; color:var(--text-muted); line-height:1.5;">
+                      <div><strong>Direct Haversine Link:</strong> <span id="res-direct-dist" style="font-family:var(--font-mono); font-weight:700;">0.00 km</span></div>
+                      <div><strong>Cumulative MST Backbone Path:</strong> <span id="res-mst-path-dist" style="font-family:var(--font-mono); font-weight:700;">0.00 km</span></div>
+                      <div style="margin-top:4px;"><strong>Rank Correlation (Kendall &tau;<sub>b</sub>):</strong> <span id="res-kendall-tau" style="font-family:var(--font-mono); font-weight:700;">N/A</span> (dispatch vs tree hops)</div>
+                    </div>
+                  </div>
+
+                  <!-- Tree Edges Table -->
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Endpoint U</th>
+                          <th>Endpoint V</th>
+                          <th>Road Duration (S_T)</th>
+                          <th>Road Distance (S_D)</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbody-scenario-mst-edges">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- TAB 3: Validation Report -->
+                <div id="tab-content-validation" class="sim-tab-panel" style="display:none;">
+                  <div class="card" style="padding:14px; margin-bottom:12px;">
+                    <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:10px;">Independent Mathematical Validation Report</h4>
+                    <div class="system-status-item" style="margin-bottom:8px;">
+                      <div>
+                        <strong>1. Structural Tree Invariants:</strong>
+                        <div style="font-size:0.74rem; color:var(--text-muted);" id="val-structural-desc">Acyclic, covers all vertices, |E| = |V| - c.</div>
+                      </div>
+                      <span class="badge badge-green" id="val-structural-badge">PASS</span>
+                    </div>
+
+                    <div class="system-status-item" style="margin-bottom:8px;">
+                      <div>
+                        <strong>2. LCA Cycle-Property Optimality:</strong>
+                        <div style="font-size:0.74rem; color:var(--text-muted);" id="val-optimality-desc">Every non-tree chord &ge; maximum tree path edge.</div>
+                      </div>
+                      <span class="badge badge-green" id="val-optimality-badge">0 Violations</span>
+                    </div>
+
+                    <div class="system-status-item">
+                      <div>
+                        <strong>3. Prim / Kruskal Weight Parity:</strong>
+                        <div style="font-size:0.74rem; color:var(--text-muted);" id="val-parity-desc">Both algorithms converge on identical integer weight.</div>
+                      </div>
+                      <span class="badge badge-green" id="val-parity-badge">Exact Parity</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Section C: Emergency Dispatch Recommendations -->
-                <div class="results-section-card">
-                  <div class="results-section-header">
-                    <div class="results-sec-title"><span>🚑</span> Top 3 Recommended Dispatch Facilities</div>
-                    <span class="badge badge-red">Primary Response</span>
-                  </div>
-                  <div id="sim-ranked-facilities-list">
-                    <!-- Populated dynamically -->
-                  </div>
-                </div>
-
-                <!-- Section D: MST Network Position & Path Comparison -->
-                <div class="results-section-card">
-                  <div class="results-section-header">
-                    <div class="results-sec-title"><span>🔗</span> MST Communication Position vs Direct Route</div>
-                    <span class="badge badge-gray">Path Telemetry</span>
-                  </div>
-                  <div style="font-size:0.80rem; color:var(--text-muted); line-height:1.5;">
-                    <div><strong>Direct Haversine Link:</strong> <span id="res-direct-dist">0.00 km</span></div>
-                    <div><strong>Cumulative MST Backbone Path:</strong> <span id="res-mst-path-dist">0.00 km</span></div>
-                    <div style="font-size:0.72rem; color:var(--text-light); margin-top:4px;">
-                      Note: Emergency response vehicles take direct surface roadways, while MST defines the fixed communication backbone.
+                <!-- TAB 4: Candidates & Exclusions Reconciliation -->
+                <div id="tab-content-exclusions" class="sim-tab-panel" style="display:none;">
+                  <div class="card" style="padding:14px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <h4 style="font-size:0.86rem; font-weight:700;">Candidate Eligibility & Exclusion Reconciliation</h4>
+                      <span class="badge badge-gray" id="exclusions-count-badge">0 Excluded</span>
+                    </div>
+                    <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom:10px;">
+                      Every facility in the BBMP registry is accounted for as eligible or excluded with a documented reason code.
+                    </p>
+                    <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
+                      <table class="data-table">
+                        <thead>
+                          <tr>
+                            <th>Facility ID</th>
+                            <th>Facility Name</th>
+                            <th>Reason Code</th>
+                            <th>Explanation</th>
+                            <th>Haversine</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbody-exclusions-list">
+                          <!-- Populated dynamically -->
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>

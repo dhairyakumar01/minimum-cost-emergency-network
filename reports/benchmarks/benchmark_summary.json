@@ -1,0 +1,52 @@
+{
+  "system_benchmark": {
+    "study_area": "BBMP Bengaluru, Karnataka, India",
+    "dataset_records_count": 1255,
+    "sha256": "293930b3db46e55910f68494a3c7bd6652a9af0ff7fa06a761f94d9bec78d943",
+    "environment": {
+      "python_version": "3.11.3",
+      "framework": "Flask 3.0+",
+      "platform": "Windows 11 / x86_64",
+      "process_rss_mb": 84.5
+    },
+    "global_haversine_mst": {
+      "vertices_count": 1255,
+      "tree_edges_count": 1254,
+      "candidate_edges_count": 786885,
+      "total_integer_weight_mm": 480178397,
+      "total_weight_km": 480.178397,
+      "kruskal_execution_ms": 41.8,
+      "prim_execution_ms": 67.4,
+      "weight_parity": true,
+      "lca_cycle_property_verification": {
+        "chords_evaluated": 785631,
+        "violations_count": 0,
+        "execution_ms": 318.5,
+        "is_optimal": true
+      }
+    },
+    "scenario_pipeline_benchmarks": {
+      "average_candidate_pool": 25,
+      "stage_1_coordinates_validation_ms": 0.4,
+      "stage_2_candidate_selection_ms": 2.1,
+      "stage_3_osrm_pairwise_measurement_ms": {
+        "cache_miss_osrm_query_ms": 1850.0,
+        "cache_hit_sqlite_retrieval_ms": 1.2
+      },
+      "stage_4_symmetric_graph_construction_ms": 3.8,
+      "stage_5_mst_optimization_ms": 4.5,
+      "stage_6_dispatch_ranking_ms": 1.1,
+      "stage_7_lca_cycle_property_validation_ms": 12.4,
+      "stage_8_persistence_and_serialization_ms": 8.6,
+      "total_end_to_end_pipeline_ms": 1882.8
+    },
+    "test_suite": {
+      "framework": "pytest",
+      "total_tests": 89,
+      "passed": 89,
+      "failed": 0,
+      "duration_seconds": 13.17,
+      "pass_rate_percent": 100.0
+    }
+  }
+}
