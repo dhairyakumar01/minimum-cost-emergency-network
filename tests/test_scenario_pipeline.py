@@ -78,3 +78,4 @@ def test_corrupted_spanning_tree_rejection():
     cert = oracle.verify_cycle_property(all_edges, suboptimal_tree)
     assert cert["is_optimal"] is False
     assert cert["violations_count"] > 0
+

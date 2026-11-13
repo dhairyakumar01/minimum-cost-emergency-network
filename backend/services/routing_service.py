@@ -135,6 +135,33 @@ def query_osrm_table(coords_list: List[Tuple[float, float]], base_url: Optional[
     return None
 
 
+def fetch_osrm_submatrix(
+    coords_list: List[Tuple[float, float]],
+    src_indices: List[int],
+    dst_indices: List[int],
+    base_url: str
+) -> Optional[Dict[str, Any]]:
+    """Query OSRM Table API with sources and destinations parameters."""
+    coord_str = ";".join(f"{lon:.5f},{lat:.5f}" for lon, lat in coords_list)
+    src_str = ";".join(str(i) for i in src_indices)
+    dst_str = ";".join(str(i) for i in dst_indices)
+    url = f"{base_url}/table/v1/driving/{coord_str}?sources={src_str}&destinations={dst_str}&annotations=duration,distance"
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "BengaluruEmergencyNetworkAcademic/1.0 (DMGT-Research)"}
+        )
+        with urllib.request.urlopen(req, timeout=12.0) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode())
+                if data.get("code") == "Ok":
+                    return data
+    except Exception:
+        return None
+    return None
+
+
 def get_pairwise_measurements(
     points: List[Dict[str, Any]],
     max_snapping_m: float = DEFAULT_MAX_SNAPPING_METERS
@@ -189,51 +216,108 @@ def get_pairwise_measurements(
                     missing_pairs.append((i, j, u_str, v_str))
 
     # 2. Query OSRM in batches if there are missing pairs
-    if missing_pairs and n <= 100:
-        # Full table query for small to medium sets
-        coords = [(p["longitude"], p["latitude"]) for p in points]
-        tbl_data = query_osrm_table(coords, health["endpoint"])
+    if missing_pairs:
+        endpoint = health["endpoint"]
+        if n <= 70:
+            # Full table query for small to medium sets
+            coords = [(p["longitude"], p["latitude"]) for p in points]
+            tbl_data = query_osrm_table(coords, endpoint)
 
-        if tbl_data is None:
-            conn.close()
-            return {
-                "status": "ROUTING_UNAVAILABLE",
-                "reason": "OSRM table query timed out or failed to return road route matrix.",
-                "directed_measurements": {},
-                "symmetric_edges": [],
-                "exclusions": [],
-                "diagnostics": {}
-            }
+            if tbl_data is None and not directed:
+                conn.close()
+                return {
+                    "status": "ROUTING_UNAVAILABLE",
+                    "reason": "OSRM table query timed out or failed to return road route matrix.",
+                    "directed_measurements": {},
+                    "symmetric_edges": [],
+                    "exclusions": [],
+                    "diagnostics": {}
+                }
 
-        durations = tbl_data.get("durations", [])
-        distances = tbl_data.get("distances", [])
-        sources = tbl_data.get("sources", [])
-        
-        with conn:
-            for i in range(n):
-                for j in range(n):
-                    if i == j:
+            if tbl_data:
+                durations = tbl_data.get("durations", [])
+                distances = tbl_data.get("distances", [])
+                
+                with conn:
+                    for i in range(n):
+                        for j in range(n):
+                            if i == j:
+                                continue
+                            p1, p2 = points[i], points[j]
+                            dur = durations[i][j] if i < len(durations) and j < len(durations[i]) else None
+                            dist = distances[i][j] if i < len(distances) and j < len(distances[i]) else None
+
+                            if dur is not None and dist is not None:
+                                dur_ds = round_half_up(dur * 10.0)
+                                dist_dm = round_half_up(dist * 10.0)
+                                u_str = f"{p1['longitude']:.5f},{p1['latitude']:.5f}"
+                                v_str = f"{p2['longitude']:.5f},{p2['latitude']:.5f}"
+
+                                conn.execute("""
+                                    INSERT OR REPLACE INTO route_measurements 
+                                    (origin, dest, duration_ds, distance_dm, timestamp)
+                                    VALUES (?, ?, ?, ?, datetime('now'))
+                                """, (u_str, v_str, dur_ds, dist_dm))
+
+                                directed[(p1["id"], p2["id"])] = {
+                                    "duration_ds": dur_ds,
+                                    "distance_dm": dist_dm
+                                }
+        else:
+            # Chunked submatrix querying for larger point sets
+            chunk_size = 40
+            missing_set = {(mp[0], mp[1]) for mp in missing_pairs}
+
+            for i_start in range(0, n, chunk_size):
+                sub_src = points[i_start : min(n, i_start + chunk_size)]
+                for j_start in range(0, n, chunk_size):
+                    sub_dst = points[j_start : min(n, j_start + chunk_size)]
+
+                    # Check if this block contains any missing pairs
+                    has_missing = any(
+                        (i_start + si, j_start + dj) in missing_set
+                        for si in range(len(sub_src))
+                        for dj in range(len(sub_dst))
+                    )
+                    if not has_missing:
                         continue
-                    p1, p2 = points[i], points[j]
-                    dur = durations[i][j] if i < len(durations) and j < len(durations[i]) else None
-                    dist = distances[i][j] if i < len(distances) and j < len(distances[i]) else None
 
-                    if dur is not None and dist is not None:
-                        dur_ds = round_half_up(dur * 10.0)
-                        dist_dm = round_half_up(dist * 10.0)
-                        u_str = f"{p1['longitude']:.5f},{p1['latitude']:.5f}"
-                        v_str = f"{p2['longitude']:.5f},{p2['latitude']:.5f}"
+                    combined_pts = sub_src + sub_dst
+                    combined_coords = [(p["longitude"], p["latitude"]) for p in combined_pts]
+                    src_idx = list(range(len(sub_src)))
+                    dst_idx = [len(sub_src) + k for k in range(len(sub_dst))]
 
-                        conn.execute("""
-                            INSERT OR REPLACE INTO route_measurements 
-                            (origin, dest, duration_ds, distance_dm, timestamp)
-                            VALUES (?, ?, ?, ?, datetime('now'))
-                        """, (u_str, v_str, dur_ds, dist_dm))
+                    sub_data = fetch_osrm_submatrix(combined_coords, src_idx, dst_idx, endpoint)
+                    if sub_data and sub_data.get("code") == "Ok":
+                        durs = sub_data.get("durations", [])
+                        dists = sub_data.get("distances", [])
 
-                        directed[(p1["id"], p2["id"])] = {
-                            "duration_ds": dur_ds,
-                            "distance_dm": dist_dm
-                        }
+                        with conn:
+                            for si, p1 in enumerate(sub_src):
+                                orig_i = i_start + si
+                                for dj, p2 in enumerate(sub_dst):
+                                    orig_j = j_start + dj
+                                    if orig_i == orig_j:
+                                        continue
+                                    dur = durs[si][dj] if si < len(durs) and dj < len(durs[si]) else None
+                                    dist = dists[si][dj] if si < len(dists) and dj < len(dists[si]) else None
+
+                                    if dur is not None and dist is not None:
+                                        dur_ds = round_half_up(dur * 10.0)
+                                        dist_dm = round_half_up(dist * 10.0)
+                                        u_str = f"{p1['longitude']:.5f},{p1['latitude']:.5f}"
+                                        v_str = f"{p2['longitude']:.5f},{p2['latitude']:.5f}"
+
+                                        conn.execute("""
+                                            INSERT OR REPLACE INTO route_measurements 
+                                            (origin, dest, duration_ds, distance_dm, timestamp)
+                                            VALUES (?, ?, ?, ?, datetime('now'))
+                                        """, (u_str, v_str, dur_ds, dist_dm))
+
+                                        directed[(p1["id"], p2["id"])] = {
+                                            "duration_ds": dur_ds,
+                                            "distance_dm": dist_dm
+                                        }
 
     # 3. Construct undirected symmetric edges: S_T(i, j) and S_D(i, j)
     symmetric_edges = []
@@ -247,6 +331,7 @@ def get_pairwise_measurements(
             fwd = directed.get((p1["id"], p2["id"]))
             rev = directed.get((p2["id"], p1["id"]))
 
+            # Undirected edge is only formed if BOTH directions are available (never fabricated)
             if fwd and rev:
                 s_t = fwd["duration_ds"] + rev["duration_ds"]
                 s_d = fwd["distance_dm"] + rev["distance_dm"]
@@ -269,7 +354,9 @@ def get_pairwise_measurements(
                     "s_t_ds": s_t,
                     "s_d_dm": s_d,
                     "t_avg_min": round(s_t / 1200.0, 3),
+                    "t_avg_s": round(s_t / 20.0, 2),
                     "d_avg_km": round(s_d / 20000.0, 3),
+                    "d_avg_m": round(s_d / 20.0, 2),
                     # For optimization mode weighting:
                     "duration_ds": s_t,
                     "distance_dm": s_d,

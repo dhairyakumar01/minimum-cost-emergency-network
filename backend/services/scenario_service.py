@@ -244,23 +244,7 @@ def execute_scenario_pipeline(
         if not eligible_candidates:
             raise ValueError(f"No eligible {norm_agency} facilities found within {radius_km:.1f} km radius. Try increasing search radius.")
 
-        # Limit candidate graph if excessive (e.g., > 25 nodes) to fit OSRM Table API URL limits and ensure sub-second response
-        MAX_SAFE_CANDIDATES = 25
-        if len(eligible_candidates) > MAX_SAFE_CANDIDATES:
-            # Sort by straight-line Haversine distance and retain top nearest candidates
-            eligible_candidates.sort(key=lambda x: x["haversine_km"])
-            excess = eligible_candidates[MAX_SAFE_CANDIDATES:]
-            eligible_candidates = eligible_candidates[:MAX_SAFE_CANDIDATES]
-            for exc in excess:
-                exclusions.append({
-                    "facility_id": exc["facility_id"],
-                    "facility_name": exc["facility_name"],
-                    "reason_code": "COMPUTATIONAL_LIMIT",
-                    "reason": f"Candidate beyond 25-nearest threshold for real-time road measurement. Preserved nearest 25 candidates for dispatch.",
-                    "haversine_km": exc["haversine_km"],
-                })
-
-        # All points in graph: Incident (vertex 0) + Candidates
+        # All eligible candidates within the radius are evaluated without arbitrary truncation
         graph_points = [incident_point] + eligible_candidates
         vertex_ids = [p["id"] for p in graph_points]
 
@@ -402,6 +386,20 @@ def execute_scenario_pipeline(
         # Check pure compromise sweep
         tradeoff_summary = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
 
+        # Disconnected Forest and Component Telemetry
+        num_comps = selected_mst_res["num_components"]
+        comps_dict = selected_mst_res["components"]
+        is_forest = (num_comps > 1)
+        
+        # Identify incident-connected component vs unreachable facilities
+        incident_comp_key = None
+        for c_key, members in comps_dict.items():
+            if "incident_0" in members:
+                incident_comp_key = c_key
+                break
+        incident_connected_members = comps_dict.get(incident_comp_key, ["incident_0"]) if incident_comp_key else []
+        unreachable_facs = [vid for vid in vertex_ids if vid != "incident_0" and vid not in incident_connected_members]
+
         # Assemble Full Scenario Payload
         scenario_result = {
             "scenario_id": scenario_id,
@@ -424,17 +422,26 @@ def execute_scenario_pipeline(
                 "graph_vertices_count": len(vertex_ids),
                 "evaluated_chords_count": optimality_cert["chords_tested"],
                 "tree_edge_count": len(active_edges),
-                "is_connected": struct_val["is_valid_tree"],
-                "num_components": struct_val["num_components"],
+                "is_connected": not is_forest,
+                "num_components": num_comps,
+                "is_forest": is_forest,
+                "network_type": "Minimum Spanning Forest (MSF)" if is_forest else "Minimum Spanning Tree (MST)",
+                "incident_connected_count": len(incident_connected_members) - 1,
+                "unreachable_facilities_count": len(unreachable_facs),
                 "kendall_tau_b": kendall_tau,
             },
             "dispatch_ranking": dispatch_rows,
             "network_mst": {
                 "algorithm": selected_mst_res["algorithm"],
+                "network_type": "Minimum Spanning Forest (MSF)" if is_forest else "Minimum Spanning Tree (MST)",
+                "is_forest": is_forest,
                 "edges": active_edges,
                 "total_integer_weight": selected_mst_res["total_integer_weight"],
-                "num_components": selected_mst_res["num_components"],
-                "components": selected_mst_res["components"],
+                "num_components": num_comps,
+                "components": comps_dict,
+                "incident_component_key": incident_comp_key,
+                "incident_connected_members": incident_connected_members,
+                "unreachable_facilities": unreachable_facs,
             },
             "validation": {
                 "structural": struct_val,
@@ -537,3 +544,4 @@ def list_recent_scenarios(limit: int = 20) -> List[Dict[str, Any]]:
     rows = conn.execute("SELECT scenario_id, created_at, status, incident_label, agency, radius_km, optimization_mode FROM scenarios ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+

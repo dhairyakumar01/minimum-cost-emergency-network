@@ -173,6 +173,7 @@ def kruskal_mst(
     return {
         "algorithm": "kruskal",
         "mst_edges": mst_edges,
+        "edges": mst_edges,
         "edge_count": len(mst_edges),
         "expected_edge_count": expected_edges,
         "total_integer_weight": total_weight,
@@ -287,6 +288,7 @@ def prim_mst(
     return {
         "algorithm": "prim",
         "mst_edges": mst_edges,
+        "edges": mst_edges,
         "edge_count": len(mst_edges),
         "expected_edge_count": expected_edges,
         "total_integer_weight": total_weight,
@@ -418,9 +420,11 @@ class LCABinaryLiftingOracle:
                         "discrepancy": max_tree_key[0] - chord_key[0]
                     })
 
+        max_viol = max((v["discrepancy"] for v in violations), default=0)
         return {
             "chords_tested": chords_tested,
             "violations_count": len(violations),
+            "max_violation": max_viol,
             "is_optimal": len(violations) == 0,
             "violations": violations
         }
@@ -532,3 +536,4 @@ def compute_compromise_tradeoff_sweep(
         "pure_objectives_coincide": coincide,
         "tradeoff_points": points
     }
+

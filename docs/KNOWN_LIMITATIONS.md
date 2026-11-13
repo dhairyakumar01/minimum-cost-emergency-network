@@ -47,3 +47,4 @@ Incidents placed outside this bounding box are rejected during Stage 1 validatio
 - The catalog contains 1,255 facilities (1,097 hospitals/clinics, 138 police stations, 20 fire stations) sourced from open municipal registries.
 - Small private clinics or temporary police outposts not recorded in the official dataset are not reflected in the network.
 - 13 facility pairs are located within 5 metres of each other (representing co-located clinics, campus multi-specialty buildings, or sub-stations). These are treated as distinct vertices with small positive or zero-distance edges, correctly handled by the mathematical engine.
+

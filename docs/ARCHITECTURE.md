@@ -145,3 +145,4 @@ CREATE TABLE IF NOT EXISTS route_measurements (
 | `/api/scenarios/<id>/tradeoff` | GET | Retrieve compromise multi-objective trade-off curve |
 | `/api/benchmarks` | GET | Latency, edge counts, and algorithm benchmarks |
 | `/api/methodology/manifest` | GET | Academic methodology documentation manifest |
+

@@ -645,18 +645,18 @@
                   <div class="mode-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
                       <div class="mode-icon">⏱️</div>
-                      <div class="mode-title">Mode 1: Min Time</div>
-                      <div class="mode-desc">Minimizes total road duration (<i>S<sub>T</sub></i>).</div>
+                      <div class="mode-title">Mode 1: Minimum Time</div>
+                      <div class="mode-desc">Minimizes total symmetric travel-time backbone (<i>S<sub>T</sub></i>).</div>
                     </div>
                     <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
                       <div class="mode-icon">📏</div>
-                      <div class="mode-title">Mode 2: Min Distance</div>
-                      <div class="mode-desc">Minimizes total road distance (<i>S<sub>D</sub></i>).</div>
+                      <div class="mode-title">Mode 2: Minimum Road Distance (along fastest routes)</div>
+                      <div class="mode-desc">Minimizes physical road distance along the fastest-route profile (<i>S<sub>D</sub></i>).</div>
                     </div>
                     <div class="mode-card" data-mode="compromise" onclick="App.selectMode('compromise')">
                       <div class="mode-icon">⚖️</div>
                       <div class="mode-title">Mode 3: Compromise</div>
-                      <div class="mode-desc">Integer composite <i>N<sub>e</sub></i> = <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.</div>
+                      <div class="mode-desc">Supported trade-off solutions: <i>N<sub>e</sub></i> = <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.</div>
                     </div>
                   </div>
                   
@@ -705,7 +705,7 @@
                     </div>
                     <div class="summary-item">
                       <span class="sum-lbl">Objective Mode:</span>
-                      <span class="sum-val" id="sum-mode">Minimum Response Time</span>
+                      <span class="sum-val" id="sum-mode">Minimum Time (S_T)</span>
                     </div>
                   </div>
 

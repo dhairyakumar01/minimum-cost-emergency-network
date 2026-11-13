@@ -80,8 +80,20 @@
   }
 
   // --------------------------------------------------------------------------
-  // Lifecycle Initialization
+  // Lifecycle Initialization & Global Error Boundaries
   // --------------------------------------------------------------------------
+
+  // Global uncaught error protection (Zero Blank-Screen Requirement)
+  window.addEventListener("error", (event) => {
+    console.error("Global UI Error caught:", event.error || event.message);
+    showErrorBanner(`A component encountered an issue: ${event.message || "Unknown error"}. Other features remain functional.`);
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    console.error("Unhandled Promise Rejection caught:", event.reason);
+    const msg = event.reason?.message || (typeof event.reason === "string" ? event.reason : "Network operation failed");
+    showErrorBanner(`Operation warning: ${msg}. Click retry or check connection.`);
+  });
 
   document.addEventListener("DOMContentLoaded", () => {
     Navigation.init();
@@ -89,28 +101,32 @@
 
     // Map invalidation on navigation
     Navigation.onNavigate((sectionId) => {
-      if (sectionId === "dashboard") {
-        setTimeout(() => {
-          if (overviewMap) overviewMap.invalidateSize();
-        }, 120);
-      } else if (sectionId === "facilities-map") {
-        setTimeout(() => {
-          if (!facMap) {
-            initFacilitiesMap();
-          } else {
-            facMap.invalidateSize();
-          }
-        }, 120);
-      } else if (sectionId === "mst-network") {
-        setTimeout(() => {
-          if (!mstMap) {
-            initMstMap();
-          } else {
-            mstMap.invalidateSize();
-          }
-        }, 120);
-      } else if (sectionId === "simulation") {
-        updateSimulationUI();
+      try {
+        if (sectionId === "dashboard") {
+          setTimeout(() => {
+            if (overviewMap) overviewMap.invalidateSize();
+          }, 120);
+        } else if (sectionId === "facilities-map") {
+          setTimeout(() => {
+            if (!facMap) {
+              initFacilitiesMap();
+            } else {
+              facMap.invalidateSize();
+            }
+          }, 120);
+        } else if (sectionId === "mst-network") {
+          setTimeout(() => {
+            if (!mstMap) {
+              initMstMap();
+            } else {
+              mstMap.invalidateSize();
+            }
+          }, 120);
+        } else if (sectionId === "simulation") {
+          updateSimulationUI();
+        }
+      } catch (navErr) {
+        console.warn("Navigation map refresh caught safely:", navErr);
       }
     });
 
@@ -187,32 +203,36 @@
    * Dashboard GIS Overview Mini-Map
    */
   function initOverviewMap() {
-    const container = document.getElementById("dashboard-overview-map");
-    if (!container || overviewMap) return;
+    try {
+      const container = document.getElementById("dashboard-overview-map");
+      if (!container || overviewMap || typeof L === "undefined") return;
 
-    overviewMap = L.map("dashboard-overview-map", {
-      center: [12.9716, 77.5946],
-      zoom: 11,
-      zoomControl: false,
-      attributionControl: false,
-    });
+      overviewMap = L.map("dashboard-overview-map", {
+        center: [12.9716, 77.5946],
+        zoom: 11,
+        zoomControl: false,
+        attributionControl: false,
+      });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 16,
-    }).addTo(overviewMap);
-
-    // Render sample facility markers
-    const step = Math.ceil(State.facilities.length / 150);
-    for (let i = 0; i < State.facilities.length; i += step) {
-      const fac = State.facilities[i];
-      const color = AGENCY_COLORS[fac.agency] || "#2563eb";
-      L.circleMarker([fac.latitude, fac.longitude], {
-        radius: 3,
-        fillColor: color,
-        color: "#ffffff",
-        weight: 0.8,
-        fillOpacity: 0.8,
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 16,
       }).addTo(overviewMap);
+
+      // Render sample facility markers
+      const step = Math.ceil(State.facilities.length / 150);
+      for (let i = 0; i < State.facilities.length; i += step) {
+        const fac = State.facilities[i];
+        const color = AGENCY_COLORS[fac.agency] || "#2563eb";
+        L.circleMarker([fac.latitude, fac.longitude], {
+          radius: 3,
+          fillColor: color,
+          color: "#ffffff",
+          weight: 0.8,
+          fillOpacity: 0.8,
+        }).addTo(overviewMap);
+      }
+    } catch (err) {
+      console.warn("Overview mini-map fallback:", err);
     }
   }
 
@@ -221,47 +241,52 @@
   // --------------------------------------------------------------------------
 
   function initFacilitiesMap() {
-    const container = document.getElementById("leaflet-map");
-    if (!container || facMap) return;
+    try {
+      const container = document.getElementById("leaflet-map");
+      if (!container || facMap || typeof L === "undefined") return;
 
-    facMap = L.map("leaflet-map", {
-      center: [12.9716, 77.5946],
-      zoom: 12,
-      zoomControl: true,
-    });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: "&copy; OpenStreetMap contributors | DMGT Bengaluru Research",
-    }).addTo(facMap);
-
-    // Marker Clustering Group
-    if (typeof L.markerClusterGroup === "function") {
-      facMarkersLayer = L.markerClusterGroup({
-        maxClusterRadius: 40,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
+      facMap = L.map("leaflet-map", {
+        center: [12.9716, 77.5946],
+        zoom: 12,
+        zoomControl: true,
       });
-    } else {
-      facMarkersLayer = L.layerGroup();
-    }
-    facMap.addLayer(facMarkersLayer);
 
-    renderFacilityMarkers();
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors | DMGT Bengaluru Research",
+      }).addTo(facMap);
 
-    // Setup initial incident pin if set
-    if (State.incident.isSet && State.incident.lat != null && State.incident.lon != null) {
-      placeIncidentMarker(State.incident.lat, State.incident.lon);
-    }
-
-    // Map click handler for incident placement
-    facMap.on("click", (e) => {
-      if (State.incidentSelectMode) {
-        placeIncidentMarker(e.latlng.lat, e.latlng.lng);
-        setIncidentSelectMode(false);
+      // Marker Clustering Group
+      if (typeof L.markerClusterGroup === "function") {
+        facMarkersLayer = L.markerClusterGroup({
+          maxClusterRadius: 40,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+        });
+      } else {
+        facMarkersLayer = L.layerGroup();
       }
-    });
+      facMap.addLayer(facMarkersLayer);
+
+      renderFacilityMarkers();
+
+      // Setup initial incident pin if set
+      if (State.incident.isSet && State.incident.lat != null && State.incident.lon != null) {
+        placeIncidentMarker(State.incident.lat, State.incident.lon, State.incident.label);
+      }
+
+      // Map click handler for incident placement
+      facMap.on("click", (e) => {
+        if (State.incidentSelectMode) {
+          placeIncidentMarker(e.latlng.lat, e.latlng.lng);
+          setIncidentSelectMode(false);
+        }
+      });
+    } catch (err) {
+      console.error("Facilities map initialization failed:", err);
+      showErrorBanner("Map tiles could not be initialized. Facilities catalog remains accessible in list/table views.");
+    }
   }
 
   function renderFacilityMarkers() {
@@ -601,24 +626,29 @@
   // --------------------------------------------------------------------------
 
   function initMstMap() {
-    const container = document.getElementById("mst-leaflet-map");
-    if (!container || mstMap) return;
+    try {
+      const container = document.getElementById("mst-leaflet-map");
+      if (!container || mstMap || typeof L === "undefined") return;
 
-    mstMap = L.map("mst-leaflet-map", {
-      center: [12.9716, 77.5946],
-      zoom: 12,
-      zoomControl: true,
-    });
+      mstMap = L.map("mst-leaflet-map", {
+        center: [12.9716, 77.5946],
+        zoom: 12,
+        zoomControl: true,
+      });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: "&copy; OpenStreetMap contributors | Bengaluru MST Model",
-    }).addTo(mstMap);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors | Bengaluru MST Model",
+      }).addTo(mstMap);
 
-    mstEdgesLayer = L.layerGroup().addTo(mstMap);
-    mstNodesLayer = L.layerGroup().addTo(mstMap);
+      mstEdgesLayer = L.layerGroup().addTo(mstMap);
+      mstNodesLayer = L.layerGroup().addTo(mstMap);
 
-    loadAndRenderMst(State.mstAlgorithm);
+      loadAndRenderMst(State.mstAlgorithm);
+    } catch (err) {
+      console.error("MST map initialization failed:", err);
+      showErrorBanner("Global MST map view unavailable. Algorithm analysis tables remain accessible.");
+    }
   }
 
   async function loadAndRenderMst(algo = "kruskal") {
@@ -849,8 +879,8 @@
       }
 
       const modeNames = {
-        "time": "Minimum Response Time (S_T)",
-        "distance": "Minimum Road Distance (S_D)",
+        "time": "Minimum Time (S_T)",
+        "distance": "Minimum Road Distance (along fastest routes)",
         "compromise": `Compromise Trade-Off (k=${State.compromiseK !== undefined ? State.compromiseK : 5}/10)`,
       };
       setText("sum-mode", modeNames[modeKey] || modeKey);

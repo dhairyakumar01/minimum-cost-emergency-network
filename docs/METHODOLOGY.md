@@ -156,3 +156,4 @@ $$w(e) \ge \max_{e' \in \operatorname{Path}_{\mathcal{T}}(u, v)} w(e')$$
 4. Assert:
    $$w(u, v) - M \ge 0$$
    Any negative difference indicates a cycle property violation and invalidates the tree.
+
