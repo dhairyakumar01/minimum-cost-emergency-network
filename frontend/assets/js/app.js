@@ -99,6 +99,14 @@
     Navigation.init();
     initApp();
 
+    // Wire up retry connection button
+    document.querySelectorAll(".btn-retry-connection").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        hideErrorBanner();
+        initApp();
+      });
+    });
+
     // Map invalidation on navigation
     Navigation.onNavigate((sectionId) => {
       try {

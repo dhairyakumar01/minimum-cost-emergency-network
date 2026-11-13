@@ -205,3 +205,4 @@ def test_adv_15_zero_or_invalid_compromise_references():
     tradeoff = compute_compromise_tradeoff_sweep(vertices, zero_edges)
     assert tradeoff["status"] == "UNAVAILABLE"
     assert "non-positive" in tradeoff["reason"]
+
