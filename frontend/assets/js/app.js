@@ -925,6 +925,24 @@
           panel.style.display = (t === tabId) ? "block" : "none";
         }
       });
+
+      // When switching to the Network Backbone tab, invalidate Leaflet map dimensions
+      if (tabId === "network") {
+        setTimeout(() => {
+          if (simMstMap) {
+            simMstMap.invalidateSize();
+            if (simBounds && simBounds.isValid()) {
+              simMstMap.fitBounds(simBounds, { padding: [30, 30] });
+            }
+          }
+        }, 120);
+      }
+    },
+
+    fitSimMapBounds() {
+      if (simMstMap && simBounds && simBounds.isValid()) {
+        simMstMap.fitBounds(simBounds, { padding: [30, 30] });
+      }
     },
 
     async runSimulationPreview() {
@@ -1027,14 +1045,15 @@
             pipelineBadge.textContent = `Stage ${stageNum}: ${stageName}`;
           }
 
-          if (statusInfo.status === "COMPLETED") {
+          const isFinished = ["COMPLETED", "DISCONNECTED_FOREST", "COMPLETED_WITH_WARNINGS", "ZERO_USABLE_EDGES"].includes(statusInfo.status);
+          if (isFinished) {
             if (stageVal) stageVal.className = "pipeline-stage completed";
             if (stageCand) stageCand.className = "pipeline-stage completed";
             if (stageNet) stageNet.className = "pipeline-stage completed";
             if (stageRank) stageRank.className = "pipeline-stage completed";
             if (pipelineBadge) {
-              pipelineBadge.className = "badge badge-green";
-              pipelineBadge.textContent = "Analysis Complete";
+              pipelineBadge.className = statusInfo.status === "COMPLETED" ? "badge badge-green" : "badge badge-amber";
+              pipelineBadge.textContent = statusInfo.status === "COMPLETED" ? "Analysis Complete (MST)" : "Analysis Complete (MSF)";
             }
             break;
           } else if (statusInfo.status === "FAILED") {
@@ -1050,7 +1069,10 @@
 
         if (resultsContainer) resultsContainer.style.display = "block";
         if (statusEl) {
-          statusEl.textContent = `Scenario complete in ${scenarioData.summary.runtime_ms} ms (${scenarioData.summary.eligible_count} candidates).`;
+          const evalTotal = scenarioData?.summary?.total_candidates_in_radius || scenarioData?.dispatch_ranking?.length || 0;
+          const roadGeoms = scenarioData?.network_mst?.road_geometries_count || 0;
+          const isCached = scenarioData?.summary?.from_cache ? " [Cached]" : "";
+          statusEl.textContent = `Analysis complete in ${Date.now() - startTime} ms (${evalTotal} facilities, ${roadGeoms} road routes)${isCached}.`;
         }
       } catch (err) {
         console.error("Simulation error:", err);
@@ -1308,8 +1330,259 @@
       });
     }
 
+    // Render Dedicated Geographic Incident MST Network Map
+    renderSimulationNetworkMap(res);
+
     // Default to Dispatch tab
     App.switchSimTab("dispatch");
+  }
+
+  // --------------------------------------------------------------------------
+  // Simulation Network Map Engine (Leaflet + Genuine OSRM Road Geometry)
+  // --------------------------------------------------------------------------
+
+  let simMstMap = null;
+  let simMstLayers = null;
+  let simBounds = null;
+
+  function renderSimulationNetworkMap(res) {
+    const mapEl = document.getElementById("sim-mst-leaflet-map");
+    if (!mapEl || !window.L) return;
+
+    // 1. Initialize Map instance once
+    if (!simMstMap) {
+      simMstMap = L.map("sim-mst-leaflet-map", {
+        center: [12.9781, 77.5696],
+        zoom: 12,
+        zoomControl: true,
+      });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
+      }).addTo(simMstMap);
+      simMstLayers = L.layerGroup().addTo(simMstMap);
+    }
+
+    simMstLayers.clearLayers();
+    simBounds = L.latLngBounds();
+
+    const inc = res.incident || State.incident;
+    const net = res.network_mst || {};
+    const edges = net.edges || [];
+    const ranking = res.dispatch_ranking || [];
+    const params = res.parameters || {};
+
+    // Update mode badge on map header
+    const modeBadge = document.getElementById("sim-map-mode-badge");
+    if (modeBadge) {
+      const modeLabels = {
+        time: "Mode 1: Minimum Time (S_T)",
+        distance: "Mode 2: Minimum Distance (S_D)",
+        compromise: `Mode 3: Compromise (k=${params.k_param !== undefined ? params.k_param : 5})`,
+      };
+      modeBadge.textContent = modeLabels[params.optimization_mode] || "MST Backbone";
+    }
+
+    // Update geometry badge
+    const geomBadge = document.getElementById("sim-map-geom-badge");
+    const roadGeomCount = net.road_geometries_count !== undefined ? net.road_geometries_count : (edges.filter(e => e.is_road_route).length);
+    const totalEdges = edges.length;
+    if (geomBadge) {
+      if (roadGeomCount === totalEdges && totalEdges > 0) {
+        geomBadge.className = "badge badge-green";
+        geomBadge.textContent = `Genuine Road Route Geometry: ${roadGeomCount}/${totalEdges} links (100%)`;
+      } else if (roadGeomCount > 0) {
+        geomBadge.className = "badge badge-blue";
+        geomBadge.textContent = `Road Geometry: ${roadGeomCount}/${totalEdges} links`;
+      } else {
+        geomBadge.className = "badge badge-amber";
+        geomBadge.textContent = "Schematic Connections (Road geometry unavailable)";
+      }
+    }
+
+    // 2. Incident Pin (Prominently marked with pulsing styling)
+    if (inc && inc.latitude != null && inc.longitude != null) {
+      const incLatLng = [inc.latitude, inc.longitude];
+      simBounds.extend(incLatLng);
+
+      const incIcon = L.divIcon({
+        className: "incident-sim-pin-wrap",
+        html: `<div class="incident-sim-pin" title="Incident Origin">🚨</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+
+      const incMarker = L.marker(incLatLng, { icon: incIcon, zIndexOffset: 2000 });
+      incMarker.bindPopup(`
+        <div style="font-size:0.80rem; line-height:1.45;">
+          <span class="badge badge-red" style="font-size:0.68rem; margin-bottom:4px;">🚨 INCIDENT ORIGIN</span>
+          <h4 style="font-size:0.88rem; font-weight:700; margin:2px 0;">${escapeHtml(inc.label || "Incident Location")}</h4>
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
+            Coordinates: ${inc.latitude.toFixed(5)}° N, ${inc.longitude.toFixed(5)}° E
+          </div>
+          <div style="font-size:0.74rem; color:var(--primary); font-weight:600; margin-top:4px;">
+            Network Backbone Root Node
+          </div>
+        </div>
+      `);
+      simMstLayers.addLayer(incMarker);
+    }
+
+    // 3. Collect Facilities in MST
+    const facsInMST = new Map();
+    ranking.forEach((r) => {
+      const f = State.facilitiesById[r.facility_id];
+      if (f) facsInMST.set(r.facility_id, { ...f, ...r });
+    });
+
+    edges.forEach((e) => {
+      [e.u, e.v].forEach((vid) => {
+        if (vid !== "incident_0" && !facsInMST.has(vid)) {
+          const f = State.facilitiesById[vid];
+          if (f) facsInMST.set(vid, f);
+        }
+      });
+    });
+
+    const agencyColors = {
+      hospital_clinic: "#dc2626",
+      hospital: "#dc2626",
+      police: "#2563eb",
+      police_station: "#2563eb",
+      fire: "#ea580c",
+      fire_station: "#ea580c",
+    };
+
+    facsInMST.forEach((fac, fid) => {
+      if (fac.latitude == null || fac.longitude == null) return;
+      const latLng = [fac.latitude, fac.longitude];
+      simBounds.extend(latLng);
+
+      const color = agencyColors[fac.agency] || "#dc2626";
+      const marker = L.circleMarker(latLng, {
+        radius: 6,
+        fillColor: color,
+        color: "#ffffff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9,
+      });
+
+      const timeMin = fac.travel_time_min !== undefined ? Number(fac.travel_time_min).toFixed(1) : (fac.travel_time_ds ? (fac.travel_time_ds / 600).toFixed(1) : "N/A");
+      const roadKm = fac.road_distance_km !== undefined ? Number(fac.road_distance_km).toFixed(2) : (fac.road_distance_dm ? (fac.road_distance_dm / 10000).toFixed(2) : "N/A");
+
+      marker.bindPopup(`
+        <div style="font-size:0.80rem; line-height:1.45;">
+          <span class="badge ${fac.agency === 'police' ? 'badge-blue' : (fac.agency === 'fire' ? 'badge-amber' : 'badge-red')}" style="font-size:0.68rem; margin-bottom:4px; text-transform:uppercase;">
+            ${escapeHtml(fac.agency || "Agency")}
+          </span>
+          <h4 style="font-size:0.88rem; font-weight:700; margin:2px 0;">${escapeHtml(fac.facility_name)}</h4>
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
+            ID: <code>${fac.facility_id || fid}</code> &bull; (${fac.latitude.toFixed(5)}, ${fac.longitude.toFixed(5)})
+          </div>
+          <div style="margin-top:6px; font-size:0.75rem; border-top:1px solid #e2e8f0; padding-top:4px;">
+            <div><strong>Direct Travel Time:</strong> ${timeMin} min</div>
+            <div><strong>Direct Road Distance:</strong> ${roadKm} km</div>
+          </div>
+        </div>
+      `);
+
+      simMstLayers.addLayer(marker);
+    });
+
+    // 4. Render MST / MSF Edges with Genuine Road Geometry
+    edges.forEach((edge) => {
+      let uCoord = null;
+      let vCoord = null;
+
+      if (edge.u === "incident_0" && inc) {
+        uCoord = [inc.latitude, inc.longitude];
+      } else if (State.facilitiesById[edge.u]) {
+        const f = State.facilitiesById[edge.u];
+        uCoord = [f.latitude, f.longitude];
+      }
+
+      if (edge.v === "incident_0" && inc) {
+        vCoord = [inc.latitude, inc.longitude];
+      } else if (State.facilitiesById[edge.v]) {
+        const f = State.facilitiesById[edge.v];
+        vCoord = [f.latitude, f.longitude];
+      }
+
+      if (!uCoord || !vCoord) return;
+
+      const uName = edge.u === "incident_0" ? (inc.label || "🚨 Incident Origin") : (State.facilitiesById[edge.u]?.facility_name || edge.u);
+      const vName = edge.v === "incident_0" ? (inc.label || "🚨 Incident Origin") : (State.facilitiesById[edge.v]?.facility_name || edge.v);
+      const durMin = (((edge.duration_ds || 0) / 10) / 60).toFixed(1);
+      const distKm = (((edge.distance_dm || 0) / 10) / 1000).toFixed(2);
+
+      let polyline = null;
+      const isGenuineRoad = Boolean(edge.is_road_route && edge.geometry && edge.geometry.length > 1);
+
+      if (isGenuineRoad) {
+        polyline = L.polyline(edge.geometry, {
+          color: "#2563eb",
+          weight: 3.5,
+          opacity: 0.82,
+          lineJoin: "round",
+        });
+        edge.geometry.forEach((pt) => simBounds.extend(pt));
+      } else {
+        polyline = L.polyline([uCoord, vCoord], {
+          color: "#d97706",
+          weight: 2.2,
+          opacity: 0.75,
+          dashArray: "6, 6",
+        });
+        simBounds.extend(uCoord);
+        simBounds.extend(vCoord);
+      }
+
+      const popupHtml = `
+        <div style="font-size:0.78rem; line-height:1.45;">
+          <span class="badge ${isGenuineRoad ? 'badge-blue' : 'badge-amber'}" style="font-size:0.66rem; margin-bottom:4px;">
+            ${isGenuineRoad ? '🛣️ GENUINE ROAD-NETWORK LINK' : '⚠️ SCHEMATIC STRAIGHT-LINE (Fallback)'}
+          </span>
+          <div style="margin:4px 0;"><strong>From:</strong> ${escapeHtml(uName)}</div>
+          <div style="margin:4px 0;"><strong>To:</strong> ${escapeHtml(vName)}</div>
+          <div style="margin-top:6px; font-size:0.74rem; background:#f8fafc; padding:4px 8px; border-radius:4px; border:1px solid #e2e8f0;">
+            <div><strong>Round-trip Travel Duration (S_T):</strong> ${durMin} min</div>
+            <div><strong>Round-trip Road Distance (S_D):</strong> ${distKm} km</div>
+          </div>
+        </div>
+      `;
+
+      polyline.bindPopup(popupHtml);
+
+      polyline.on("mouseover", function () {
+        this.setStyle({ weight: 5, color: "#1d4ed8", opacity: 1 });
+        const tt = document.getElementById("sim-map-tooltip-card");
+        const ttTitle = document.getElementById("sim-tt-title");
+        const ttDesc = document.getElementById("sim-tt-desc");
+        const ttBadge = document.getElementById("sim-tt-badge");
+        if (tt && ttTitle && ttDesc && ttBadge) {
+          ttBadge.className = isGenuineRoad ? "badge badge-blue" : "badge badge-amber";
+          ttBadge.textContent = isGenuineRoad ? "OSRM Road Route" : "Schematic Fallback";
+          ttTitle.textContent = `${uName} ⟷ ${vName}`;
+          ttDesc.textContent = `Duration: ${durMin} min • Road Dist: ${distKm} km`;
+          tt.style.display = "block";
+        }
+      });
+
+      polyline.on("mouseout", function () {
+        this.setStyle({
+          weight: isGenuineRoad ? 3.5 : 2.2,
+          color: isGenuineRoad ? "#2563eb" : "#d97706",
+          opacity: isGenuineRoad ? 0.82 : 0.75,
+        });
+      });
+
+      simMstLayers.addLayer(polyline);
+    });
+
+    if (simBounds.isValid()) {
+      simMstMap.fitBounds(simBounds, { padding: [30, 30] });
+    }
   }
 
   // --------------------------------------------------------------------------

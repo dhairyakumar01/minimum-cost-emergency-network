@@ -827,7 +827,58 @@
                 <div id="tab-content-network" class="sim-tab-panel" style="display:none;">
                   <div class="tab-notice-banner tab-notice-purple">
                     <span>🕸️</span>
-                    <span>Minimum-weight connecting backbone connecting incident and eligible facilities. This is NOT a dispatch ranking.</span>
+                    <span>Incident-Specific Minimum-Weight Network Backbone (MST/MSF). This displays physical communication links, NOT vehicular dispatch.</span>
+                  </div>
+
+                  <!-- Dedicated Incident-Specific Geographic MST Map -->
+                  <div class="card" style="padding:0; margin-bottom:14px; overflow:hidden; border:1px solid var(--border-color);">
+                    <div style="padding:10px 14px; background:var(--bg-card); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.90rem; font-weight:700; color:var(--text-main);">🗺️ Incident MST Geographic Network Map</span>
+                        <span class="badge badge-blue" id="sim-map-mode-badge">Mode 1: Minimum Time</span>
+                        <span class="badge badge-green" id="sim-map-geom-badge">Genuine Road Geometry</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn btn-outline btn-sm" id="btn-fit-sim-map" onclick="App.fitSimMapBounds()" title="Zoom to fit all network facilities">
+                          ⛶ Fit Network Bounds
+                        </button>
+                      </div>
+                    </div>
+
+                    <div id="sim-map-wrapper">
+                      <div id="sim-mst-leaflet-map"></div>
+
+                      <!-- Floating Interactive Legend -->
+                      <div class="sim-map-legend">
+                        <div class="sim-legend-title">Network Legend</div>
+                        <div class="sim-legend-item">
+                          <span style="font-size:1rem;">🚨</span>
+                          <span>Incident Location</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-marker marker-node"></span>
+                          <span id="sim-legend-fac-label">Connected Facilities</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-line line-road"></span>
+                          <span>OSRM Road Route</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-line line-schematic"></span>
+                          <span>Schematic Fallback</span>
+                        </div>
+                      </div>
+
+                      <!-- Floating Edge / Facility Detail Tooltip Card -->
+                      <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                          <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected Link</span>
+                          <button class="btn-icon" style="padding:0; font-size:0.75rem;" onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
+                        </div>
+                        <div id="sim-tt-title" style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">Endpoint U ⟷ Endpoint V</div>
+                        <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Road Route: 3.2 km &bull; 4.5 min</div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="results-metrics-grid" style="margin-bottom:12px;">

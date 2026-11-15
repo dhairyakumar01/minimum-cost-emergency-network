@@ -1974,3 +1974,109 @@ body {
 .badge-reason-radius { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
 .badge-reason-snapping { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
 .badge-reason-null { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+/* Simulation Incident-Specific Geographic MST Network Map */
+#sim-map-wrapper {
+  position: relative;
+  height: 480px;
+  min-height: 420px;
+  width: 100%;
+  background: #f8fafc;
+}
+
+#sim-mst-leaflet-map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.sim-map-legend {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  pointer-events: auto;
+}
+
+.sim-legend-title {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sim-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+
+.sim-legend-line {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.sim-legend-line.line-road {
+  background: #2563eb;
+}
+
+.sim-legend-line.line-schematic {
+  background: #d97706;
+  border-top: 1px dashed #d97706;
+}
+
+.sim-legend-marker {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.sim-legend-marker.marker-node {
+  background: #dc2626;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+
+.incident-sim-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.5));
+  animation: pulse-pin 2s infinite ease-in-out;
+}
+
+@keyframes pulse-pin {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.sim-map-tooltip {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 8px 12px;
+  max-width: 280px;
+  z-index: 1000;
+}

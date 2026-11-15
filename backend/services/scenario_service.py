@@ -2,8 +2,10 @@
 Emergency Scenario Orchestrator and SQLite Persistence Service
 Manages end-to-end incident scenario execution, candidate filtering,
 road measurement collection, Prim/Kruskal optimization, LCA validation,
-dispatch ranking, MST network-position analysis, and algorithm tracing.
+dispatch ranking, MST network-position analysis, algorithm tracing,
+and OSRM road-route geometry retrieval for network map visualization.
 """
+import hashlib
 import json
 import math
 import sqlite3
@@ -26,6 +28,7 @@ from backend.services.graph_engine import (
 from backend.services.routing_service import (
     check_osrm_health,
     get_pairwise_measurements,
+    fetch_mst_edge_geometries,
     DEFAULT_MAX_SNAPPING_METERS,
 )
 
@@ -60,10 +63,31 @@ def get_scenario_db() -> sqlite3.Connection:
                 radius_km REAL NOT NULL,
                 optimization_mode TEXT NOT NULL,
                 k_param INTEGER NOT NULL,
-                result_json TEXT
+                result_json TEXT,
+                cache_key TEXT
             )
         """)
+        # Ensure cache_key column exists if table existed previously
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(scenarios)")
+        cols = [r[1] for r in cur.fetchall()]
+        if "cache_key" not in cols:
+            conn.execute("ALTER TABLE scenarios ADD COLUMN cache_key TEXT")
     return conn
+
+
+def compute_scenario_cache_key(
+    incident_lat: float,
+    incident_lon: float,
+    agency: str,
+    radius_km: float,
+    optimization_mode: str,
+    k_param: int
+) -> str:
+    """Generate deterministic provenance cache key based on incident parameters."""
+    norm_agency = normalize_agency(agency)
+    raw = f"{incident_lat:.5f}_{incident_lon:.5f}_{norm_agency}_{radius_km:.2f}_{optimization_mode}_{k_param}"
+    return hashlib.sha256(raw.encode()).hexdigest()
 
 
 def calculate_kendall_tau_b(ranks_x: List[int], ranks_y: List[int]) -> float:
@@ -183,17 +207,39 @@ def execute_scenario_pipeline(
     optimization_mode: str = "time",
     k_param: int = 5
 ) -> None:
-    """Synchronous or asynchronous execution of the full 8-stage pipeline."""
+    """Synchronous or asynchronous execution of the 9-stage pipeline with real-time provenance."""
     conn = get_scenario_db()
+    cache_key = compute_scenario_cache_key(incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param)
 
     def update_stage(idx: int, name: str, status: str = "RUNNING"):
         with conn:
             conn.execute(
-                "UPDATE scenarios SET stage_index=?, stage_name=?, status=? WHERE scenario_id=?",
-                (idx, name, status, scenario_id)
+                "UPDATE scenarios SET stage_index=?, stage_name=?, status=?, cache_key=? WHERE scenario_id=?",
+                (idx, name, status, cache_key, scenario_id)
             )
 
     try:
+        # Check Scenario Cache first (instant reuse for identical parameters)
+        cached_row = conn.execute(
+            """SELECT result_json, status FROM scenarios 
+               WHERE cache_key=? AND status IN ('COMPLETED', 'DISCONNECTED_FOREST', 'COMPLETED_WITH_WARNINGS') 
+               AND result_json IS NOT NULL AND scenario_id != ?
+               ORDER BY created_at DESC LIMIT 1""",
+            (cache_key, scenario_id)
+        ).fetchone()
+
+        if cached_row:
+            cached_res = json.loads(cached_row["result_json"])
+            cached_res["scenario_id"] = scenario_id
+            cached_res["cache_provenance"] = "CACHE_HIT"
+            cached_res["summary"]["from_cache"] = True
+            with conn:
+                conn.execute(
+                    "UPDATE scenarios SET status=?, stage_index=9, stage_name='Completed (Cached)', result_json=? WHERE scenario_id=?",
+                    (cached_row["status"], json.dumps(cached_res), scenario_id)
+                )
+            return
+
         # Stage 1: Validate Incident Location
         update_stage(1, "Validating Incident Coordinates & Boundary")
         if math.isnan(incident_lat) or math.isnan(incident_lon) or not (12.0 <= incident_lat <= 14.0) or not (77.0 <= incident_lon <= 78.5):
@@ -244,12 +290,12 @@ def execute_scenario_pipeline(
         if not eligible_candidates:
             raise ValueError(f"No eligible {norm_agency} facilities found within {radius_km:.1f} km radius. Try increasing search radius.")
 
-        # All eligible candidates within the radius are evaluated without arbitrary truncation
         graph_points = [incident_point] + eligible_candidates
         vertex_ids = [p["id"] for p in graph_points]
+        points_by_id = {p["id"]: p for p in graph_points}
 
         # Stage 3: Measuring Road Routes via OSRM
-        update_stage(3, "Measuring Road Routes via OSRM")
+        update_stage(3, f"Measuring Road Routes via OSRM ({len(graph_points)} nodes)")
         measurements_result = get_pairwise_measurements(graph_points)
 
         if measurements_result["status"] != "COMPLETED":
@@ -264,7 +310,7 @@ def execute_scenario_pipeline(
         symmetric_edges = measurements_result["symmetric_edges"]
 
         # Stage 4: Constructing Graph & Components
-        update_stage(4, "Constructing Undirected Symmetric Graph")
+        update_stage(4, f"Constructing Graph ({len(symmetric_edges)} edges)")
         time_edges = []
         dist_edges = []
         for e in symmetric_edges:
@@ -287,8 +333,6 @@ def execute_scenario_pipeline(
 
         # Stage 5: Running Graph Optimization
         update_stage(5, f"Optimizing Network ({optimization_mode.upper()} Mode)")
-        
-        # Calculate Pure Time MST & Pure Dist MST
         mst_time_res = kruskal_mst(vertex_ids, time_edges, track_trace=True)
         mst_dist_res = kruskal_mst(vertex_ids, dist_edges, track_trace=True)
         prim_time_res = prim_mst(vertex_ids, time_edges, start_vertex="incident_0", track_trace=True)
@@ -298,7 +342,6 @@ def execute_scenario_pipeline(
             selected_mst_res = mst_dist_res
         elif optimization_mode == "compromise":
             tradeoff = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
-            # Find the point matching k_param
             match_point = next((p for p in tradeoff["tradeoff_points"] if p["k"] == k_param), tradeoff["tradeoff_points"][5])
             selected_mst_res = {
                 "algorithm": "kruskal_compromise",
@@ -322,14 +365,14 @@ def execute_scenario_pipeline(
         optimality_cert = oracle.verify_cycle_property(eval_edges, active_edges)
 
         # Stage 7: Direct Dispatch Ranking (Independent of MST)
-        update_stage(7, "Ranking Emergency Dispatch Candidates")
+        update_stage(7, f"Ranking Dispatch Candidates ({len(eligible_candidates)} facilities)")
         fuel_rate = ASSUMED_FUEL_RATES.get(norm_agency, 12.50)
         dispatch_rows = []
 
         for fac in eligible_candidates:
             f_id = fac["id"]
             direct_data = directed_measurements.get((f_id, "incident_0"))
-            
+
             if direct_data:
                 dur_ds = direct_data["duration_ds"]
                 dist_dm = direct_data["distance_dm"]
@@ -337,7 +380,7 @@ def execute_scenario_pipeline(
                 dist_km = round(dist_dm / 10000.0, 3)
                 detour = round(dist_km / fac["haversine_km"], 2) if fac["haversine_km"] > 0 else 1.0
                 est_fuel = round(dist_km * fuel_rate, 2)
-                
+
                 dispatch_rows.append({
                     "facility_id": f_id,
                     "facility_name": fac["facility_name"],
@@ -362,36 +405,35 @@ def execute_scenario_pipeline(
                     "haversine_km": fac["haversine_km"],
                 })
 
-        # Sort dispatch rows strictly by (travel_time_ds, road_distance_dm, facility_id)
         dispatch_rows.sort(key=lambda r: (r["travel_time_ds"], r["road_distance_dm"], r["facility_id"]))
         for rank_idx, row in enumerate(dispatch_rows, start=1):
             row["rank"] = rank_idx
 
-        # Stage 8: MST Network Position & Kendall Tau
-        update_stage(8, "Analyzing Network Topology & Saving Scenario")
+        # Stage 8: Retrieving Road-Route Geometries for Network Map
+        update_stage(8, f"Retrieving Road-Route Geometries ({len(active_edges)} links)")
+        active_edges_with_geom = fetch_mst_edge_geometries(active_edges, points_by_id)
+        road_geom_count = sum(1 for e in active_edges_with_geom if e.get("is_road_route"))
+
+        # Stage 9: Finalizing Network Results & Analysis
+        update_stage(9, "Finalizing Network Results & Analysis")
         net_pos = extract_tree_paths_and_stretch(
             "incident_0",
             vertex_ids,
-            active_edges,
+            active_edges_with_geom,
             directed_measurements
         )
 
-        # Calculate Kendall tau-b between dispatch ranking and tree hops
         common_facs = [r["facility_id"] for r in dispatch_rows]
         dispatch_ranks = [r["rank"] for r in dispatch_rows]
         telemetry_by_id = {t["facility_id"]: t for t in net_pos["node_telemetry"]}
         tree_hops = [telemetry_by_id.get(f_id, {}).get("hops", 999) or 999 for f_id in common_facs]
         kendall_tau = calculate_kendall_tau_b(dispatch_ranks, tree_hops)
-
-        # Check pure compromise sweep
         tradeoff_summary = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
 
-        # Disconnected Forest and Component Telemetry
         num_comps = selected_mst_res["num_components"]
         comps_dict = selected_mst_res["components"]
         is_forest = (num_comps > 1)
-        
-        # Identify incident-connected component vs unreachable facilities
+
         incident_comp_key = None
         for c_key, members in comps_dict.items():
             if "incident_0" in members:
@@ -400,8 +442,7 @@ def execute_scenario_pipeline(
         incident_connected_members = comps_dict.get(incident_comp_key, ["incident_0"]) if incident_comp_key else []
         unreachable_facs = [vid for vid in vertex_ids if vid != "incident_0" and vid not in incident_connected_members]
 
-        # Determine strict status and network type
-        if len(active_edges) == 0:
+        if len(active_edges_with_geom) == 0:
             final_status = "ZERO_USABLE_EDGES"
             net_type = "Disconnected Graph (0 Usable Edges)"
             is_forest = True
@@ -415,11 +456,11 @@ def execute_scenario_pipeline(
             final_status = "COMPLETED_WITH_WARNINGS"
             net_type = "Spanning Tree (Suboptimal / Warnings)"
 
-        # Assemble Full Scenario Payload
         scenario_result = {
             "scenario_id": scenario_id,
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             "status": final_status,
+            "cache_provenance": "FRESH_COMPUTATION",
             "incident": {
                 "latitude": incident_lat,
                 "longitude": incident_lon,
@@ -436,7 +477,9 @@ def execute_scenario_pipeline(
                 "total_candidates_in_radius": len(eligible_candidates),
                 "graph_vertices_count": len(vertex_ids),
                 "evaluated_chords_count": optimality_cert["chords_tested"],
-                "tree_edge_count": len(active_edges),
+                "tree_edge_count": len(active_edges_with_geom),
+                "road_geometries_count": road_geom_count,
+                "has_road_geometries": (road_geom_count > 0),
                 "is_connected": not is_forest,
                 "num_components": num_comps,
                 "is_forest": is_forest,
@@ -444,19 +487,23 @@ def execute_scenario_pipeline(
                 "incident_connected_count": len(incident_connected_members) - 1,
                 "unreachable_facilities_count": len(unreachable_facs),
                 "kendall_tau_b": kendall_tau,
+                "from_cache": False,
             },
             "dispatch_ranking": dispatch_rows,
             "network_mst": {
                 "algorithm": selected_mst_res["algorithm"],
                 "network_type": net_type,
                 "is_forest": is_forest,
-                "edges": active_edges,
+                "edges": active_edges_with_geom,
                 "total_integer_weight": selected_mst_res["total_integer_weight"],
                 "num_components": num_comps,
                 "components": comps_dict,
                 "incident_component_key": incident_comp_key,
                 "incident_connected_members": incident_connected_members,
                 "unreachable_facilities": unreachable_facs,
+                "road_geometries_count": road_geom_count,
+                "total_tree_edges": len(active_edges_with_geom),
+                "has_road_geometries": (road_geom_count > 0),
             },
             "validation": {
                 "structural": struct_val,
@@ -477,8 +524,8 @@ def execute_scenario_pipeline(
 
         with conn:
             conn.execute(
-                "UPDATE scenarios SET status=?, stage_index=8, stage_name='Completed', result_json=? WHERE scenario_id=?",
-                (scenario_result["status"], json.dumps(scenario_result), scenario_id)
+                "UPDATE scenarios SET status=?, stage_index=9, stage_name='Completed', result_json=?, cache_key=? WHERE scenario_id=?",
+                (scenario_result["status"], json.dumps(scenario_result), cache_key, scenario_id)
             )
 
     except Exception as e:
@@ -505,13 +552,14 @@ def create_and_run_scenario(
 ) -> str:
     """Creates a new scenario in SQLite and triggers execution pipeline."""
     scenario_id = str(uuid.uuid4())
+    cache_key = compute_scenario_cache_key(incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param)
     conn = get_scenario_db()
     with conn:
         conn.execute("""
             INSERT INTO scenarios 
-            (scenario_id, created_at, status, stage_index, stage_name, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param)
-            VALUES (?, datetime('now'), 'PENDING', 0, 'Initializing Scenario', ?, ?, ?, ?, ?, ?, ?)
-        """, (scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param))
+            (scenario_id, created_at, status, stage_index, stage_name, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key)
+            VALUES (?, datetime('now'), 'PENDING', 0, 'Initializing Scenario', ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key))
     conn.close()
 
     if async_mode:
@@ -559,4 +607,3 @@ def list_recent_scenarios(limit: int = 20) -> List[Dict[str, Any]]:
     rows = conn.execute("SELECT scenario_id, created_at, status, incident_label, agency, radius_km, optimization_mode FROM scenarios ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
-
