@@ -837,6 +837,20 @@
       if (facMap) facMap.setView([lat, lon], 14);
     },
 
+    getCategoryLabel(catKey) {
+      const labels = {
+        medical: "Medical Emergency",
+        fire: "Fire Emergency",
+        police: "Public Safety",
+        traffic: "Road Accident",
+        "Medical Emergency": "Medical Emergency",
+        "Fire Emergency": "Fire Emergency",
+        "Public Safety": "Public Safety",
+        "Road Accident": "Road Accident",
+      };
+      return labels[catKey] || "Medical Emergency";
+    },
+
     selectCategory(catKey) {
       State.simCategory = catKey;
       document.querySelectorAll(".category-card").forEach((card) => {
@@ -846,15 +860,7 @@
           card.classList.remove("active");
         }
       });
-
-      // Recommend agency
-      if (catKey === "medical" || catKey === "traffic") {
-        this.selectAgency("hospital");
-      } else if (catKey === "fire") {
-        this.selectAgency("fire_station");
-      } else if (catKey === "police") {
-        this.selectAgency("police_station");
-      }
+      setText("sum-category", this.getCategoryLabel(catKey));
     },
 
     selectAgency(agencyKey) {
@@ -1022,6 +1028,7 @@
         incident_lat: State.incident.lat,
         incident_lon: State.incident.lon,
         incident_label: State.incident.label || "Incident Origin",
+        incident_category: this.getCategoryLabel(State.simCategory),
         agency: backendAgency,
         radius_km: State.simRadiusKm || 5.0,
         optimization_mode: State.simMode || "time",

@@ -73,7 +73,19 @@ def get_scenario_db() -> sqlite3.Connection:
         cols = [r[1] for r in cur.fetchall()]
         if "cache_key" not in cols:
             conn.execute("ALTER TABLE scenarios ADD COLUMN cache_key TEXT")
+        if "incident_category" not in cols:
+            conn.execute("ALTER TABLE scenarios ADD COLUMN incident_category TEXT DEFAULT 'Medical Emergency'")
     return conn
+
+
+def clear_scenario_cache() -> int:
+    """Explicitly invalidate and clear all cached scenario records."""
+    conn = get_scenario_db()
+    with conn:
+        cur = conn.execute("DELETE FROM scenarios")
+        deleted = cur.rowcount
+    conn.close()
+    return deleted
 
 
 def compute_scenario_cache_key(
@@ -82,11 +94,25 @@ def compute_scenario_cache_key(
     agency: str,
     radius_km: float,
     optimization_mode: str,
-    k_param: int
+    k_param: int,
+    incident_category: str = "Medical Emergency",
+    dataset_sha256: Optional[str] = None,
+    routing_profile: str = "car",
+    model_version: str = "v2.1",
 ) -> str:
-    """Generate deterministic provenance cache key based on incident parameters."""
+    """Generate deterministic provenance cache key based on all computation-relevant inputs."""
     norm_agency = normalize_agency(agency)
-    raw = f"{incident_lat:.5f}_{incident_lon:.5f}_{norm_agency}_{radius_km:.2f}_{optimization_mode}_{k_param}"
+    if dataset_sha256 is None:
+        try:
+            from backend.services.data_service import data_service
+            dataset_sha256 = data_service.dataset_sha256 or "canonical_bbmp"
+        except Exception:
+            dataset_sha256 = "canonical_bbmp"
+    raw = (
+        f"{incident_lat:.5f}_{incident_lon:.5f}_{norm_agency}_{radius_km:.2f}_"
+        f"{optimization_mode}_{k_param}_{incident_category}_{dataset_sha256}_"
+        f"{routing_profile}_{model_version}"
+    )
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
@@ -205,40 +231,45 @@ def execute_scenario_pipeline(
     agency: str,
     radius_km: float,
     optimization_mode: str = "time",
-    k_param: int = 5
+    k_param: int = 5,
+    incident_category: str = "Medical Emergency",
+    bypass_cache: bool = False
 ) -> None:
     """Synchronous or asynchronous execution of the 9-stage pipeline with real-time provenance."""
     conn = get_scenario_db()
-    cache_key = compute_scenario_cache_key(incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param)
+    cache_key = compute_scenario_cache_key(
+        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category
+    )
 
     def update_stage(idx: int, name: str, status: str = "RUNNING"):
         with conn:
             conn.execute(
-                "UPDATE scenarios SET stage_index=?, stage_name=?, status=?, cache_key=? WHERE scenario_id=?",
-                (idx, name, status, cache_key, scenario_id)
+                "UPDATE scenarios SET stage_index=?, stage_name=?, status=?, cache_key=?, incident_category=? WHERE scenario_id=?",
+                (idx, name, status, cache_key, incident_category, scenario_id)
             )
 
     try:
-        # Check Scenario Cache first (instant reuse for identical parameters)
-        cached_row = conn.execute(
-            """SELECT result_json, status FROM scenarios 
-               WHERE cache_key=? AND status IN ('COMPLETED', 'DISCONNECTED_FOREST', 'COMPLETED_WITH_WARNINGS') 
-               AND result_json IS NOT NULL AND scenario_id != ?
-               ORDER BY created_at DESC LIMIT 1""",
-            (cache_key, scenario_id)
-        ).fetchone()
+        # Check Scenario Cache first (instant reuse for identical parameters, unless bypass_cache=True)
+        if not bypass_cache:
+            cached_row = conn.execute(
+                """SELECT result_json, status FROM scenarios 
+                   WHERE cache_key=? AND status IN ('COMPLETED', 'DISCONNECTED_FOREST', 'COMPLETED_WITH_WARNINGS') 
+                   AND result_json IS NOT NULL AND scenario_id != ?
+                   ORDER BY created_at DESC LIMIT 1""",
+                (cache_key, scenario_id)
+            ).fetchone()
 
-        if cached_row:
-            cached_res = json.loads(cached_row["result_json"])
-            cached_res["scenario_id"] = scenario_id
-            cached_res["cache_provenance"] = "CACHE_HIT"
-            cached_res["summary"]["from_cache"] = True
-            with conn:
-                conn.execute(
-                    "UPDATE scenarios SET status=?, stage_index=9, stage_name='Completed (Cached)', result_json=? WHERE scenario_id=?",
-                    (cached_row["status"], json.dumps(cached_res), scenario_id)
-                )
-            return
+            if cached_row:
+                cached_res = json.loads(cached_row["result_json"])
+                cached_res["scenario_id"] = scenario_id
+                cached_res["cache_provenance"] = "CACHE_HIT"
+                cached_res["summary"]["from_cache"] = True
+                with conn:
+                    conn.execute(
+                        "UPDATE scenarios SET status=?, stage_index=9, stage_name='Completed (Cached)', result_json=?, incident_category=? WHERE scenario_id=?",
+                        (cached_row["status"], json.dumps(cached_res), incident_category, scenario_id)
+                    )
+                return
 
         # Stage 1: Validate Incident Location
         update_stage(1, "Validating Incident Coordinates & Boundary")
@@ -468,6 +499,7 @@ def execute_scenario_pipeline(
             },
             "parameters": {
                 "agency": norm_agency,
+                "incident_category": incident_category,
                 "radius_km": radius_km,
                 "optimization_mode": optimization_mode,
                 "k_param": k_param,
@@ -548,30 +580,34 @@ def create_and_run_scenario(
     radius_km: float,
     optimization_mode: str = "time",
     k_param: int = 5,
-    async_mode: bool = True
+    async_mode: bool = True,
+    incident_category: str = "Medical Emergency",
+    bypass_cache: bool = False,
 ) -> str:
     """Creates a new scenario in SQLite and triggers execution pipeline."""
     scenario_id = str(uuid.uuid4())
-    cache_key = compute_scenario_cache_key(incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param)
+    cache_key = compute_scenario_cache_key(
+        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category
+    )
     conn = get_scenario_db()
     with conn:
         conn.execute("""
             INSERT INTO scenarios 
-            (scenario_id, created_at, status, stage_index, stage_name, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key)
-            VALUES (?, datetime('now'), 'PENDING', 0, 'Initializing Scenario', ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key))
+            (scenario_id, created_at, status, stage_index, stage_name, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key, incident_category)
+            VALUES (?, datetime('now'), 'PENDING', 0, 'Initializing Scenario', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, cache_key, incident_category))
     conn.close()
 
     if async_mode:
         t = threading.Thread(
             target=execute_scenario_pipeline,
-            args=(scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param),
+            args=(scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache),
             daemon=True
         )
         t.start()
     else:
         execute_scenario_pipeline(
-            scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param
+            scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache
         )
 
     return scenario_id

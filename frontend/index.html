@@ -76,7 +76,7 @@
           <span class="status-indicator"></span>
           <span>System Operational</span>
         </div>
-        <div>1,255 Verified Facilities &bull; <i>K</i>₁₂₅₅</div>
+        <div>1,255 Registered Facilities &bull; <i>K</i>₁₂₅₅</div>
         <div style="margin-top:2px; font-size:0.70rem; color:var(--text-light);">BBMP Municipal Corporation</div>
       </div>
     </aside>
@@ -138,7 +138,7 @@
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Verified BBMP registry nodes</div>
+              <div class="metric-subtext">Geocoded municipal facility records</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🏢</span> Facility Composition</div>
@@ -152,12 +152,12 @@
             <div class="metric-card">
               <div class="metric-label"><span>🔗</span> Global MST Links</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
-              <div class="metric-subtext">Cayley invariant (|V| - 1)</div>
+              <div class="metric-subtext">Tree edge-count property (|V| − 1 for connected tree)</div>
             </div>
             <div class="metric-card highlight-card">
               <div class="metric-label"><span>📏</span> Global Network Length</div>
               <div class="metric-value" id="metric-mst-length">480.1784 km</div>
-              <div class="metric-subtext">Optimal Euclidean spanning tree</div>
+              <div class="metric-subtext">Optimal Haversine-distance spanning tree</div>
             </div>
           </div>
 
@@ -673,6 +673,10 @@
                       <span class="sum-val" id="sum-incident">Majestic (12.9781°N, 77.5696°E)</span>
                     </div>
                     <div class="summary-item">
+                      <span class="sum-lbl">Incident Category:</span>
+                      <span class="sum-val" id="sum-category">Medical Emergency</span>
+                    </div>
+                    <div class="summary-item">
                       <span class="sum-lbl">Agency Fleet:</span>
                       <span class="sum-val" id="sum-agency">Healthcare & Ambulance</span>
                     </div>
@@ -1014,7 +1018,7 @@
                         <td><strong>Spanning Edges (|E_T|)</strong></td>
                         <td>1,254</td>
                         <td>1,254</td>
-                        <td><span class="badge badge-green">Cayley Invariant</span></td>
+                        <td><span class="badge badge-green">Tree Edge Property (|V| − 1)</span></td>
                       </tr>
                       <tr>
                         <td><strong>Total Tree Length</strong></td>
@@ -1167,7 +1171,7 @@
                     <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 = 786,885 edges).</li>
                     <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius <i>R</i> = 6,371.0088 km.</li>
                   </ul>
-                  <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is an acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| - 1 = 1,254 edges such that total weight &sum; <i>w</i>(<i>e</i>) is minimized.</p>
+                  <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is a connected acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| − 1 = 1,254 edges (satisfying the fundamental tree edge-count property: any connected tree on <i>V</i> vertices contains exactly <i>V</i> − 1 edges) such that total weight &sum; <i>w</i>(<i>e</i>) is minimized using spherical Haversine geodesic distance.</p>
                 </div>
               </details>
 

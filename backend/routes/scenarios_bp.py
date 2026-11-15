@@ -14,6 +14,7 @@ from backend.services.scenario_service import (
     get_scenario_status,
     get_scenario_result,
     list_recent_scenarios,
+    clear_scenario_cache,
     ASSUMED_FUEL_RATES,
 )
 from backend.services.routing_service import check_osrm_health
@@ -114,6 +115,8 @@ def create_scenario():
 
     label = str(data.get("incident_label") or "Custom Incident Origin")
     agency = str(data.get("agency") or "hospital_clinic")
+    incident_category = str(data.get("incident_category") or data.get("category") or "Medical Emergency")
+    bypass_cache = bool(data.get("bypass_cache") or data.get("force_refresh") or False)
     
     try:
         radius_km = float(data.get("radius_km", 5.0))
@@ -138,7 +141,9 @@ def create_scenario():
         radius_km=radius_km,
         optimization_mode=opt_mode,
         k_param=k_param,
-        async_mode=True
+        async_mode=True,
+        incident_category=incident_category,
+        bypass_cache=bypass_cache
     )
 
     return jsonify({
@@ -149,6 +154,16 @@ def create_scenario():
             "message": "Scenario initialized and running in execution pipeline.",
         }
     }), 202
+
+
+@scenarios_bp.route("/scenarios/cache/clear", methods=["POST"])
+def clear_cache_endpoint():
+    """Explicitly invalidate and purge the scenario provenance cache."""
+    deleted_count = clear_scenario_cache()
+    return jsonify({
+        "success": True,
+        "message": f"Successfully cleared {deleted_count} cached scenario records."
+    }), 200
 
 
 @scenarios_bp.route("/scenarios", methods=["GET"])

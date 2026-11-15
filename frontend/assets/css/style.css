@@ -2142,8 +2142,9 @@ body {
 }
 
 .sim-legend-line.line-schematic {
-  background: #d97706;
-  border-top: 1px dashed #d97706;
+  background: transparent;
+  border-top: 2px dashed #d97706;
+  height: 0px;
 }
 
 .sim-legend-marker {

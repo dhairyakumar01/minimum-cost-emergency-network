@@ -37,9 +37,19 @@ SCENARIOS = {
         "supporting_types": ["police_station", "fire_station"],
         "description": "Vehicular collision requiring primary trauma care, supported by traffic police and fire extrication rescue.",
     },
+    "Public Safety": {
+        "primary_type": "police_station",
+        "supporting_types": ["hospital", "fire_station"],
+        "description": "Law enforcement and public safety incident requiring primary police intervention, supported by emergency medical triage.",
+    },
 }
-# Backward-compatibility alias for test suite
+# Backward-compatibility and UI aliases
 SCENARIOS["Fire"] = SCENARIOS["Fire Emergency"]
+SCENARIOS["Police"] = SCENARIOS["Public Safety"]
+SCENARIOS["Traffic"] = SCENARIOS["Road Accident"]
+SCENARIOS["Road Traffic Accident"] = SCENARIOS["Road Accident"]
+SCENARIOS["Structural Fire / HazMat"] = SCENARIOS["Fire Emergency"]
+SCENARIOS["Public Safety / Crime"] = SCENARIOS["Public Safety"]
 
 
 def find_nearest_facilities(incident_lat: float, incident_lon: float, facilities: pd.DataFrame) -> dict:

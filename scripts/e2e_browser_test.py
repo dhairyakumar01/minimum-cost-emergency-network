@@ -65,6 +65,17 @@ def run_tests():
         assert mst_conn == "1,254"
         assert "480.1784" in mst_len
 
+        # Mathematical terminology verification
+        mst_conn_card = page.locator(".metric-card:has(#metric-mst-connections)").text_content()
+        assert "Tree edge-count property" in mst_conn_card
+        assert "Cayley" not in mst_conn_card
+        mst_len_card = page.locator(".metric-card:has(#metric-mst-length)").text_content()
+        assert "Haversine-distance" in mst_len_card
+        assert "Euclidean" not in mst_len_card
+        tot_fac_card = page.locator(".metric-card:has(#metric-total-facilities)").text_content()
+        assert "Geocoded municipal facility records" in tot_fac_card
+        print("[+] Mathematical terminology verified (Tree edge-count property, Haversine-distance).")
+
         page.wait_for_timeout(1000)
         page.screenshot(path=str(SCREENSHOTS_DIR / "01_dashboard_desktop.png"), full_page=False)
         print("[+] Captured 01_dashboard_desktop.png")
@@ -94,6 +105,21 @@ def run_tests():
         page.wait_for_selector("#section-simulation", state="visible")
         page.wait_for_timeout(500)
 
+        # Category and Agency separation test
+        page.click(".category-card[data-category='fire']")
+        page.wait_for_timeout(300)
+        cat_text = page.text_content("#sum-category")
+        agency_text = page.text_content("#sum-agency")
+        assert "Fire Emergency" in cat_text
+        # Ensure agency is NOT silently mutated to fire
+        assert "Healthcare" in agency_text
+        print("[+] Category and Agency independence verified: Category selection does not overwrite agency.")
+
+        # Re-select Medical Emergency and Healthcare
+        page.click(".category-card[data-category='medical']")
+        page.click("#sim-agency-hospital")
+        page.wait_for_timeout(300)
+
         # Select Majestic landmark pill inside simulation step 1
         page.click("#sim-step-1 button.landmark-pill:has-text('Majestic')")
         page.wait_for_timeout(500)
@@ -116,6 +142,12 @@ def run_tests():
         page.click("#btn-tab-network")
         page.wait_for_selector("#tab-content-network", state="visible")
         page.wait_for_timeout(1500)
+
+        # Verify legend elements
+        assert page.is_visible(".sim-legend-line.line-road")
+        assert page.is_visible(".sim-legend-line.line-schematic")
+        print("[+] Legend elements verified: OSRM road line and schematic fallback.")
+
         page.screenshot(path=str(SCREENSHOTS_DIR / "04b_simulation_mst_map_desktop.png"), full_page=False)
         print("[+] Captured 04b_simulation_mst_map_desktop.png")
 
@@ -166,6 +198,13 @@ def run_tests():
         page.wait_for_timeout(800)
         page.screenshot(path=str(SCREENSHOTS_DIR / "09_simulation_mobile.png"), full_page=False)
         print("[+] Captured 09_simulation_mobile.png")
+
+        # Step 10: Explicit Cache Purge Verification
+        print("[*] Testing Cache Invalidation Endpoint...")
+        clear_res = page.request.post(f"{BASE_URL}/api/scenarios/cache/clear")
+        assert clear_res.status == 200
+        assert clear_res.json()["success"] is True
+        print(f"[+] Cache clear endpoint verified: {clear_res.json()['message']}")
 
         browser.close()
         print("[✓] All E2E browser tests and screenshots completed successfully!")
