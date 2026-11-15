@@ -307,9 +307,9 @@ def get_methodology_manifest():
                 "road_duration": "deciseconds (1s = 10 ds)",
                 "road_distance": "decimetres (1m = 10 dm)",
             },
-            "fuel_price_benchmark_inr_l": 88.94,
+            "fuel_cost_model": "Fixed Project Assumptions",
             "fuel_rates_per_km": ASSUMED_FUEL_RATES,
-            "statutory_reference": "Government of Karnataka Notification No. FD 31 CSL 2024",
+            "fuel_cost_formula": "Fuel Estimate = Agency Fuel Rate (INR/km) * Direct Road Distance (km)",
             "routing_engine": osrm_status,
             "optimization_modes": [
                 {"mode": "time", "formula": "min sum(S_T)", "description": "Minimizes total estimated road travel duration."},

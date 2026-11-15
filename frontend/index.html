@@ -244,13 +244,13 @@
                 <div class="status-left">
                   <span>⛽</span>
                   <div>
-                    <div>Fleet Fuel Rate Benchmark</div>
+                    <div>Fleet Fuel Rate Assumptions</div>
                     <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
-                      Karnataka Gazette FD 31 CSL 2024 diesel benchmark (₹88.94/L).
+                      Fixed project parameters: Ambulance ₹12.50/km, Police ₹6.25/km, Fire ₹18.00/km.
                     </div>
                   </div>
                 </div>
-                <span class="badge badge-green">₹88.94 / L</span>
+                <span class="badge badge-blue">Project Assumptions</span>
               </div>
             </div>
           </div>
@@ -1051,34 +1051,32 @@
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Objective Mode</th>
-                        <th>Objective Metric</th>
-                        <th>Fleet Rate Model</th>
+                        <th>Optimization Mode</th>
+                        <th>Objective Formulation</th>
+                        <th>Operational Interpretation</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td><strong>Minimum Time</strong></td>
-                        <td>Traversed road duration (<i>T<sub>ij</sub></i>)</td>
-                        <td>OSRM free-flow speed limits</td>
+                        <td><strong>Mode 1: Minimum Time</strong></td>
+                        <td><i>S<sub>T</sub></i> = &frac12; (<i>T<sub>uv</sub></i> + <i>T<sub>vu</sub></i>)</td>
+                        <td>Minimizes symmetric round-trip travel duration along fastest road routes.</td>
                       </tr>
                       <tr>
-                        <td><strong>Minimum Distance</strong></td>
-                        <td>Traversed road distance (<i>D<sub>ij</sub></i>)</td>
-                        <td>Bangalore arterial street network</td>
+                        <td><strong>Mode 2: Minimum Distance</strong></td>
+                        <td><i>S<sub>D</sub></i> = &frac12; (<i>D<sub>uv</sub></i> + <i>D<sub>vu</sub></i>)</td>
+                        <td>Minimizes physical road traversal distance along fastest road profiles.</td>
                       </tr>
                       <tr>
-                        <td><strong>Minimum Cost</strong></td>
-                        <td>Vehicle fuel cost (<i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>)</td>
-                        <td>Karnataka Gazette ₹88.94/L benchmark</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Balanced</strong></td>
-                        <td>0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup></td>
-                        <td>Equivalent to distance under constant rate</td>
+                        <td><strong>Mode 3: Compromise</strong></td>
+                        <td><i>N<sub>e</sub></i> = <i>k S<sub>T</sub> D*</i> + (10 - <i>k</i>) <i>S<sub>D</sub> T*</i></td>
+                        <td>Supported bi-objective trade-off balancing response speed and travel mileage.</td>
                       </tr>
                     </tbody>
                   </table>
+                  <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+                    ℹ️ <em>Cost Isomorphism: Under fixed per-km fuel rate assumptions (₹12.50, ₹6.25, ₹18.00/km), vehicle fuel cost (<i>C = D &times; R<sub>a</sub></i>) is strictly linear with distance, making independent cost optimization topologically identical to Mode 2.</em>
+                  </div>
                 </div>
               </div>
 
@@ -1209,41 +1207,42 @@
               </div>
             </details>
 
-            <!-- Accordion 6: Balanced Optimization Equivalence Proof -->
+            <!-- Accordion 6: Three Discrete Modes & Cost-Distance Isomorphism -->
             <details class="method-accordion">
               <summary>
                 <div class="summary-title-wrap">
                   <span class="summary-num">6</span>
-                  <span>Four Optimization Modes & Balanced Equivalence Theorem</span>
+                  <span>Three Discrete Optimization Modes & Cost-Distance Isomorphism</span>
                 </div>
                 <span class="summary-indicator">▼</span>
               </summary>
               <div class="method-content">
-                <p>In single-agency emergency dispatch, fuel transit cost is strictly modeled as <i>C<sub>ij</sub></i> = <i>D<sub>ij</sub></i> &times; <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate.</p>
-                <p><strong>Equivalence Theorem:</strong> Because <i>R<sub>a</sub></i> is an invariant scalar across candidates in any single-agency run, min-max normalization yields identical values for normalized distance and cost:</p>
+                <p>The network backbone supports three discrete optimization modes: <strong>Mode 1 (Minimum Time <i>S<sub>T</sub></i>)</strong>, <strong>Mode 2 (Minimum Road Distance <i>S<sub>D</sub></i>)</strong>, and <strong>Mode 3 (Supported Compromise <i>N<sub>e</sub></i>)</strong>.</p>
+                <p><strong>Cost-Distance Isomorphism Theorem:</strong> In any single-agency emergency dispatch run, vehicle operating fuel cost is modeled strictly as <i>C<sub>uv</sub></i> = <i>D<sub>uv</sub></i> &times; <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate parameter.</p>
                 <div class="math-callout">
-                  <i>C</i><sup>norm</sup> &equiv; <i>D</i><sup>norm</sup> &implies; <i>W</i><sup>balanced</sup> = 0.50 <i>T</i><sup>norm</sup> + 0.25 <i>D</i><sup>norm</sup> + 0.25 <i>C</i><sup>norm</sup> = <strong>0.50 <i>T</i><sup>norm</sup> + 0.50 <i>D</i><sup>norm</sup></strong>
+                  <i>C<sub>uv</sub></i> &prop; <i>D<sub>uv</sub></i> &implies; argmin &sum; <i>C<sub>uv</sub></i> &equiv; argmin &sum; <i>D<sub>uv</sub></i>
                 </div>
-                <p>This formal reduction proves that Minimum Cost and Minimum Distance produce identical facility rankings under fixed-rate dispatch.</p>
+                <p>Because multiplying all edge weights by an invariant positive scalar <i>R<sub>a</sub></i> preserves pairwise edge-weight orderings, an independent minimum fuel-cost objective generates the exact same minimum spanning tree as Mode 2. Hence, fuel cost is evaluated as a metric rather than a separate optimization mode.</p>
               </div>
             </details>
 
-            <!-- Accordion 7: Statutory Fuel Rate Framework -->
+            <!-- Accordion 7: Project Fuel-Cost Parameter Framework -->
             <details class="method-accordion">
               <summary>
                 <div class="summary-title-wrap">
                   <span class="summary-num">7</span>
-                  <span>Statutory Fuel Rate Framework (Karnataka Gazette FD 31 CSL 2024)</span>
+                  <span>Project Fuel-Cost Parameter Framework</span>
                 </div>
                 <span class="summary-indicator">▼</span>
               </summary>
               <div class="method-content">
-                <p>Vehicle operating costs are calibrated to the Government of Karnataka retail diesel benchmark of ₹88.94/L:</p>
+                <p>Estimated fuel expenditures in dispatch rankings are calculated using fixed project parameter assumptions:</p>
                 <ul style="padding-left:20px; margin:8px 0;">
-                  <li><strong>Ambulance Fleet:</strong> Force Traveller / Tata Winger (7.11 km/L) &bull; <strong>₹12.50 / km</strong></li>
-                  <li><strong>Police Patrol:</strong> Mahindra Bolero Diesel (14.23 km/L) &bull; <strong>₹6.25 / km</strong></li>
-                  <li><strong>Fire Engine:</strong> Heavy Water Tender Appliance (4.94 km/L) &bull; <strong>₹18.00 / km</strong></li>
+                  <li><strong>Ambulance / Healthcare:</strong> Fixed project parameter &bull; <strong>₹12.50 / km</strong></li>
+                  <li><strong>Police Patrol:</strong> Fixed project parameter &bull; <strong>₹6.25 / km</strong></li>
+                  <li><strong>Fire & Rescue Engine:</strong> Fixed project parameter &bull; <strong>₹18.00 / km</strong></li>
                 </ul>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;"><em>Disclaimer: These are illustrative project assumptions used strictly for dispatch cost estimation (Fuel Estimate = Direct Distance × Rate) and are not live retail fuel prices or verified departmental operating allocations.</em></p>
               </div>
             </details>
 

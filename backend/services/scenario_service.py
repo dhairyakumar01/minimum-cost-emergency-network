@@ -350,7 +350,7 @@ def execute_scenario_pipeline(
                     "detour_ratio": detour,
                     "fuel_cost_est_inr": est_fuel,
                     "fuel_rate_inr_km": fuel_rate,
-                    "fuel_model_label": f"Estimated fuel (assumed rate ₹{fuel_rate:.2f}/km × road distance)",
+                    "fuel_model_label": f"Estimated Fuel Cost — Based on Project Assumptions (₹{fuel_rate:.2f}/km × road distance)",
                     "snapping_status": "VALID",
                 })
             else:
@@ -400,11 +400,26 @@ def execute_scenario_pipeline(
         incident_connected_members = comps_dict.get(incident_comp_key, ["incident_0"]) if incident_comp_key else []
         unreachable_facs = [vid for vid in vertex_ids if vid != "incident_0" and vid not in incident_connected_members]
 
+        # Determine strict status and network type
+        if len(active_edges) == 0:
+            final_status = "ZERO_USABLE_EDGES"
+            net_type = "Disconnected Graph (0 Usable Edges)"
+            is_forest = True
+        elif is_forest:
+            final_status = "DISCONNECTED_FOREST"
+            net_type = "Minimum Spanning Forest (MSF)"
+        elif struct_val["is_valid_tree"] and optimality_cert["is_optimal"]:
+            final_status = "COMPLETED"
+            net_type = "Minimum Spanning Tree (MST)"
+        else:
+            final_status = "COMPLETED_WITH_WARNINGS"
+            net_type = "Spanning Tree (Suboptimal / Warnings)"
+
         # Assemble Full Scenario Payload
         scenario_result = {
             "scenario_id": scenario_id,
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "status": "COMPLETED" if struct_val["is_valid_tree"] and optimality_cert["is_optimal"] else "COMPLETED_WITH_WARNINGS",
+            "status": final_status,
             "incident": {
                 "latitude": incident_lat,
                 "longitude": incident_lon,
@@ -425,7 +440,7 @@ def execute_scenario_pipeline(
                 "is_connected": not is_forest,
                 "num_components": num_comps,
                 "is_forest": is_forest,
-                "network_type": "Minimum Spanning Forest (MSF)" if is_forest else "Minimum Spanning Tree (MST)",
+                "network_type": net_type,
                 "incident_connected_count": len(incident_connected_members) - 1,
                 "unreachable_facilities_count": len(unreachable_facs),
                 "kendall_tau_b": kendall_tau,
@@ -433,7 +448,7 @@ def execute_scenario_pipeline(
             "dispatch_ranking": dispatch_rows,
             "network_mst": {
                 "algorithm": selected_mst_res["algorithm"],
-                "network_type": "Minimum Spanning Forest (MSF)" if is_forest else "Minimum Spanning Tree (MST)",
+                "network_type": net_type,
                 "is_forest": is_forest,
                 "edges": active_edges,
                 "total_integer_weight": selected_mst_res["total_integer_weight"],

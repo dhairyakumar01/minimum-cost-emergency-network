@@ -111,7 +111,9 @@ def test_adv_6_disconnected_graph():
     struct = validate_mst_structural(vertices, res_k["mst_edges"])
     assert struct["num_components"] == 2
     assert struct["expected_edge_count"] == 2
-    assert struct["is_valid_tree"] is True  # Valid spanning forest invariant |V| - c
+    assert struct["is_valid_tree"] is False  # A disconnected forest is NOT a valid tree
+    assert struct["is_valid_forest"] is True  # Valid spanning forest invariant |V| - c
+    assert struct["is_connected"] is False
 
 
 def test_adv_7_isolated_facility():

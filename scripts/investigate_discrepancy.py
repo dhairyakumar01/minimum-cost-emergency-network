@@ -50,3 +50,4 @@ if val_json.exists():
     print("validation_report.json keys:", list(vdata.keys()))
     print("prim_total_km:", vdata.get("prim_total_km"))
     print("kruskal_total_km:", vdata.get("kruskal_total_km"))
+

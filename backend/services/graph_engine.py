@@ -441,16 +441,25 @@ def validate_mst_structural(vertices: List[Any], tree_edges: List[Dict[str, Any]
             has_cycle = True
 
     components = dsu.get_components()
-    expected_edges = max(0, len(vertices) - len(components))
-    is_valid_tree = (not has_cycle) and (len(tree_edges) == expected_edges)
+    num_components = len(components)
+    expected_forest_edges = max(0, len(vertices) - num_components)
+    
+    # A graph is connected iff num_components <= 1
+    is_connected = (num_components <= 1)
+    # A valid spanning forest is acyclic and contains exactly |V| - c edges
+    is_valid_forest = (not has_cycle) and (len(tree_edges) == expected_forest_edges)
+    # A valid spanning tree MUST be connected and have exactly |V| - 1 edges
+    is_valid_tree = is_valid_forest and is_connected and (len(vertices) <= 1 or len(tree_edges) == len(vertices) - 1)
 
     return {
         "is_valid_tree": is_valid_tree,
+        "is_valid_forest": is_valid_forest,
+        "is_connected": is_connected,
         "vertex_count": len(vertices),
         "edge_count": len(tree_edges),
-        "expected_edge_count": expected_edges,
+        "expected_edge_count": expected_forest_edges,
         "has_cycle": has_cycle,
-        "num_components": len(components),
+        "num_components": num_components,
         "components": components
     }
 

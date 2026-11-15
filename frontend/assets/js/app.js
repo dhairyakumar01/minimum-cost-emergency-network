@@ -118,18 +118,20 @@
           setTimeout(() => {
             if (!facMap) {
               initFacilitiesMap();
-            } else {
+            }
+            if (facMap) {
               facMap.invalidateSize();
             }
-          }, 120);
+          }, 100);
         } else if (sectionId === "mst-network") {
           setTimeout(() => {
             if (!mstMap) {
               initMstMap();
-            } else {
+            }
+            if (mstMap) {
               mstMap.invalidateSize();
             }
-          }, 120);
+          }, 100);
         } else if (sectionId === "simulation") {
           updateSimulationUI();
         }
@@ -291,6 +293,10 @@
           setIncidentSelectMode(false);
         }
       });
+
+      setTimeout(() => {
+        if (facMap) facMap.invalidateSize();
+      }, 200);
     } catch (err) {
       console.error("Facilities map initialization failed:", err);
       showErrorBanner("Map tiles could not be initialized. Facilities catalog remains accessible in list/table views.");
@@ -1235,14 +1241,24 @@
     const opt = val.optimality || {};
     const parity = val.prim_kruskal_parity;
 
-    const isTreeValid = struct.is_valid_tree !== undefined ? struct.is_valid_tree : isTree;
-    const structDesc = `Acyclic: ${isTreeValid ? "YES" : "NO"} &bull; |V| = ${struct.vertex_count || summary.graph_vertices_count || 0}, |E| = ${struct.edge_count || summary.tree_edge_count || 0} &bull; Components: ${struct.num_components || compCount}`;
+    const isTreeValid = struct.is_valid_tree === true;
+    const isForestValid = struct.is_valid_forest === true;
+    const acyclicText = struct.is_acyclic !== false ? "YES" : "NO";
+    const structDesc = `Acyclic: ${acyclicText} &bull; |V| = ${struct.vertex_count || summary.graph_vertices_count || 0}, |E| = ${struct.edge_count || summary.tree_edge_count || 0} &bull; Components: ${struct.num_components || compCount}`;
     const structBadge = document.getElementById("val-structural-badge");
     const structDescEl = document.getElementById("val-structural-desc");
     if (structDescEl) structDescEl.innerHTML = structDesc;
     if (structBadge) {
-      structBadge.className = isTreeValid ? "badge badge-green" : "badge badge-red";
-      structBadge.textContent = isTreeValid ? "PASS" : "FAIL";
+      if (isTreeValid) {
+        structBadge.className = "badge badge-green";
+        structBadge.textContent = "PASS (Tree)";
+      } else if (isForestValid) {
+        structBadge.className = "badge badge-amber";
+        structBadge.textContent = "MSF (Forest)";
+      } else {
+        structBadge.className = "badge badge-red";
+        structBadge.textContent = "FAIL";
+      }
     }
 
     const optViolations = opt.violations_count !== undefined ? opt.violations_count : (opt.num_violations || 0);

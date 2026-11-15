@@ -37,7 +37,7 @@ def test_scenario_pipeline_execution():
 
     # Verify fuel model parameters
     assert dispatch[0]["fuel_rate_inr_km"] == 18.00
-    assert "Estimated fuel" in dispatch[0]["fuel_model_label"]
+    assert "estimated fuel" in dispatch[0]["fuel_model_label"].lower()
 
     # Verify structural validity
     assert res["validation"]["structural"]["is_valid_tree"] is True
