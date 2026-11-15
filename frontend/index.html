@@ -64,15 +64,9 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" data-target="project-analysis">
+          <a class="nav-link" data-target="results-stats">
             <span class="nav-icon">📈</span>
-            <span>Project Analysis & Results</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-target="help">
-            <span class="nav-icon">❓</span>
-            <span>Help & Methodology</span>
+            <span>Results & Statistics</span>
           </a>
         </li>
       </ul>
@@ -83,7 +77,7 @@
           <span>System Operational</span>
         </div>
         <div>1,255 Verified Facilities &bull; <i>K</i>₁₂₅₅</div>
-        <div style="margin-top:2px; font-size:0.70rem; color:#94a3b8;">BBMP Municipal Corporation</div>
+        <div style="margin-top:2px; font-size:0.70rem; color:var(--text-light);">BBMP Municipal Corporation</div>
       </div>
     </aside>
 
@@ -92,10 +86,10 @@
       <!-- Top Application Bar -->
       <header class="top-bar">
         <div class="page-header-title" id="current-page-title">
-          <span style="margin-right:8px;">📊</span> System Dashboard
+          <span style="margin-right:8px;">📊</span> Executive Dashboard
         </div>
         <div class="header-badges">
-          <span class="badge badge-blue">BBMP Municipal Area</span>
+          <span class="badge badge-sage">BBMP Municipal Area</span>
           <span class="badge badge-green" id="backend-status-pill">
             <span class="status-indicator"></span> Backend Connected
           </span>
@@ -123,23 +117,23 @@
             <div>
               <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
               <p class="dash-subtitle">
-                Minimum Spanning Tree Optimization & Geospatial Public Safety Planning &bull; BBMP Area
+                Discrete Mathematics &amp; Graph Theory (DMGT) &bull; Spatial Optimization for BBMP Bengaluru
               </p>
             </div>
             <div class="dash-actions">
               <button class="btn btn-primary" onclick="Navigation.navigateTo('simulation')">
-                🚨 Start Emergency Simulation
+                🚨 Launch Simulation
+              </button>
+              <button class="btn btn-outline" onclick="Navigation.navigateTo('mst-network')">
+                🕸️ Inspect Global MST
               </button>
               <button class="btn btn-outline" onclick="Navigation.navigateTo('facilities-map')">
                 🗺️ Facilities Map
               </button>
-              <button class="btn btn-outline" onclick="Navigation.navigateTo('mst-network')">
-                🕸️ Global MST
-              </button>
             </div>
           </div>
 
-          <!-- 6 Primary Metric Cards -->
+          <!-- 4 Primary Key Metric Cards -->
           <div class="metrics-grid">
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Facilities</div>
@@ -147,29 +141,23 @@
               <div class="metric-subtext">Verified BBMP registry nodes</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label"><span style="color:#dc2626;">🔴</span> Hospitals & Clinics</div>
-              <div class="metric-value" id="metric-hospitals">1,097</div>
-              <div class="metric-subtext">Acute care & trauma triage</div>
+              <div class="metric-label"><span>🏢</span> Facility Composition</div>
+              <div class="metric-composition-inline">
+                <span title="Hospitals"><span style="color:#dc2626;">●</span> <strong id="metric-hospitals">1,097</strong> <small>Hosp</small></span>
+                <span title="Police"><span style="color:#2563eb;">●</span> <strong id="metric-police">138</strong> <small>Pol</small></span>
+                <span title="Fire"><span style="color:#ea580c;">●</span> <strong id="metric-fire">20</strong> <small>Fire</small></span>
+              </div>
+              <div class="metric-subtext">Hospitals (87.4%), Police (11.0%), Fire (1.6%)</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label"><span style="color:#2563eb;">🔵</span> Police Stations</div>
-              <div class="metric-value" id="metric-police">138</div>
-              <div class="metric-subtext">Law enforcement & Hoysala</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label"><span style="color:#ea580c;">🟠</span> Fire Stations</div>
-              <div class="metric-value" id="metric-fire">20</div>
-              <div class="metric-subtext">KSFES rescue & extrication</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label"><span>🔗</span> MST Connections</div>
+              <div class="metric-label"><span>🔗</span> Global MST Links</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
               <div class="metric-subtext">Cayley invariant (|V| - 1)</div>
             </div>
             <div class="metric-card highlight-card">
-              <div class="metric-label"><span>📏</span> Global MST Length</div>
+              <div class="metric-label"><span>📏</span> Global Network Length</div>
               <div class="metric-value" id="metric-mst-length">480.1784 km</div>
-              <div class="metric-subtext">Sum of 1,254 selected links</div>
+              <div class="metric-subtext">Optimal Euclidean spanning tree</div>
             </div>
           </div>
 
@@ -191,66 +179,55 @@
               </div>
             </div>
 
-            <!-- Right: Operational Status & System Invariants -->
+            <!-- Right: Executive Launchpad & Municipal Scope Card -->
             <div class="card dash-status-card" style="margin-bottom:0;">
               <div class="card-header">
                 <div>
-                  <h3 class="card-title">System Status & Invariants</h3>
-                  <p class="card-subtitle">Verified mathematical certifications</p>
+                  <h3 class="card-title">Municipal Emergency Framework</h3>
+                  <p class="card-subtitle">BBMP administrative first-response architecture</p>
                 </div>
                 <span class="badge badge-green">Ready</span>
               </div>
 
-              <div class="system-status-item">
-                <div class="status-left">
-                  <span>🏛️</span>
-                  <div>
-                    <div>Dual-Layer Model</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
-                      Separates Layer 1 physical communication backbone from Layer 2 road transit.
-                    </div>
+              <div class="framework-scope-grid">
+                <div class="scope-item">
+                  <div class="scope-icon">📍</div>
+                  <div class="scope-text">
+                    <div class="scope-title">Study Jurisdiction</div>
+                    <div class="scope-desc">Bruhat Bengaluru Mahanagara Palike (198 Wards, 8 Zones)</div>
                   </div>
                 </div>
-                <span class="badge badge-blue">Verified</span>
+                <div class="scope-item">
+                  <div class="scope-icon">📐</div>
+                  <div class="scope-text">
+                    <div class="scope-title">Complete Graph Topology</div>
+                    <div class="scope-desc"><i>K</i>₁₂₅₅ complete metric graph &bull; 786,885 candidate edges</div>
+                  </div>
+                </div>
+                <div class="scope-item">
+                  <div class="scope-icon">⏱️</div>
+                  <div class="scope-text">
+                    <div class="scope-title">Dual-Layer Optimization</div>
+                    <div class="scope-desc">Layer 1 MST physical backbone + Layer 2 road dispatch</div>
+                  </div>
+                </div>
               </div>
 
-              <div class="system-status-item">
-                <div class="status-left">
-                  <span>🔍</span>
-                  <div>
-                    <div>Cycle Property LCA Audit</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
-                      785,631 non-tree candidate edges verified against tree path maximums.
-                    </div>
+              <div class="launchpad-box" style="margin-top:16px; padding:14px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                <div style="font-size:0.78rem; font-weight:700; color:var(--text-main); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Quick Navigation</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <button class="btn btn-primary" onclick="Navigation.navigateTo('simulation')" style="justify-content:flex-start;">
+                    🚨 Run Incident Simulation &rarr;
+                  </button>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
+                      🗺️ Facilities Map
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('mst-network')">
+                      🕸️ Global MST
+                    </button>
                   </div>
                 </div>
-                <span class="badge badge-green">0 Violations</span>
-              </div>
-
-              <div class="system-status-item">
-                <div class="status-left">
-                  <span>⚖️</span>
-                  <div>
-                    <div>Balanced Optimization Mode</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
-                      Proved single-agency scalar equivalence: <i>C</i><sup>norm</sup> &equiv; <i>D</i><sup>norm</sup>.
-                    </div>
-                  </div>
-                </div>
-                <span class="badge badge-blue">Proved</span>
-              </div>
-
-              <div class="system-status-item">
-                <div class="status-left">
-                  <span>⛽</span>
-                  <div>
-                    <div>Fleet Fuel Rate Assumptions</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">
-                      Fixed project parameters: Ambulance ₹12.50/km, Police ₹6.25/km, Fire ₹18.00/km.
-                    </div>
-                  </div>
-                </div>
-                <span class="badge badge-blue">Project Assumptions</span>
               </div>
             </div>
           </div>
@@ -991,326 +968,337 @@
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 5: PROJECT ANALYSIS & RESULTS -->
+        <!-- SECTION 5: RESULTS & STATISTICS (Integrated Results & Methodology) -->
         <!-- ================================================================= -->
-        <section id="section-project-analysis" class="view-section" style="display:none;">
-          <div class="analysis-grid">
-            
-            <!-- Card 1: Prim vs Kruskal Comprehensive Audit Table -->
-            <div class="card" style="margin-bottom:0;">
-              <div class="card-header">
-                <div>
-                  <h3 class="card-title">Prim vs Kruskal Algorithm Mathematical Audit</h3>
-                  <p class="card-subtitle">Empirical and mathematical parity on 1,255 emergency facilities.</p>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Property</th>
-                      <th>Prim's Algorithm</th>
-                      <th>Kruskal's Algorithm</th>
-                      <th>Audit Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><strong>Vertex Count (|V|)</strong></td>
-                      <td>1,255</td>
-                      <td>1,255</td>
-                      <td><span class="badge badge-green">Exact Match</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Spanning Edges (|E_T|)</strong></td>
-                      <td>1,254</td>
-                      <td>1,254</td>
-                      <td><span class="badge badge-green">Cayley Invariant</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Total Tree Length</strong></td>
-                      <td>480.1784 km</td>
-                      <td>480.1784 km</td>
-                      <td><span class="badge badge-green">&Delta; &lt; 10⁻¹² km</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Theoretical Complexity</strong></td>
-                      <td><i>O</i>(|<i>E</i>| log |<i>V</i>|)</td>
-                      <td><i>O</i>(|<i>E</i>| log |<i>E</i>|)</td>
-                      <td><span class="badge badge-blue">Proven Asymptotic</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Primary Data Structure</strong></td>
-                      <td>Binary Min-Heap</td>
-                      <td>Disjoint Set Union (DSU)</td>
-                      <td><span class="badge badge-blue">Standard</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Optimizations Applied</strong></td>
-                      <td>Visited Bitset</td>
-                      <td>Union-by-Rank + Path Compression</td>
-                      <td><span class="badge badge-blue">Optimal</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>Candidate Graph Size</strong></td>
-                      <td>786,885 edges</td>
-                      <td>786,885 edges</td>
-                      <td><span class="badge badge-green">Complete <i>K</i>₁₂₅₅</span></td>
-                    </tr>
-                    <tr>
-                      <td><strong>LCA Cycle Test</strong></td>
-                      <td>785,631 edges verified</td>
-                      <td>785,631 edges verified</td>
-                      <td><span class="badge badge-green">0 Violations</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <section id="section-results-stats" class="view-section" style="display:none;">
+          <!-- Sub-Navigation Bar -->
+          <div class="results-subnav-bar">
+            <button class="results-subnav-btn active" id="btn-subnav-results" onclick="App.switchResultsSubTab('results')">
+              📊 Project Results &amp; Algorithmic Telemetry
+            </button>
+            <button class="results-subnav-btn" id="btn-subnav-methodology" onclick="App.switchResultsSubTab('methodology')">
+              📖 Academic Methodology Guide (8 Modules)
+            </button>
+          </div>
 
-            <!-- Card 2: Empirical Performance Telemetry -->
-            <div class="card" style="margin-bottom:0;">
-              <div class="card-header">
-                <div>
-                  <h3 class="card-title">Empirical Benchmark Telemetry (10 Trials)</h3>
-                  <p class="card-subtitle">Runtime scaling across complete graph <i>K</i>₁₂₅₅</p>
-                </div>
-              </div>
+          <!-- Sub-Tab 1: Project Analysis & Empirical Telemetry -->
+          <div id="section-project-analysis" class="results-subpanel">
+            <div class="analysis-grid">
               
-              <div class="benchmark-card-grid">
-                <div class="bench-card">
-                  <div class="bench-title">Kruskal Median Runtime</div>
-                  <div class="bench-val" style="color:var(--primary);">1.581 s</div>
-                  <div class="bench-sub">Timsort edge-ordering</div>
+              <!-- Card 1: Prim vs Kruskal Comprehensive Audit Table -->
+              <div class="card" style="margin-bottom:0;">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Prim vs Kruskal Algorithm Mathematical Audit</h3>
+                    <p class="card-subtitle">Empirical and mathematical parity on 1,255 emergency facilities.</p>
+                  </div>
                 </div>
-                <div class="bench-card">
-                  <div class="bench-title">Prim Median Runtime</div>
-                  <div class="bench-val" style="color:#9333ea;">5.029 s</div>
-                  <div class="bench-sub">Python min-heap cut queue</div>
-                </div>
-                <div class="bench-card">
-                  <div class="bench-title">Empirical Speedup</div>
-                  <div class="bench-val" style="color:var(--success);">3.18 &times;</div>
-                  <div class="bench-sub">Kruskal faster on dense graph</div>
-                </div>
-              </div>
-
-              <!-- Optimization Modes Matrix -->
-              <div style="margin-top:16px;">
-                <h4 style="font-size:0.86rem; font-weight:700; color:var(--text-main); margin-bottom:8px;">Optimization Objective Matrix</h4>
                 <div class="table-responsive">
                   <table class="data-table">
                     <thead>
                       <tr>
-                        <th>Optimization Mode</th>
-                        <th>Objective Formulation</th>
-                        <th>Operational Interpretation</th>
+                        <th>Property</th>
+                        <th>Prim's Algorithm</th>
+                        <th>Kruskal's Algorithm</th>
+                        <th>Audit Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td><strong>Mode 1: Minimum Time</strong></td>
-                        <td><i>S<sub>T</sub></i> = &frac12; (<i>T<sub>uv</sub></i> + <i>T<sub>vu</sub></i>)</td>
-                        <td>Minimizes symmetric round-trip travel duration along fastest road routes.</td>
+                        <td><strong>Vertex Count (|V|)</strong></td>
+                        <td>1,255</td>
+                        <td>1,255</td>
+                        <td><span class="badge badge-green">Exact Match</span></td>
                       </tr>
                       <tr>
-                        <td><strong>Mode 2: Minimum Distance</strong></td>
-                        <td><i>S<sub>D</sub></i> = &frac12; (<i>D<sub>uv</sub></i> + <i>D<sub>vu</sub></i>)</td>
-                        <td>Minimizes physical road traversal distance along fastest road profiles.</td>
+                        <td><strong>Spanning Edges (|E_T|)</strong></td>
+                        <td>1,254</td>
+                        <td>1,254</td>
+                        <td><span class="badge badge-green">Cayley Invariant</span></td>
                       </tr>
                       <tr>
-                        <td><strong>Mode 3: Compromise</strong></td>
-                        <td><i>N<sub>e</sub></i> = <i>k S<sub>T</sub> D*</i> + (10 - <i>k</i>) <i>S<sub>D</sub> T*</i></td>
-                        <td>Supported bi-objective trade-off balancing response speed and travel mileage.</td>
+                        <td><strong>Total Tree Length</strong></td>
+                        <td>480.1784 km</td>
+                        <td>480.1784 km</td>
+                        <td><span class="badge badge-green">&Delta; &lt; 10⁻¹² km</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>Theoretical Complexity</strong></td>
+                        <td><i>O</i>(|<i>E</i>| log |<i>V</i>|)</td>
+                        <td><i>O</i>(|<i>E</i>| log |<i>E</i>|)</td>
+                        <td><span class="badge badge-sage">Proven Asymptotic</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>Primary Data Structure</strong></td>
+                        <td>Binary Min-Heap</td>
+                        <td>Disjoint Set Union (DSU)</td>
+                        <td><span class="badge badge-sage">Standard</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>Optimizations Applied</strong></td>
+                        <td>Visited Bitset</td>
+                        <td>Union-by-Rank + Path Compression</td>
+                        <td><span class="badge badge-sage">Optimal</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>Candidate Graph Size</strong></td>
+                        <td>786,885 edges</td>
+                        <td>786,885 edges</td>
+                        <td><span class="badge badge-green">Complete <i>K</i>₁₂₅₅</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>LCA Cycle Test</strong></td>
+                        <td>785,631 edges verified</td>
+                        <td>785,631 edges verified</td>
+                        <td><span class="badge badge-green">0 Violations</span></td>
                       </tr>
                     </tbody>
                   </table>
-                  <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
-                    ℹ️ <em>Cost Isomorphism: Under fixed per-km fuel rate assumptions (₹12.50, ₹6.25, ₹18.00/km), vehicle fuel cost (<i>C = D &times; R<sub>a</sub></i>) is strictly linear with distance, making independent cost optimization topologically identical to Mode 2.</em>
+                </div>
+              </div>
+
+              <!-- Card 2: Empirical Performance Telemetry -->
+              <div class="card" style="margin-bottom:0;">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">Empirical Benchmark Telemetry (10 Trials)</h3>
+                    <p class="card-subtitle">Runtime scaling across complete graph <i>K</i>₁₂₅₅</p>
                   </div>
                 </div>
+                
+                <div class="benchmark-card-grid">
+                  <div class="bench-card">
+                    <div class="bench-title">Kruskal Median Runtime</div>
+                    <div class="bench-val" style="color:var(--primary);">1.581 s</div>
+                    <div class="bench-sub">Timsort edge-ordering</div>
+                  </div>
+                  <div class="bench-card">
+                    <div class="bench-title">Prim Median Runtime</div>
+                    <div class="bench-val" style="color:var(--forest-green);">5.029 s</div>
+                    <div class="bench-sub">Python min-heap cut queue</div>
+                  </div>
+                  <div class="bench-card">
+                    <div class="bench-title">Empirical Speedup</div>
+                    <div class="bench-val" style="color:var(--primary);">3.18 &times;</div>
+                    <div class="bench-sub">Kruskal faster on dense graph</div>
+                  </div>
+                </div>
+
+                <!-- Optimization Modes Matrix -->
+                <div style="margin-top:16px;">
+                  <h4 style="font-size:0.86rem; font-weight:700; color:var(--text-main); margin-bottom:8px;">Optimization Objective Matrix</h4>
+                  <div class="table-responsive">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Optimization Mode</th>
+                          <th>Objective Formulation</th>
+                          <th>Operational Interpretation</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Mode 1: Minimum Time</strong></td>
+                          <td><i>S<sub>T</sub></i> = &frac12; (<i>T<sub>uv</sub></i> + <i>T<sub>vu</sub></i>)</td>
+                          <td>Minimizes symmetric round-trip travel duration along fastest road routes.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Mode 2: Minimum Distance</strong></td>
+                          <td><i>S<sub>D</sub></i> = &frac12; (<i>D<sub>uv</sub></i> + <i>D<sub>vu</sub></i>)</td>
+                          <td>Minimizes physical road traversal distance along fastest road profiles.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Mode 3: Compromise</strong></td>
+                          <td><i>N<sub>e</sub></i> = <i>k S<sub>T</sub> D*</i> + (10 - <i>k</i>) <i>S<sub>D</sub> T*</i></td>
+                          <td>Supported bi-objective trade-off balancing response speed and travel mileage.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+                      ℹ️ <em>Cost Isomorphism: Under fixed per-km fuel rate assumptions (₹12.50, ₹6.25, ₹18.00/km), vehicle fuel cost (<i>C = D &times; R<sub>a</sub></i>) is strictly linear with distance, making independent cost optimization topologically identical to Mode 2.</em>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
             </div>
 
+            <!-- Zero-Weight Edge Investigation Card -->
+            <div class="card" style="margin-top:20px;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</h3>
+                  <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
+                </div>
+              </div>
+              <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
+                <p>
+                  During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of <strong>0.0000 km</strong>:
+                </p>
+                <div class="math-callout">
+                  <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br/>
+                  Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
+                </div>
+                <p>
+                  <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across executions.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <!-- Zero-Weight Edge Investigation Card -->
-          <div class="card" style="margin-top:20px;">
-            <div class="card-header">
-              <div>
-                <h3 class="card-title">Zero-Weight Edge Investigation & Deterministic Tie-Breaking</h3>
-                <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
-              </div>
-            </div>
-            <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
-              <p>
-                During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of <strong>0.0000 km</strong>:
-              </p>
-              <div class="math-callout">
-                <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br/>
-                Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
-              </div>
-              <p>
-                <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across executions.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- ================================================================= -->
-        <!-- SECTION 6: HELP & METHODOLOGY (Expandable Accordion Knowledge Hub) -->
-        <!-- ================================================================= -->
-        <section id="section-help" class="view-section" style="display:none;">
-          <div class="help-container">
-            
-            <!-- Accordion 1: Graph Theory Problem Formulation -->
-            <details class="method-accordion" open>
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">1</span>
-                  <span>Graph-Theoretic Problem Formulation & Complete Graph <i>K</i>₁₂₅₅</span>
-                </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>The municipal emergency network is modeled as a weighted undirected graph <i>G</i> = (<i>V</i>, <i>E</i>, <i>w</i>), where:</p>
-                <ul style="padding-left:20px; margin:8px 0;">
-                  <li><i>V</i> is the set of all registered emergency facilities in Bengaluru (|<i>V</i>| = 1,255).</li>
-                  <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 = 786,885 edges).</li>
-                  <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius <i>R</i> = 6,371.0088 km.</li>
-                </ul>
-                <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is an acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| - 1 = 1,254 edges such that total weight &sum; <i>w</i>(<i>e</i>) is minimized.</p>
-              </div>
-            </details>
-
-            <!-- Accordion 2: Dual-Layer Architecture -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">2</span>
-                  <span>Dual-Layer Infrastructure Model: Backbone vs Vehicular Dispatch</span>
-                </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>The system maintains a strict conceptual separation between two distinct operational layers:</p>
-                <div class="layer-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:10px;">
-                  <div class="layer-box layer-mst" style="padding:12px; border:1px solid #bfdbfe; border-radius:6px; background:#eff6ff;">
-                    <div style="font-size:0.72rem; font-weight:700; color:#1d4ed8; text-transform:uppercase;">Layer 1 &bull; Communication Topology</div>
-                    <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Minimum Spanning Tree (MST) Backbone</h4>
-                    <p style="font-size:0.78rem; color:#475569;">1,254 optical/RF transmission links connecting all 1,255 facilities (480.1784 km total length). Computed over <i>K</i>₁₂₅₅ to minimize municipal transmission infrastructure cost.</p>
+          <!-- Sub-Tab 2: Academic Methodology Guide -->
+          <div id="section-help" class="results-subpanel" style="display:none;">
+            <div class="help-container">
+              
+              <!-- Accordion 1: Graph Theory Problem Formulation -->
+              <details class="method-accordion" open>
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">1</span>
+                    <span>Graph-Theoretic Problem Formulation &amp; Complete Graph <i>K</i>₁₂₅₅</span>
                   </div>
-                  <div class="layer-box layer-road" style="padding:12px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc;">
-                    <div style="font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase;">Layer 2 &bull; Vehicular Transit</div>
-                    <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Physical Road Transit Network</h4>
-                    <p style="font-size:0.78rem; color:#475569;">Surface roadway network traversed by emergency response vehicles (ambulances, police cruisers, fire engines). Governed by one-way systems, turn restrictions, and road speed limits (<i>D</i><sub>road</sub> &ge; <i>D</i><sub>haversine</sub>).</p>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>The municipal emergency network is modeled as a weighted undirected graph <i>G</i> = (<i>V</i>, <i>E</i>, <i>w</i>), where:</p>
+                  <ul style="padding-left:20px; margin:8px 0;">
+                    <li><i>V</i> is the set of all registered emergency facilities in Bengaluru (|<i>V</i>| = 1,255).</li>
+                    <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 = 786,885 edges).</li>
+                    <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius <i>R</i> = 6,371.0088 km.</li>
+                  </ul>
+                  <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is an acyclic subgraph spanning all 1,255 vertices with exactly |<i>V</i>| - 1 = 1,254 edges such that total weight &sum; <i>w</i>(<i>e</i>) is minimized.</p>
+                </div>
+              </details>
+
+              <!-- Accordion 2: Dual-Layer Architecture -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">2</span>
+                    <span>Dual-Layer Infrastructure Model: Backbone vs Vehicular Dispatch</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>The system maintains a strict conceptual separation between two distinct operational layers:</p>
+                  <div class="layer-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-top:10px;">
+                    <div class="layer-box layer-mst" style="padding:12px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-subtle);">
+                      <div style="font-size:0.72rem; font-weight:700; color:var(--primary-green); text-transform:uppercase;">Layer 1 &bull; Communication Topology</div>
+                      <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Minimum Spanning Tree (MST) Backbone</h4>
+                      <p style="font-size:0.78rem; color:var(--text-muted);">1,254 optical/RF transmission links connecting all 1,255 facilities (480.1784 km total length). Computed over <i>K</i>₁₂₅₅ to minimize municipal transmission infrastructure cost.</p>
+                    </div>
+                    <div class="layer-box layer-road" style="padding:12px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-surface);">
+                      <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Layer 2 &bull; Vehicular Transit</div>
+                      <h4 style="font-size:0.86rem; font-weight:700; margin:4px 0;">Physical Road Transit Network</h4>
+                      <p style="font-size:0.78rem; color:var(--text-muted);">Surface roadway network traversed by emergency response vehicles (ambulances, police cruisers, fire engines). Governed by one-way systems, turn restrictions, and road speed limits (<i>D</i><sub>road</sub> &ge; <i>D</i><sub>haversine</sub>).</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 3: Prim's Algorithm & Cut Property -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">3</span>
-                  <span>Prim's Algorithm & The Cut Property</span>
+              <!-- Accordion 3: Prim's Algorithm & Cut Property -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">3</span>
+                    <span>Prim's Algorithm &amp; The Cut Property</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p><strong>Cut Property Theorem:</strong> For any cut (<i>S</i>, <i>V</i> \ <i>S</i>) partitioning the graph, the minimum-weight crossing edge across the cut belongs to every minimum spanning tree.</p>
+                  <p>Prim's algorithm starts from an arbitrary root vertex, maintaining visited set <i>S</i> and priority queue <i>Q</i> of crossing edges. At each step, it greedily accepts the minimum crossing link, growing the tree until |<i>S</i>| = |<i>V</i>|.</p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p><strong>Cut Property Theorem:</strong> For any cut (<i>S</i>, <i>V</i> \ <i>S</i>) partitioning the graph, the minimum-weight crossing edge across the cut belongs to every minimum spanning tree.</p>
-                <p>Prim's algorithm starts from an arbitrary root vertex, maintaining visited set <i>S</i> and priority queue <i>Q</i> of crossing edges. At each step, it greedily accepts the minimum crossing link, growing the tree until |<i>S</i>| = |<i>V</i>|.</p>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 4: Kruskal's Algorithm & Cycle Property -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">4</span>
-                  <span>Kruskal's Algorithm & The Cycle Property</span>
+              <!-- Accordion 4: Kruskal's Algorithm & Cycle Property -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">4</span>
+                    <span>Kruskal's Algorithm &amp; The Cycle Property</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p><strong>Cycle Property Theorem:</strong> For any simple cycle in graph <i>G</i>, the strictly maximum-weight edge cannot belong to any minimum spanning tree.</p>
+                  <p>Kruskal's algorithm sorts all 786,885 candidate edges in non-decreasing weight order, greedily adding each edge using a Disjoint Set Union (DSU) data structure with union-by-rank and path compression, skipping chords whose endpoints belong to the same component.</p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p><strong>Cycle Property Theorem:</strong> For any simple cycle in graph <i>G</i>, the strictly maximum-weight edge cannot belong to any minimum spanning tree.</p>
-                <p>Kruskal's algorithm sorts all 786,885 candidate edges in non-decreasing weight order, greedily adding each edge using a Disjoint Set Union (DSU) data structure with union-by-rank and path compression, skipping chords whose endpoints belong to the same component.</p>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 5: LCA Binary-Lifting Verification -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">5</span>
-                  <span>LCA Binary-Lifting Cycle Property Verification Oracle</span>
+              <!-- Accordion 5: LCA Binary-Lifting Verification -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">5</span>
+                    <span>LCA Binary-Lifting Cycle Property Verification Oracle</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>To provide an absolute mathematical proof of optimality, an independent Lowest Common Ancestor (LCA) binary-lifting verifier tests every single non-tree chord (785,631 candidate edges) against the tree path maximum:</p>
+                  <div class="math-callout">
+                    &forall; (<i>u</i>, <i>v</i>) &notin; <i>E<sub>T</sub></i>, &nbsp; <i>w</i>(<i>u</i>, <i>v</i>) &ge; max_edge_on_tree_path(<i>u</i>, <i>v</i>)
+                  </div>
+                  <p>Result: <strong>0 cycle violations</strong> at numerical tolerance 10⁻⁹ km, formally certifying that the 480.1784 km spanning tree is mathematically optimal.</p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>To provide an absolute mathematical proof of optimality, an independent Lowest Common Ancestor (LCA) binary-lifting verifier tests every single non-tree chord (785,631 candidate edges) against the tree path maximum:</p>
-                <div class="math-callout">
-                  &forall; (<i>u</i>, <i>v</i>) &notin; <i>E<sub>T</sub></i>, &nbsp; <i>w</i>(<i>u</i>, <i>v</i>) &ge; max_edge_on_tree_path(<i>u</i>, <i>v</i>)
-                </div>
-                <p>Result: <strong>0 cycle violations</strong> at numerical tolerance 10⁻⁹ km, formally certifying that the 480.1784 km spanning tree is mathematically optimal.</p>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 6: Three Discrete Modes & Cost-Distance Isomorphism -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">6</span>
-                  <span>Three Discrete Optimization Modes & Cost-Distance Isomorphism</span>
+              <!-- Accordion 6: Three Discrete Modes & Cost-Distance Isomorphism -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">6</span>
+                    <span>Three Discrete Optimization Modes &amp; Cost-Distance Isomorphism</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>The network backbone supports three discrete optimization modes: <strong>Mode 1 (Minimum Time <i>S<sub>T</sub></i>)</strong>, <strong>Mode 2 (Minimum Road Distance <i>S<sub>D</sub></i>)</strong>, and <strong>Mode 3 (Supported Compromise <i>N<sub>e</sub></i>)</strong>.</p>
+                  <p><strong>Cost-Distance Isomorphism Theorem:</strong> In any single-agency emergency dispatch run, vehicle operating fuel cost is modeled strictly as <i>C<sub>uv</sub></i> = <i>D<sub>uv</sub></i> &times; <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate parameter.</p>
+                  <div class="math-callout">
+                    <i>C<sub>uv</sub></i> &prop; <i>D<sub>uv</sub></i> &implies; argmin &sum; <i>C<sub>uv</sub></i> &equiv; argmin &sum; <i>D<sub>uv</sub></i>
+                  </div>
+                  <p>Because multiplying all edge weights by an invariant positive scalar <i>R<sub>a</sub></i> preserves pairwise edge-weight orderings, an independent minimum fuel-cost objective generates the exact same minimum spanning tree as Mode 2. Hence, fuel cost is evaluated as a metric rather than a separate optimization mode.</p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>The network backbone supports three discrete optimization modes: <strong>Mode 1 (Minimum Time <i>S<sub>T</sub></i>)</strong>, <strong>Mode 2 (Minimum Road Distance <i>S<sub>D</sub></i>)</strong>, and <strong>Mode 3 (Supported Compromise <i>N<sub>e</sub></i>)</strong>.</p>
-                <p><strong>Cost-Distance Isomorphism Theorem:</strong> In any single-agency emergency dispatch run, vehicle operating fuel cost is modeled strictly as <i>C<sub>uv</sub></i> = <i>D<sub>uv</sub></i> &times; <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate parameter.</p>
-                <div class="math-callout">
-                  <i>C<sub>uv</sub></i> &prop; <i>D<sub>uv</sub></i> &implies; argmin &sum; <i>C<sub>uv</sub></i> &equiv; argmin &sum; <i>D<sub>uv</sub></i>
-                </div>
-                <p>Because multiplying all edge weights by an invariant positive scalar <i>R<sub>a</sub></i> preserves pairwise edge-weight orderings, an independent minimum fuel-cost objective generates the exact same minimum spanning tree as Mode 2. Hence, fuel cost is evaluated as a metric rather than a separate optimization mode.</p>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 7: Project Fuel-Cost Parameter Framework -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">7</span>
-                  <span>Project Fuel-Cost Parameter Framework</span>
+              <!-- Accordion 7: Project Fuel-Cost Parameter Framework -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">7</span>
+                    <span>Project Fuel-Cost Parameter Framework</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>Estimated fuel expenditures in dispatch rankings are calculated using fixed project parameter assumptions:</p>
+                  <ul style="padding-left:20px; margin:8px 0;">
+                    <li><strong>Ambulance / Healthcare:</strong> Fixed project parameter &bull; <strong>₹12.50 / km</strong></li>
+                    <li><strong>Police Patrol:</strong> Fixed project parameter &bull; <strong>₹6.25 / km</strong></li>
+                    <li><strong>Fire &amp; Rescue Engine:</strong> Fixed project parameter &bull; <strong>₹18.00 / km</strong></li>
+                  </ul>
+                  <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;"><em>Disclaimer: These are illustrative project assumptions used strictly for dispatch cost estimation (Fuel Estimate = Direct Distance × Rate) and are not live retail fuel prices or verified departmental operating allocations.</em></p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>Estimated fuel expenditures in dispatch rankings are calculated using fixed project parameter assumptions:</p>
-                <ul style="padding-left:20px; margin:8px 0;">
-                  <li><strong>Ambulance / Healthcare:</strong> Fixed project parameter &bull; <strong>₹12.50 / km</strong></li>
-                  <li><strong>Police Patrol:</strong> Fixed project parameter &bull; <strong>₹6.25 / km</strong></li>
-                  <li><strong>Fire & Rescue Engine:</strong> Fixed project parameter &bull; <strong>₹18.00 / km</strong></li>
-                </ul>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;"><em>Disclaimer: These are illustrative project assumptions used strictly for dispatch cost estimation (Fuel Estimate = Direct Distance × Rate) and are not live retail fuel prices or verified departmental operating allocations.</em></p>
-              </div>
-            </details>
+              </details>
 
-            <!-- Accordion 8: Limitations & Topological Vulnerability -->
-            <details class="method-accordion">
-              <summary>
-                <div class="summary-title-wrap">
-                  <span class="summary-num">8</span>
-                  <span>Engineering Limitations & Single-Edge Partition Vulnerability</span>
+              <!-- Accordion 8: Limitations & Topological Vulnerability -->
+              <details class="method-accordion">
+                <summary>
+                  <div class="summary-title-wrap">
+                    <span class="summary-num">8</span>
+                    <span>Engineering Limitations &amp; Single-Edge Partition Vulnerability</span>
+                  </div>
+                  <span class="summary-indicator">▼</span>
+                </summary>
+                <div class="method-content">
+                  <p>By mathematical definition, any spanning tree contains exactly zero cycles. As an acyclic network ($k=1$ edge connectivity), severing any single link partitions the network into two disconnected components. In real-world telecommunication deployments, biconnected or 2-edge-connected augmentation is recommended to prevent single-point failures.</p>
                 </div>
-                <span class="summary-indicator">▼</span>
-              </summary>
-              <div class="method-content">
-                <p>By mathematical definition, any spanning tree contains exactly zero cycles. As an acyclic network ($k=1$ edge connectivity), severing any single link partitions the network into two disconnected components. In real-world telecommunication deployments, biconnected or 2-edge-connected augmentation is recommended to prevent single-point failures.</p>
-              </div>
-            </details>
+              </details>
 
+            </div>
           </div>
         </section>
 

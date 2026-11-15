@@ -4,14 +4,25 @@
    ========================================================================== */
 
 :root {
-  /* Brand & Core Palette */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: rgba(37, 99, 235, 0.08);
-  --primary-glow: rgba(37, 99, 235, 0.25);
-  --secondary: #4f46e5;
+  /* Exact Design System Palette */
+  --forest-green: #183C32;
+  --primary-green: #286B4B;
+  --sage-green: #83A88B;
+  --bg-app: #F4F6F1;
+  --bg-surface: #FFFFFF;
+  --border-color: #D9E2D9;
+  --text-main: #26332C;
+  --text-muted: #69756D;
 
-  /* Semantic Agency Accents */
+  /* Aliased Core Semantic Colors */
+  --primary: #286B4B;
+  --primary-hover: #183C32;
+  --primary-light: rgba(40, 107, 75, 0.09);
+  --primary-glow: rgba(40, 107, 75, 0.22);
+  --secondary: #83A88B;
+  --accent-sage: #83A88B;
+
+  /* Semantic Agency Accents (Public Safety Standard) */
   --hospital-color: #dc2626;
   --hospital-bg: rgba(220, 38, 38, 0.07);
   --hospital-border: #fecaca;
@@ -23,45 +34,40 @@
   --fire-border: #fed7aa;
 
   /* Status Colors */
-  --success: #10b981;
-  --success-bg: rgba(16, 185, 129, 0.08);
-  --warning: #f59e0b;
-  --warning-bg: rgba(245, 158, 11, 0.08);
-  --danger: #ef4444;
-  --danger-bg: rgba(239, 68, 68, 0.08);
-  --info: #0284c7;
+  --success: #286B4B;
+  --success-bg: rgba(40, 107, 75, 0.09);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.08);
+  --danger: #dc2626;
+  --danger-bg: rgba(220, 38, 38, 0.08);
+  --info: #286B4B;
 
   /* Surfaces & Backgrounds */
-  --bg-app: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-subtle: #f1f5f9;
-  --bg-sidebar: #0b1329;
-  --bg-sidebar-hover: #172554;
-  --bg-sidebar-active: #1d4ed8;
+  --bg-subtle: #EBF0EA;
+  --bg-sidebar: #183C32;
+  --bg-sidebar-hover: #214C40;
+  --bg-sidebar-active: #286B4B;
 
   /* Typography */
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-light: #94a3b8;
+  --text-light: #83A88B;
   --text-white: #ffffff;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, monospace;
 
   /* Borders & Shadows */
-  --border-color: #e2e8f0;
-  --border-light: #f1f5f9;
-  --border-sidebar: #1e293b;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --border-light: #EBF0EA;
+  --border-sidebar: rgba(217, 226, 217, 0.16);
+  --shadow-xs: 0 1px 2px rgba(24, 60, 50, 0.04);
+  --shadow-sm: 0 1px 3px rgba(24, 60, 50, 0.06), 0 1px 2px rgba(24, 60, 50, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(24, 60, 50, 0.06), 0 2px 4px -2px rgba(24, 60, 50, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(24, 60, 50, 0.07), 0 4px 6px -4px rgba(24, 60, 50, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(24, 60, 50, 0.09), 0 8px 10px -6px rgba(24, 60, 50, 0.04);
 
   /* Radius & Dimensions */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
   --sidebar-width: 256px;
 }
 
@@ -440,9 +446,15 @@ body {
 }
 
 .badge-green {
-  background-color: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background-color: rgba(40, 107, 75, 0.10);
+  color: var(--primary-green);
+  border: 1px solid rgba(40, 107, 75, 0.28);
+}
+
+.badge-sage {
+  background-color: rgba(131, 168, 139, 0.18);
+  color: var(--forest-green);
+  border: 1px solid var(--sage-green);
 }
 
 .badge-gray {
@@ -510,16 +522,16 @@ body {
 }
 
 .dash-title {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.75rem;
+  font-weight: 700;
   color: var(--text-main);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 .dash-subtitle {
-  font-size: 0.84rem;
+  font-size: 0.9375rem;
   color: var(--text-muted);
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .dash-actions {
@@ -528,11 +540,11 @@ body {
   gap: 10px;
 }
 
-/* Operational Metrics Grid */
+/* Operational Metrics Grid (4-Column Layout) */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   margin-bottom: 20px;
 }
 
@@ -540,7 +552,7 @@ body {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 16px 18px;
   box-shadow: var(--shadow-xs);
   display: flex;
   flex-direction: column;
@@ -554,12 +566,12 @@ body {
 }
 
 .metric-card.highlight-card {
-  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-  border-color: #bfdbfe;
+  background: linear-gradient(135deg, rgba(131, 168, 139, 0.15) 0%, #ffffff 100%);
+  border-color: var(--sage-green);
 }
 
 .metric-label {
-  font-size: 0.74rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);
   display: flex;
@@ -570,7 +582,7 @@ body {
 }
 
 .metric-value {
-  font-size: 1.55rem;
+  font-size: 1.65rem;
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -0.5px;
@@ -578,16 +590,37 @@ body {
   font-family: var(--font-sans);
 }
 
+.metric-composition-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 6px 0;
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+.metric-composition-inline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-composition-inline small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .metric-subtext {
-  font-size: 0.72rem;
-  color: var(--text-light);
-  line-height: 1.2;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.35;
 }
 
 /* Dashboard Two-Column Operations Layout */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.35fr 1fr;
   gap: 20px;
   margin-bottom: 20px;
 }
@@ -609,6 +642,39 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.framework-scope-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scope-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.scope-icon {
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.scope-text {
+  flex: 1;
+}
+
+.scope-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.scope-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
 }
 
 .system-status-item {
@@ -1590,8 +1656,49 @@ body {
 }
 
 /* ==========================================================================
-   VIEW 5: PROJECT ANALYSIS & BENCHMARKS
+   VIEW 5: RESULTS & STATISTICS (Integrated Telemetry & Methodology)
    ========================================================================== */
+
+.results-subnav-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 14px;
+}
+
+.results-subnav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.results-subnav-btn:hover {
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+  border-color: var(--sage-green);
+}
+
+.results-subnav-btn.active {
+  background-color: var(--forest-green);
+  border-color: var(--forest-green);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.results-subpanel {
+  animation: fadeIn 0.18s ease;
+}
 
 .analysis-grid {
   display: grid;

@@ -1,16 +1,20 @@
 /**
  * Navigation Module for Single-Page Application (SPA)
- * Manages view switching across the 6 primary sections.
+ * Manages view switching across the 5 primary sections.
  */
 
 const Navigation = (function () {
   const SECTIONS = {
-    "dashboard": { title: "System Dashboard", icon: "📊" },
+    "dashboard": { title: "Executive Dashboard", icon: "📊" },
     "facilities-map": { title: "Facilities Map", icon: "🗺️" },
-    "mst-network": { title: "MST Network Visualization", icon: "🕸️" },
+    "mst-network": { title: "MST Network Backbone", icon: "🕸️" },
     "simulation": { title: "Emergency Simulation", icon: "🚨" },
-    "project-analysis": { title: "Project Analysis & Results", icon: "📈" },
-    "help": { title: "Help & System Methodology", icon: "❓" },
+    "results-stats": { title: "Results & Statistics", icon: "📈" },
+  };
+
+  const ALIASES = {
+    "project-analysis": "results-stats",
+    "help": "results-stats",
   };
 
   let currentSection = "dashboard";
@@ -21,7 +25,16 @@ const Navigation = (function () {
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        const target = link.getAttribute("data-target");
+        let target = link.getAttribute("data-target");
+        if (target && ALIASES[target]) {
+          const subTarget = target;
+          target = ALIASES[target];
+          navigateTo(target);
+          if (window.App && typeof window.App.switchResultsSubTab === "function") {
+            window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
+          }
+          return;
+        }
         if (target && SECTIONS[target]) {
           navigateTo(target);
         }
@@ -29,8 +42,17 @@ const Navigation = (function () {
     });
 
     // Check URL hash on load
-    const hash = window.location.hash.replace("#", "").trim();
-    if (hash && SECTIONS[hash]) {
+    let hash = window.location.hash.replace("#", "").trim();
+    if (hash && ALIASES[hash]) {
+      const subTarget = hash;
+      hash = ALIASES[hash];
+      navigateTo(hash, false);
+      setTimeout(() => {
+        if (window.App && typeof window.App.switchResultsSubTab === "function") {
+          window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
+        }
+      }, 50);
+    } else if (hash && SECTIONS[hash]) {
       navigateTo(hash, false);
     } else {
       navigateTo("dashboard", false);
@@ -38,14 +60,31 @@ const Navigation = (function () {
 
     // Handle browser back/forward buttons
     window.addEventListener("hashchange", () => {
-      const h = window.location.hash.replace("#", "").trim();
-      if (h && SECTIONS[h] && h !== currentSection) {
+      let h = window.location.hash.replace("#", "").trim();
+      if (h && ALIASES[h]) {
+        const subTarget = h;
+        h = ALIASES[h];
+        if (h !== currentSection) {
+          navigateTo(h, false);
+        }
+        if (window.App && typeof window.App.switchResultsSubTab === "function") {
+          window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
+        }
+      } else if (h && SECTIONS[h] && h !== currentSection) {
         navigateTo(h, false);
       }
     });
   }
 
   function navigateTo(sectionId, updateHash = true) {
+    if (ALIASES[sectionId]) {
+      const subTarget = sectionId;
+      sectionId = ALIASES[sectionId];
+      if (window.App && typeof window.App.switchResultsSubTab === "function") {
+        window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
+      }
+    }
+
     if (!SECTIONS[sectionId]) return;
 
     currentSection = sectionId;
@@ -53,7 +92,7 @@ const Navigation = (function () {
     // Update active nav link
     document.querySelectorAll(".nav-link").forEach((link) => {
       const t = link.getAttribute("data-target");
-      if (t === sectionId) {
+      if (t === sectionId || (ALIASES[t] && ALIASES[t] === sectionId)) {
         link.classList.add("active");
       } else {
         link.classList.remove("active");

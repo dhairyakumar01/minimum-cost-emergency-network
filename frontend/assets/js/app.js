@@ -945,6 +945,26 @@
       }
     },
 
+    switchResultsSubTab(subTabId) {
+      const isResults = subTabId === "results";
+      const resPanel = document.getElementById("section-project-analysis");
+      const helpPanel = document.getElementById("section-help");
+      const btnRes = document.getElementById("btn-subnav-results");
+      const btnHelp = document.getElementById("btn-subnav-methodology");
+
+      if (resPanel) resPanel.style.display = isResults ? "block" : "none";
+      if (helpPanel) helpPanel.style.display = isResults ? "none" : "block";
+
+      if (btnRes) {
+        if (isResults) btnRes.classList.add("active");
+        else btnRes.classList.remove("active");
+      }
+      if (btnHelp) {
+        if (isResults) btnHelp.classList.remove("active");
+        else btnHelp.classList.add("active");
+      }
+    },
+
     async runSimulationPreview() {
       return this.runSimulation();
     },
