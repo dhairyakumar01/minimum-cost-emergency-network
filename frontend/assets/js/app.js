@@ -52,6 +52,17 @@
     mstAlgorithm: "kruskal",
     mstCache: { kruskal: null, prim: null },
     mstSelectedEdge: null,
+
+    // Algorithm Construction Simulator State
+    simSubtab: "sim",
+    simGraphContext: "global",
+    simAlgorithm: "kruskal",
+    simSpeedMs: 200,
+    simIsPlaying: false,
+    simCurrentStep: 0,
+    simTraceData: null,
+    simTimer: null,
+    simCompareContext: "global",
   };
 
   // Leaflet Map Instances
@@ -63,6 +74,16 @@
   let mstMap = null;
   let mstEdgesLayer = null;
   let mstNodesLayer = null;
+
+  // Simulator Map Instances & Layers
+  let simMap = null;
+  let simNodesLayer = null;
+  let simAcceptedEdgesLayer = null;
+  let simEvaluatedEdgeLayer = null;
+  let simRejectedEdgeLayer = null;
+  let simIncidentMarkerLayer = null;
+  let simNodeMarkers = {};
+  let simTraceCache = {};
 
   /**
    * Spherical Haversine calculation matching backend and DMGT formulation.
@@ -125,11 +146,25 @@
           }, 100);
         } else if (sectionId === "mst-network") {
           setTimeout(() => {
-            if (!mstMap) {
-              initMstMap();
-            }
-            if (mstMap) {
-              mstMap.invalidateSize();
+            if (State.simSubtab === "sim") {
+              if (!simMap) {
+                initSimMap();
+              }
+              if (simMap) {
+                simMap.invalidateSize();
+              }
+              if (!State.simTraceData) {
+                loadSimulatorTrace(State.simGraphContext, State.simAlgorithm);
+              }
+            } else if (State.simSubtab === "compare") {
+              loadMstComparison(State.simCompareContext);
+            } else if (State.simSubtab === "static") {
+              if (!mstMap) {
+                initMstMap();
+              }
+              if (mstMap) {
+                mstMap.invalidateSize();
+              }
             }
           }, 100);
         } else if (sectionId === "simulation") {
@@ -745,7 +780,524 @@
     }
   }
 
+  // --------------------------------------------------------------------------
+  // Algorithm Construction Simulator & Comparison Suite
+  // --------------------------------------------------------------------------
+
+  function initSimMap() {
+    try {
+      const container = document.getElementById("sim-leaflet-map");
+      if (!container || simMap || typeof L === "undefined") return;
+
+      simMap = L.map("sim-leaflet-map", {
+        center: [12.9716, 77.5946],
+        zoom: 11,
+        zoomControl: true,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors | MST Simulator",
+      }).addTo(simMap);
+
+      simAcceptedEdgesLayer = L.layerGroup().addTo(simMap);
+      simEvaluatedEdgeLayer = L.layerGroup().addTo(simMap);
+      simRejectedEdgeLayer = L.layerGroup().addTo(simMap);
+      simNodesLayer = L.layerGroup().addTo(simMap);
+      simIncidentMarkerLayer = L.layerGroup().addTo(simMap);
+    } catch (err) {
+      console.error("Simulator map initialization failed:", err);
+    }
+  }
+
+  function switchMstSubtab(targetSubtab) {
+    State.simSubtab = targetSubtab;
+
+    // Update active tab button
+    document.querySelectorAll(".mst-tab-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-target") === `mst-view-${targetSubtab}`);
+    });
+
+    // Update subview visibility
+    const views = {
+      sim: document.getElementById("mst-view-sim"),
+      compare: document.getElementById("mst-view-compare"),
+      static: document.getElementById("mst-view-static"),
+    };
+
+    Object.entries(views).forEach(([k, el]) => {
+      if (el) el.style.display = k === targetSubtab ? "block" : "none";
+    });
+
+    if (targetSubtab === "sim") {
+      setTimeout(() => {
+        if (!simMap) initSimMap();
+        if (simMap) simMap.invalidateSize();
+        if (!State.simTraceData) {
+          loadSimulatorTrace(State.simGraphContext, State.simAlgorithm);
+        }
+      }, 50);
+    } else if (targetSubtab === "compare") {
+      loadMstComparison(State.simCompareContext);
+    } else if (targetSubtab === "static") {
+      setTimeout(() => {
+        if (!mstMap) initMstMap();
+        if (mstMap) mstMap.invalidateSize();
+      }, 50);
+    }
+  }
+
+  async function loadSimulatorTrace(graphContext = "global", algorithm = "kruskal") {
+    pauseSimulator();
+    State.simGraphContext = graphContext;
+    State.simAlgorithm = algorithm;
+
+    // UI Toggle update
+    document.querySelectorAll("#sim-context-toggle .sim-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-context") === graphContext);
+    });
+    document.querySelectorAll("#sim-algo-toggle .sim-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-algo") === algorithm);
+    });
+
+    // Show loading state
+    const telemStatus = document.getElementById("sim-telem-status");
+    if (telemStatus) {
+      telemStatus.textContent = "LOADING...";
+      telemStatus.className = "sim-telem-val badge badge-blue";
+    }
+
+    try {
+      const cacheKey = `${graphContext}_${algorithm}`;
+      let data = simTraceCache[cacheKey];
+      if (!data) {
+        showLoader("Loading Trace...", `Retrieving ${algorithm.toUpperCase()} execution trace`);
+        data = await API.getMstTrace(graphContext, algorithm, State.activeScenarioId);
+        simTraceCache[cacheKey] = data;
+        hideLoader();
+      }
+
+      State.simTraceData = data;
+      State.simCurrentStep = 0;
+
+      // Update Map elements
+      if (!simMap) initSimMap();
+      if (simMap) {
+        simAcceptedEdgesLayer.clearLayers();
+        simEvaluatedEdgeLayer.clearLayers();
+        simRejectedEdgeLayer.clearLayers();
+        simNodesLayer.clearLayers();
+        simIncidentMarkerLayer.clearLayers();
+        simNodeMarkers = {};
+
+        const vertices = data.vertices || [];
+        const isDense = vertices.length > 100;
+        const bounds = L.latLngBounds();
+
+        vertices.forEach((v) => {
+          if (v.lat == null || v.lon == null) return;
+          const isIncident = v.id === "incident_0" || v.id.startsWith("inc_");
+          const latlng = [v.lat, v.lon];
+          bounds.extend(latlng);
+
+          if (isIncident) {
+            const incMarker = L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: "#dc2626",
+              color: "#ffffff",
+              weight: 2,
+              fillOpacity: 1.0,
+            }).bindTooltip(`<strong>🚨 Incident Origin</strong><br>${v.name || v.id}`);
+            simIncidentMarkerLayer.addLayer(incMarker);
+          } else {
+            const marker = L.circleMarker(latlng, {
+              radius: isDense ? 3 : 5.5,
+              fillColor: "#94a3b8",
+              color: "#64748b",
+              weight: 1,
+              fillOpacity: 0.85,
+            }).bindTooltip(`<strong>${v.name || v.id}</strong><br><span style="font-family:var(--font-mono); font-size:0.72rem; color:#64748b;">${v.id}</span>`);
+            simNodesLayer.addLayer(marker);
+            simNodeMarkers[v.id] = marker;
+          }
+        });
+
+        if (bounds.isValid()) {
+          simMap.fitBounds(bounds, { padding: [25, 25] });
+        }
+      }
+
+      // Configure scrubber
+      const events = data.events || [];
+      const scrubber = document.getElementById("sim-scrubber");
+      if (scrubber) {
+        scrubber.min = "0";
+        scrubber.max = String(Math.max(0, events.length - 1));
+        scrubber.value = "0";
+      }
+      setText("sim-total-steps", String(events.length));
+
+      // Telemetry label setup (Kruskal uses components, Prim uses visited cut)
+      const compLabel = document.getElementById("sim-telem-comp-label");
+      if (compLabel) {
+        compLabel.textContent = algorithm === "kruskal" ? "Components" : "Visited Cut Nodes";
+      }
+
+      // Render initial step (0)
+      renderSimulatorStep(0);
+    } catch (err) {
+      console.error("Failed to load trace:", err);
+      hideLoader();
+      showErrorBanner(`Failed to load algorithm trace: ${err.message}`);
+      if (telemStatus) {
+        telemStatus.textContent = "ERROR";
+        telemStatus.className = "sim-telem-val badge badge-danger";
+      }
+    }
+  }
+
+  function renderSimulatorStep(stepIndex) {
+    if (!State.simTraceData || !State.simTraceData.events) return;
+    const events = State.simTraceData.events;
+    if (stepIndex < 0 || stepIndex >= events.length) return;
+
+    const prevIndex = State.simCurrentStep;
+    State.simCurrentStep = stepIndex;
+
+    // Update scrubber UI
+    const scrubber = document.getElementById("sim-scrubber");
+    if (scrubber && scrubber.value !== String(stepIndex)) {
+      scrubber.value = String(stepIndex);
+    }
+    setText("sim-step-num", String(stepIndex));
+
+    const curEv = events[stepIndex];
+
+    // Map Updates:
+    if (simMap) {
+      // Clear evaluated & rejected overlays
+      simEvaluatedEdgeLayer.clearLayers();
+      simRejectedEdgeLayer.clearLayers();
+
+      const isSequentialNext = stepIndex === prevIndex + 1;
+
+      if (!isSequentialNext) {
+        // Full rebuild of accepted edges
+        simAcceptedEdgesLayer.clearLayers();
+
+        // Reset non-incident nodes to unvisited grey
+        Object.values(simNodeMarkers).forEach((marker) => {
+          marker.setStyle({ fillColor: "#94a3b8", color: "#64748b" });
+        });
+
+        // Replay all accepted edges up to stepIndex - 1
+        for (let i = 0; i < stepIndex; i++) {
+          const ev = events[i];
+          if (ev.accepted && ev.u_lat != null && ev.v_lat != null) {
+            const poly = L.polyline([[ev.u_lat, ev.u_lon], [ev.v_lat, ev.v_lon]], {
+              color: "#16a34a",
+              weight: 2.4,
+              opacity: 0.85,
+            });
+            simAcceptedEdgesLayer.addLayer(poly);
+
+            if (simNodeMarkers[ev.source_vertex_id]) {
+              simNodeMarkers[ev.source_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+            }
+            if (simNodeMarkers[ev.target_vertex_id]) {
+              simNodeMarkers[ev.target_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+            }
+          }
+        }
+      }
+
+      // Now process the current step event (stepIndex)
+      if (curEv.u_lat != null && curEv.v_lat != null) {
+        const lineCoords = [[curEv.u_lat, curEv.u_lon], [curEv.v_lat, curEv.v_lon]];
+
+        if (curEv.accepted) {
+          // Highlight in blue as currently evaluated edge
+          const evalPoly = L.polyline(lineCoords, {
+            color: "#2563eb",
+            weight: 4.2,
+            opacity: 1.0,
+          });
+          simEvaluatedEdgeLayer.addLayer(evalPoly);
+
+          // Add to accepted layer
+          const permPoly = L.polyline(lineCoords, {
+            color: "#16a34a",
+            weight: 2.4,
+            opacity: 0.85,
+          });
+          simAcceptedEdgesLayer.addLayer(permPoly);
+
+          // Endpoints turn green
+          if (simNodeMarkers[curEv.source_vertex_id]) {
+            simNodeMarkers[curEv.source_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+          }
+          if (simNodeMarkers[curEv.target_vertex_id]) {
+            simNodeMarkers[curEv.target_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+          }
+        } else if (curEv.event_type === "EDGE_REJECTED") {
+          // Candidate edge rejected (e.g. cycle): dashed red line
+          const rejPoly = L.polyline(lineCoords, {
+            color: "#dc2626",
+            weight: 3.5,
+            dashArray: "6, 6",
+            opacity: 0.95,
+          });
+          simRejectedEdgeLayer.addLayer(rejPoly);
+        }
+      }
+    }
+
+    // Telemetry updates
+    const telemStatus = document.getElementById("sim-telem-status");
+    if (telemStatus) {
+      if (curEv.event_type === "COMPLETED") {
+        telemStatus.textContent = "COMPLETED";
+        telemStatus.className = "sim-telem-val badge badge-success";
+      } else if (curEv.accepted) {
+        telemStatus.textContent = State.simIsPlaying ? "PLAYING" : "ACCEPTED";
+        telemStatus.className = "sim-telem-val badge badge-success";
+      } else if (curEv.event_type === "EDGE_REJECTED") {
+        telemStatus.textContent = "CYCLE REJECTED";
+        telemStatus.className = "sim-telem-val badge badge-danger";
+      } else {
+        telemStatus.textContent = "START";
+        telemStatus.className = "sim-telem-val badge badge-blue";
+      }
+    }
+
+    setText("sim-telem-weight", curEv.current_tree_weight_formatted || "0.0000 km");
+    setText("sim-telem-edges", `${curEv.accepted_edge_count || 0} / ${curEv.total_required_edges || 0}`);
+    setText("sim-telem-remaining", String(curEv.remaining_edge_count ?? 0));
+
+    if (State.simAlgorithm === "kruskal") {
+      setText("sim-telem-components", String(curEv.component_count ?? 0));
+    } else {
+      setText("sim-telem-components", String(curEv.visited_vertex_count ?? 0));
+    }
+
+    // Explanation Panel Updates
+    setText("sim-step-type-badge", `Event #${curEv.sequence_number || stepIndex} (${curEv.event_type})`);
+    
+    const decisionBadge = document.getElementById("sim-step-decision-badge");
+    if (decisionBadge) {
+      if (curEv.accepted) {
+        decisionBadge.textContent = "ACCEPTED (TREE LINK)";
+        decisionBadge.className = "badge badge-success";
+      } else if (curEv.event_type === "EDGE_REJECTED") {
+        decisionBadge.textContent = "REJECTED (CYCLE / STALE)";
+        decisionBadge.className = "badge badge-danger";
+      } else if (curEv.event_type === "COMPLETED") {
+        decisionBadge.textContent = "CONSTRUCTION COMPLETE";
+        decisionBadge.className = "badge badge-success";
+      } else {
+        decisionBadge.textContent = "INITIALIZATION";
+        decisionBadge.className = "badge badge-blue";
+      }
+    }
+
+    setText("sim-step-u-name", curEv.u_name || curEv.source_vertex_id || "Root / Graph");
+    setText("sim-step-u-id", curEv.source_vertex_id || "—");
+    setText("sim-step-v-name", curEv.v_name || curEv.target_vertex_id || "—");
+    setText("sim-step-v-id", curEv.target_vertex_id || "—");
+    setText("sim-step-weight", curEv.edge_weight_formatted || "—");
+
+    const principleEl = document.getElementById("sim-step-principle");
+    if (principleEl) {
+      if (State.simAlgorithm === "kruskal") {
+        principleEl.textContent = "Global Edge Sort & Disjoint Set Union (DSU)";
+      } else {
+        principleEl.textContent = "Priority Queue Cut Crossing Selection";
+      }
+    }
+
+    const rationaleBox = document.getElementById("sim-step-rationale-box");
+    if (rationaleBox) {
+      rationaleBox.className = curEv.accepted || curEv.event_type === "COMPLETED" ? "step-rationale-box" : "step-rationale-box rejected";
+    }
+
+    const rationaleText = document.getElementById("sim-step-rationale");
+    if (rationaleText) {
+      rationaleText.textContent = curEv.reason || "Greedy edge evaluation under MST optimality criteria.";
+    }
+  }
+
+  function playSimulator() {
+    if (!State.simTraceData || !State.simTraceData.events) return;
+    const max = State.simTraceData.events.length - 1;
+    if (State.simCurrentStep >= max) {
+      renderSimulatorStep(0);
+    }
+
+    State.simIsPlaying = true;
+    const playBtn = document.getElementById("btn-sim-play");
+    if (playBtn) playBtn.innerHTML = "⏸ Pause";
+
+    clearInterval(State.simTimer);
+    State.simTimer = setInterval(() => {
+      const nextStep = State.simCurrentStep + 1;
+      if (nextStep <= max) {
+        renderSimulatorStep(nextStep);
+      } else {
+        pauseSimulator();
+      }
+    }, State.simSpeedMs);
+  }
+
+  function pauseSimulator() {
+    State.simIsPlaying = false;
+    clearInterval(State.simTimer);
+    State.simTimer = null;
+    const playBtn = document.getElementById("btn-sim-play");
+    if (playBtn) playBtn.innerHTML = "▶ Play";
+  }
+
+  function stepSimulatorNext() {
+    pauseSimulator();
+    if (!State.simTraceData || !State.simTraceData.events) return;
+    const max = State.simTraceData.events.length - 1;
+    if (State.simCurrentStep < max) {
+      renderSimulatorStep(State.simCurrentStep + 1);
+    }
+  }
+
+  function stepSimulatorPrev() {
+    pauseSimulator();
+    if (State.simCurrentStep > 0) {
+      renderSimulatorStep(State.simCurrentStep - 1);
+    }
+  }
+
+  function restartSimulator() {
+    pauseSimulator();
+    renderSimulatorStep(0);
+  }
+
+  async function loadMstComparison(graphContext = "global") {
+    State.simCompareContext = graphContext;
+
+    // Toggle UI buttons
+    document.querySelectorAll("#cmp-context-toggle .sim-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-context") === graphContext);
+    });
+
+    try {
+      showLoader("Evaluating Parity...", "Comparing Prim vs Kruskal execution and invariants");
+      const comp = await API.getMstCompare(graphContext, State.activeScenarioId);
+      hideLoader();
+
+      const k = comp.kruskal_summary || {};
+      const p = comp.prim_summary || {};
+      const parity = comp.parity || {};
+      const reqEdges = comp.required_edges ?? k.tree_edges_count ?? 1254;
+
+      setText("cmp-kruskal-weight", parity.kruskal_weight_formatted || `${k.total_tree_weight || 0} ${comp.weight_unit}`);
+      setText("cmp-kruskal-edges", `${(k.tree_edges_count ?? reqEdges).toLocaleString()} (V - 1)`);
+      const kConn = document.getElementById("cmp-kruskal-connected");
+      if (kConn) {
+        kConn.textContent = k.is_connected ? "YES" : "FOREST";
+        kConn.className = k.is_connected ? "badge badge-success" : "badge badge-gray";
+      }
+
+      setText("cmp-prim-weight", parity.prim_weight_formatted || `${p.total_tree_weight || 0} ${comp.weight_unit}`);
+      setText("cmp-prim-edges", `${(p.tree_edges_count ?? reqEdges).toLocaleString()} (V - 1)`);
+      const pConn = document.getElementById("cmp-prim-connected");
+      if (pConn) {
+        pConn.textContent = p.is_connected ? "YES" : "FOREST";
+        pConn.className = p.is_connected ? "badge badge-success" : "badge badge-gray";
+      }
+
+      const summaryEl = document.getElementById("cmp-parity-summary");
+      if (summaryEl) {
+        summaryEl.textContent = parity.academic_note || "Both algorithms converge to the exact mathematically optimal total weight.";
+      }
+    } catch (err) {
+      console.error("Comparison load failed:", err);
+      hideLoader();
+      showErrorBanner(`Comparison analysis failed: ${err.message}`);
+    }
+  }
+
   function bindMstEvents() {
+    // 1. Sub-navigation tabs (Simulator vs Comparison vs Static)
+    document.querySelectorAll(".mst-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-target");
+        if (target === "mst-view-sim") switchMstSubtab("sim");
+        else if (target === "mst-view-compare") switchMstSubtab("compare");
+        else if (target === "mst-view-static") switchMstSubtab("static");
+      });
+    });
+
+    // 2. Simulator Context toggles
+    const btnCtxGlobal = document.getElementById("btn-sim-ctx-global");
+    const btnCtxIncident = document.getElementById("btn-sim-ctx-incident");
+    if (btnCtxGlobal && btnCtxIncident) {
+      btnCtxGlobal.addEventListener("click", () => loadSimulatorTrace("global", State.simAlgorithm));
+      btnCtxIncident.addEventListener("click", () => loadSimulatorTrace("incident", State.simAlgorithm));
+    }
+
+    // 3. Simulator Algorithm toggles
+    const btnAlgoKruskal = document.getElementById("btn-sim-algo-kruskal");
+    const btnAlgoPrim = document.getElementById("btn-sim-algo-prim");
+    if (btnAlgoKruskal && btnAlgoPrim) {
+      btnAlgoKruskal.addEventListener("click", () => loadSimulatorTrace(State.simGraphContext, "kruskal"));
+      btnAlgoPrim.addEventListener("click", () => loadSimulatorTrace(State.simGraphContext, "prim"));
+    }
+
+    // 4. Playback controls
+    const btnRestart = document.getElementById("btn-sim-restart");
+    const btnPrev = document.getElementById("btn-sim-prev");
+    const btnPlay = document.getElementById("btn-sim-play");
+    const btnNext = document.getElementById("btn-sim-next");
+
+    if (btnRestart) btnRestart.addEventListener("click", restartSimulator);
+    if (btnPrev) btnPrev.addEventListener("click", stepSimulatorPrev);
+    if (btnPlay) {
+      btnPlay.addEventListener("click", () => {
+        if (State.simIsPlaying) pauseSimulator();
+        else playSimulator();
+      });
+    }
+    if (btnNext) btnNext.addEventListener("click", stepSimulatorNext);
+
+    // 5. Scrubber slider
+    const scrubber = document.getElementById("sim-scrubber");
+    if (scrubber) {
+      scrubber.addEventListener("input", (e) => {
+        pauseSimulator();
+        renderSimulatorStep(parseInt(e.target.value, 10));
+      });
+    }
+
+    // 6. Speed selector
+    const speedSelect = document.getElementById("sim-speed-select");
+    if (speedSelect) {
+      speedSelect.addEventListener("change", (e) => {
+        State.simSpeedMs = parseInt(e.target.value, 10) || 200;
+        if (State.simIsPlaying) {
+          playSimulator();
+        }
+      });
+    }
+
+    // 7. Comparison controls
+    const btnCmpGlobal = document.getElementById("btn-cmp-ctx-global");
+    const btnCmpIncident = document.getElementById("btn-cmp-ctx-incident");
+    if (btnCmpGlobal && btnCmpIncident) {
+      btnCmpGlobal.addEventListener("click", () => loadMstComparison("global"));
+      btnCmpIncident.addEventListener("click", () => loadMstComparison("incident"));
+    }
+    const btnRefreshCmp = document.getElementById("btn-refresh-compare");
+    if (btnRefreshCmp) {
+      btnRefreshCmp.addEventListener("click", () => loadMstComparison(State.simCompareContext));
+    }
+
+    // 8. Static MST controls (preserved for backward compatibility)
     const btnKruskal = document.getElementById("btn-mst-kruskal");
     const btnPrim = document.getElementById("btn-mst-prim");
 

@@ -94,14 +94,17 @@ def kruskal_mst(
     vertices: List[Any],
     edges: List[Dict[str, Any]],
     weight_key: str = "weight",
-    track_trace: bool = False
+    track_trace: bool = False,
+    max_rejections: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     Kruskal's Algorithm using manual edge sorting and DSU.
     Accepts vertices and edges with weight attribute.
     Returns MST (or Minimum Spanning Forest if disconnected) and telemetry.
+    When track_trace=True, generates a structured event trace matching the Simulator Event Contract.
     """
     dsu = DisjointSetUnion(vertices)
+    expected_edges = max(0, len(vertices) - 1)
     
     # Construct normalized edge list with strict ordering keys
     normalized_edges = []
@@ -123,59 +126,156 @@ def kruskal_mst(
     mst_edges = []
     total_weight = 0
     trace = [] if track_trace else None
+    seq = 0
+    rejections_count = 0
+
+    if track_trace:
+        seq += 1
+        trace.append({
+            "sequence_number": seq,
+            "algorithm": "kruskal",
+            "event_type": "START",
+            "action": "START",
+            "u": None,
+            "v": None,
+            "source_vertex_id": None,
+            "target_vertex_id": None,
+            "edge_id": None,
+            "edge_weight": 0,
+            "accepted": True,
+            "component_count": dsu.num_components,
+            "dsu_find_ops": dsu.find_ops,
+            "dsu_union_ops": dsu.union_ops,
+            "running_total": 0,
+            "current_tree_weight": 0,
+            "accepted_edge_count": 0,
+            "total_required_edges": expected_edges,
+            "remaining_edge_count": expected_edges,
+            "reason": f"Kruskal's algorithm initialized. {len(normalized_edges)} candidate links sorted; {dsu.num_components} initial disjoint singleton components."
+        })
 
     for rank_idx, edge_item in enumerate(normalized_edges, start=1):
         u, v, w = edge_item["u"], edge_item["v"], edge_item["weight"]
         root_u = dsu.find(u)
         root_v = dsu.find(v)
+        edge_data = edge_item["data"]
         
         if root_u != root_v:
             dsu.union(u, v)
-            mst_edges.append(edge_item["data"])
+            mst_edges.append(edge_data)
             total_weight += w
             if track_trace:
+                seq += 1
                 trace.append({
+                    "sequence_number": seq,
+                    "algorithm": "kruskal",
+                    "event_type": "EDGE_ACCEPTED",
+                    "action": "ACCEPT",
                     "step": len(mst_edges),
                     "rank": rank_idx,
-                    "action": "ACCEPT",
                     "u": u,
                     "v": v,
+                    "source_vertex_id": u,
+                    "target_vertex_id": v,
+                    "edge_id": f"{u}_{v}",
                     "weight": w,
+                    "edge_weight": w,
                     "edge_key": edge_item["key"],
+                    "accepted": True,
                     "comp_u": str(root_u),
                     "comp_v": str(root_v),
+                    "component_u": str(root_u),
+                    "component_v": str(root_v),
                     "running_total": total_weight,
+                    "current_tree_weight": total_weight,
+                    "component_count": dsu.num_components,
                     "dsu_components_remaining": dsu.num_components,
+                    "accepted_edge_count": len(mst_edges),
+                    "total_required_edges": expected_edges,
+                    "remaining_edge_count": max(0, expected_edges - len(mst_edges)),
                     "dsu_find_ops": dsu.find_ops,
                     "dsu_union_ops": dsu.union_ops,
-                    "reason": f"Rank #{rank_idx}: Minimum available link connecting disjoint components ({root_u} ≠ {root_v})."
+                    "reason": f"Rank #{rank_idx}: Minimum available link connecting disjoint components ({root_u} ≠ {root_v}). DSU successfully merged components."
                 })
+            # Early termination when spanning tree is complete
+            if len(mst_edges) == expected_edges and expected_edges > 0:
+                break
         else:
+            rejections_count += 1
             if track_trace:
-                trace.append({
-                    "rank": rank_idx,
-                    "action": "REJECT",
-                    "u": u,
-                    "v": v,
-                    "weight": w,
-                    "edge_key": edge_item["key"],
-                    "comp": str(root_u),
-                    "running_total": total_weight,
-                    "dsu_find_ops": dsu.find_ops,
-                    "dsu_union_ops": dsu.union_ops,
-                    "reason": f"Rank #{rank_idx}: Cycle chord rejected. Endpoints already connected in component {root_u}."
-                })
+                record_reject = True
+                if max_rejections is not None and rejections_count > max_rejections:
+                    record_reject = False
+                if record_reject:
+                    seq += 1
+                    trace.append({
+                        "sequence_number": seq,
+                        "algorithm": "kruskal",
+                        "event_type": "EDGE_REJECTED",
+                        "action": "REJECT",
+                        "rank": rank_idx,
+                        "u": u,
+                        "v": v,
+                        "source_vertex_id": u,
+                        "target_vertex_id": v,
+                        "edge_id": f"{u}_{v}",
+                        "weight": w,
+                        "edge_weight": w,
+                        "edge_key": edge_item["key"],
+                        "accepted": False,
+                        "comp": str(root_u),
+                        "comp_u": str(root_u),
+                        "comp_v": str(root_v),
+                        "component_u": str(root_u),
+                        "component_v": str(root_v),
+                        "running_total": total_weight,
+                        "current_tree_weight": total_weight,
+                        "component_count": dsu.num_components,
+                        "dsu_components_remaining": dsu.num_components,
+                        "accepted_edge_count": len(mst_edges),
+                        "total_required_edges": expected_edges,
+                        "remaining_edge_count": max(0, expected_edges - len(mst_edges)),
+                        "dsu_find_ops": dsu.find_ops,
+                        "dsu_union_ops": dsu.union_ops,
+                        "reason": f"Rank #{rank_idx}: Cycle chord detected. Both endpoints already connected in component {root_u}. Edge rejected."
+                    })
 
     components = dsu.get_components()
     is_connected = len(components) <= 1
-    expected_edges = max(0, len(vertices) - len(components))
+    actual_expected_edges = max(0, len(vertices) - len(components))
+
+    if track_trace:
+        seq += 1
+        trace.append({
+            "sequence_number": seq,
+            "algorithm": "kruskal",
+            "event_type": "COMPLETED",
+            "action": "COMPLETED",
+            "u": None,
+            "v": None,
+            "source_vertex_id": None,
+            "target_vertex_id": None,
+            "edge_id": None,
+            "edge_weight": 0,
+            "accepted": True,
+            "component_count": len(components),
+            "dsu_components_remaining": len(components),
+            "running_total": total_weight,
+            "current_tree_weight": total_weight,
+            "accepted_edge_count": len(mst_edges),
+            "total_required_edges": actual_expected_edges,
+            "remaining_edge_count": 0,
+            "dsu_find_ops": dsu.find_ops,
+            "dsu_union_ops": dsu.union_ops,
+            "reason": f"Kruskal's algorithm completed. Generated {'Minimum Spanning Tree (MST)' if is_connected else 'Minimum Spanning Forest (MSF)'} with {len(mst_edges)} edges across {len(components)} component(s)."
+        })
 
     return {
         "algorithm": "kruskal",
         "mst_edges": mst_edges,
         "edges": mst_edges,
         "edge_count": len(mst_edges),
-        "expected_edge_count": expected_edges,
+        "expected_edge_count": actual_expected_edges,
         "total_integer_weight": total_weight,
         "is_connected": is_connected,
         "num_components": len(components),
@@ -190,11 +290,13 @@ def prim_mst(
     edges: List[Dict[str, Any]],
     weight_key: str = "weight",
     start_vertex: Optional[Any] = None,
-    track_trace: bool = False
+    track_trace: bool = False,
+    max_rejections: Optional[int] = None
 ) -> Dict[str, Any]:
     """
     Prim's Algorithm using Python heapq with lazy deletion and deterministic tie-breaking.
     If graph is disconnected, runs within the start vertex component (or across all components).
+    When track_trace=True, generates a structured event trace matching the Simulator Event Contract.
     """
     if not vertices:
         return {
@@ -208,6 +310,7 @@ def prim_mst(
             "trace": [] if track_trace else None
         }
 
+    expected_edges = max(0, len(vertices) - 1)
     # Deterministic start vertex selection
     sorted_vertices = sorted(vertices, key=lambda x: str(x))
     start_v = start_vertex if start_vertex in vertices else sorted_vertices[0]
@@ -225,6 +328,34 @@ def prim_mst(
     total_weight = 0
     trace = [] if track_trace else None
     heap_ops = 0
+    seq = 0
+    rejections_count = 0
+
+    if track_trace:
+        seq += 1
+        trace.append({
+            "sequence_number": seq,
+            "algorithm": "prim",
+            "event_type": "START",
+            "action": "START",
+            "u": start_v,
+            "v": start_v,
+            "source_vertex_id": start_v,
+            "target_vertex_id": start_v,
+            "edge_id": None,
+            "edge_weight": 0,
+            "accepted": True,
+            "visited_vertex_count": 1,
+            "cut_visited_count": 1,
+            "heap_size": 0,
+            "heap_ops": 0,
+            "running_total": 0,
+            "current_tree_weight": 0,
+            "accepted_edge_count": 0,
+            "total_required_edges": expected_edges,
+            "remaining_edge_count": expected_edges,
+            "reason": f"Prim's algorithm initialized with deterministic root vertex '{start_v}'."
+        })
 
     # Handle multiple connected components deterministically
     components = {}
@@ -256,6 +387,38 @@ def prim_mst(
             w, cu_str, cv_str, s, t, edge_data = heapq.heappop(min_heap)
             heap_ops += 1
             if t in visited:
+                rejections_count += 1
+                if track_trace:
+                    record_reject = True
+                    if max_rejections is not None and rejections_count > max_rejections:
+                        record_reject = False
+                    if record_reject:
+                        seq += 1
+                        trace.append({
+                            "sequence_number": seq,
+                            "algorithm": "prim",
+                            "event_type": "EDGE_REJECTED",
+                            "action": "SKIP",
+                            "u": s,
+                            "v": t,
+                            "source_vertex_id": s,
+                            "target_vertex_id": t,
+                            "edge_id": f"{s}_{t}",
+                            "weight": w,
+                            "edge_weight": w,
+                            "edge_key": (w, cu_str, cv_str),
+                            "accepted": False,
+                            "cut_visited_count": len(visited),
+                            "visited_vertex_count": len(visited),
+                            "heap_size": len(min_heap),
+                            "heap_ops": heap_ops,
+                            "running_total": total_weight,
+                            "current_tree_weight": total_weight,
+                            "accepted_edge_count": len(mst_edges),
+                            "total_required_edges": expected_edges,
+                            "remaining_edge_count": max(0, expected_edges - len(mst_edges)),
+                            "reason": f"Destination vertex '{t}' is already part of the visited tree cut. Candidate link ({s} ⟷ {t}) skipped as a stale priority-queue entry."
+                        })
                 continue
 
             visited.add(t)
@@ -264,18 +427,32 @@ def prim_mst(
             total_weight += w
 
             if track_trace:
+                seq += 1
                 trace.append({
-                    "step": len(mst_edges),
+                    "sequence_number": seq,
+                    "algorithm": "prim",
+                    "event_type": "EDGE_ACCEPTED",
                     "action": "ACCEPT",
+                    "step": len(mst_edges),
                     "u": s,
                     "v": t,
+                    "source_vertex_id": s,
+                    "target_vertex_id": t,
+                    "edge_id": f"{s}_{t}",
                     "weight": w,
+                    "edge_weight": w,
                     "edge_key": (w, cu_str, cv_str),
+                    "accepted": True,
                     "cut_visited_count": len(visited),
+                    "visited_vertex_count": len(visited),
                     "heap_size": len(min_heap),
                     "heap_ops": heap_ops,
                     "running_total": total_weight,
-                    "reason": f"Step #{len(mst_edges)}: Minimal crossing edge ({w}) from tree cut to unvisited vertex {t}."
+                    "current_tree_weight": total_weight,
+                    "accepted_edge_count": len(mst_edges),
+                    "total_required_edges": expected_edges,
+                    "remaining_edge_count": max(0, expected_edges - len(mst_edges)),
+                    "reason": f"Step #{len(mst_edges)}: Minimal crossing edge ({w}) from tree cut to unvisited vertex '{t}'. Edge accepted and '{t}' added to tree."
                 })
 
             push_edges(t)
@@ -283,14 +460,40 @@ def prim_mst(
         components[f"component_{component_idx}"] = comp_members
 
     is_connected = len(components) <= 1
-    expected_edges = max(0, len(vertices) - len(components))
+    actual_expected_edges = max(0, len(vertices) - len(components))
+
+    if track_trace:
+        seq += 1
+        trace.append({
+            "sequence_number": seq,
+            "algorithm": "prim",
+            "event_type": "COMPLETED",
+            "action": "COMPLETED",
+            "u": None,
+            "v": None,
+            "source_vertex_id": None,
+            "target_vertex_id": None,
+            "edge_id": None,
+            "edge_weight": 0,
+            "accepted": True,
+            "visited_vertex_count": len(visited),
+            "cut_visited_count": len(visited),
+            "heap_size": 0,
+            "heap_ops": heap_ops,
+            "running_total": total_weight,
+            "current_tree_weight": total_weight,
+            "accepted_edge_count": len(mst_edges),
+            "total_required_edges": actual_expected_edges,
+            "remaining_edge_count": 0,
+            "reason": f"Prim's algorithm completed. Generated {'Minimum Spanning Tree (MST)' if is_connected else 'Minimum Spanning Forest (MSF)'} spanning {len(visited)} facilities across {len(components)} component(s)."
+        })
 
     return {
         "algorithm": "prim",
         "mst_edges": mst_edges,
         "edges": mst_edges,
         "edge_count": len(mst_edges),
-        "expected_edge_count": expected_edges,
+        "expected_edge_count": actual_expected_edges,
         "total_integer_weight": total_weight,
         "is_connected": is_connected,
         "num_components": len(components),

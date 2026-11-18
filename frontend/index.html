@@ -383,72 +383,364 @@
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 3: MST NETWORK (Visualization First) -->
+        <!-- SECTION 3: MST NETWORK (Algorithm Construction & Verification) -->
         <!-- ================================================================= -->
         <section id="section-mst-network" class="view-section" style="display:none;">
-          <!-- Controls Bar -->
-          <div class="mst-controls-row">
-            <div class="algo-toggle-group">
-              <button class="algo-btn active" id="btn-mst-kruskal" data-algo="kruskal">
-                Kruskal's Algorithm
+          <!-- Top Sub-Navigation Tabs -->
+          <div class="mst-subnav-bar">
+            <div class="mst-tab-group">
+              <button class="mst-tab-btn active" id="tab-mst-sim" data-target="mst-view-sim">
+                ⚡ Construction Simulator
               </button>
-              <button class="algo-btn" id="btn-mst-prim" data-algo="prim">
-                Prim's Algorithm
+              <button class="mst-tab-btn" id="tab-mst-compare" data-target="mst-view-compare">
+                ⚖️ Prim vs Kruskal Convergence
+              </button>
+              <button class="mst-tab-btn" id="tab-mst-static" data-target="mst-view-static">
+                🌐 Static Spanning Tree (1,254 Links)
               </button>
             </div>
-            
-            <div class="mst-stats-pills">
-              <span class="mst-pill"><strong>Vertices:</strong> 1,255</span>
-              <span class="mst-pill"><strong>Edges:</strong> 1,254</span>
-              <span class="mst-pill highlight"><strong>Total Tree Length:</strong> 480.1784 km</span>
-              <span class="mst-pill"><strong>Min Edge:</strong> 0.0000 km</span>
-              <span class="mst-pill"><strong>Max Edge:</strong> 7.8256 km</span>
-              <span class="badge badge-gray" style="font-weight:400;">Schematic Links &bull; Topology Only</span>
+            <div class="mst-subnav-info">
+              <span class="badge badge-blue">Graph Engine: Production Prim & Kruskal</span>
             </div>
           </div>
 
-          <!-- MST Leaflet Map Container -->
-          <div id="mst-map-container" style="height:calc(100vh - 170px); min-height:560px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
-            <div id="mst-leaflet-map" style="height:100%; width:100%;"></div>
-            
-            <!-- Floating Edge Inspector Panel -->
-            <div id="mst-edge-detail-card" class="edge-inspector-card" style="display:none;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="edge-badge">Selected Tree Link</span>
-                <button class="btn-icon" id="btn-close-edge-card">✕</button>
-              </div>
-              <div class="edge-endpoints">
-                <div class="endpoint">
-                  <span class="ep-label">Endpoint U</span>
-                  <div class="ep-name" id="edge-u-name">Facility U</div>
-                  <div class="ep-id" id="edge-u-id">ID</div>
+          <!-- SUBVIEW 1: ALGORITHM CONSTRUCTION SIMULATOR -->
+          <div id="mst-view-sim" class="mst-subview">
+            <!-- Controls & Playback Toolbar -->
+            <div class="sim-controls-panel">
+              <div class="sim-toolbar-row">
+                <!-- Graph Context Selector -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label">Graph Context:</label>
+                  <div class="sim-btn-toggle" id="sim-context-toggle">
+                    <button class="sim-btn active" id="btn-sim-ctx-global" data-context="global">
+                      Global Facility Graph (|V|=1,255)
+                    </button>
+                    <button class="sim-btn" id="btn-sim-ctx-incident" data-context="incident">
+                      Incident-Specific Graph
+                    </button>
+                  </div>
                 </div>
-                <div class="edge-arrow">⟷</div>
-                <div class="endpoint">
-                  <span class="ep-label">Endpoint V</span>
-                  <div class="ep-name" id="edge-v-name">Facility V</div>
-                  <div class="ep-id" id="edge-v-id">ID</div>
+
+                <!-- Algorithm Selector -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label">Algorithm:</label>
+                  <div class="sim-btn-toggle" id="sim-algo-toggle">
+                    <button class="sim-btn active" id="btn-sim-algo-kruskal" data-algo="kruskal">
+                      Kruskal's Algorithm (DSU)
+                    </button>
+                    <button class="sim-btn" id="btn-sim-algo-prim" data-algo="prim">
+                      Prim's Algorithm (Priority Queue)
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div class="edge-metrics-row">
-                <div><strong>Weight (Haversine):</strong> <span id="edge-weight" style="font-family:var(--font-mono); font-weight:700;">0.0000 km</span></div>
-                <div><strong>Algorithm:</strong> <span id="edge-algo">Kruskal</span></div>
-              </div>
-              
-              <!-- Operational explanation -->
-              <div class="edge-rationale" id="edge-rationale">
-                Connects two separate components with minimal weight without creating a cycle.
+
+                <!-- Playback Speed -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label" for="sim-speed-select">Speed:</label>
+                  <select id="sim-speed-select" class="sim-select">
+                    <option value="600">Slow (600 ms)</option>
+                    <option value="200" selected>Normal (200 ms)</option>
+                    <option value="40">Fast (40 ms)</option>
+                  </select>
+                </div>
               </div>
 
-              <!-- Expandable mathematical detail -->
-              <details class="edge-details-toggle" style="margin-top:8px;">
-                <summary style="cursor:pointer; color:var(--primary); font-size:0.75rem; font-weight:600;">
-                  Why was this edge selected? (Mathematical Optimality)
-                </summary>
-                <div style="margin-top:6px; font-size:0.74rem; color:var(--text-muted); line-height:1.45;">
-                  Under the Cycle Property, any non-tree chord closing a cycle with this path has weight &ge; this link. Verified via LCA binary lifting (0 violations across 785,631 candidate edges).
+              <!-- Playback Controls & Scrubber -->
+              <div class="sim-playback-row">
+                <div class="sim-playback-buttons">
+                  <button class="btn btn-outline btn-sm" id="btn-sim-restart" title="Restart to Step 0">
+                    ⏮ Restart
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btn-sim-prev" title="Previous Step">
+                    ◀ Prev
+                  </button>
+                  <button class="btn btn-primary btn-sm" id="btn-sim-play" title="Play or Pause">
+                    ▶ Play
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btn-sim-next" title="Next Step">
+                    Next ▶
+                  </button>
                 </div>
-              </details>
+
+                <div class="sim-scrubber-wrap">
+                  <input type="range" id="sim-scrubber" class="sim-slider" min="0" max="0" value="0" />
+                  <div class="sim-step-counter">
+                    Step <strong id="sim-step-num">0</strong> of <strong id="sim-total-steps">0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Telemetry Strip -->
+            <div class="sim-telemetry-strip">
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">State</span>
+                <span class="sim-telem-val badge badge-gray" id="sim-telem-status">IDLE</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Tree Weight</span>
+                <span class="sim-telem-val highlight" id="sim-telem-weight">0.0000 km</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Accepted Edges</span>
+                <span class="sim-telem-val" id="sim-telem-edges">0 / 0</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Remaining Edges</span>
+                <span class="sim-telem-val" id="sim-telem-remaining">0</span>
+              </div>
+              <div class="sim-telem-card" id="sim-telem-component-card">
+                <span class="sim-telem-label" id="sim-telem-comp-label">Components</span>
+                <span class="sim-telem-val" id="sim-telem-components">1,255</span>
+              </div>
+            </div>
+
+            <!-- Visualizer Map & Step Explanation Panel -->
+            <div class="sim-visualizer-grid">
+              <div class="sim-map-container" style="height:560px; position:relative; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color);">
+                <div id="sim-leaflet-map" style="height:100%; width:100%;"></div>
+                
+                <div class="sim-legend-overlay">
+                  <div class="legend-item"><span class="legend-dot dot-unvisited"></span> Unvisited Vertex</div>
+                  <div class="legend-item"><span class="legend-dot dot-intree"></span> In Tree / Visited Cut</div>
+                  <div class="legend-item"><span class="legend-line line-candidate"></span> Current Evaluated Edge</div>
+                  <div class="legend-item"><span class="legend-line line-accepted"></span> Accepted Tree Edge</div>
+                  <div class="legend-item"><span class="legend-line line-rejected"></span> Cycle / Discarded</div>
+                </div>
+              </div>
+
+              <!-- Dedicated Step Explanation Panel -->
+              <div class="sim-step-panel" id="sim-step-panel">
+                <div class="step-panel-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="step-panel-title">Current Step Explanation</span>
+                    <span class="badge badge-gray" id="sim-step-type-badge">Step 0</span>
+                  </div>
+                  <span class="badge" id="sim-step-decision-badge">PENDING</span>
+                </div>
+
+                <div class="step-panel-body">
+                  <div class="step-edge-endpoints">
+                    <div class="step-endpoint">
+                      <span class="step-ep-role">Endpoint U</span>
+                      <div class="step-ep-name" id="sim-step-u-name">—</div>
+                      <div class="step-ep-id" id="sim-step-u-id">—</div>
+                    </div>
+                    <div class="step-edge-link" id="sim-step-link-arrow">⟷</div>
+                    <div class="step-endpoint">
+                      <span class="step-ep-role">Endpoint V</span>
+                      <div class="step-ep-name" id="sim-step-v-name">—</div>
+                      <div class="step-ep-id" id="sim-step-v-id">—</div>
+                    </div>
+                  </div>
+
+                  <div class="step-metrics-table">
+                    <div class="step-metric-item">
+                      <span class="step-metric-key">Edge Metric (Weight):</span>
+                      <strong class="step-metric-val" id="sim-step-weight">—</strong>
+                    </div>
+                    <div class="step-metric-item">
+                      <span class="step-metric-key">Selection Principle:</span>
+                      <span class="step-metric-val" id="sim-step-principle">Greedy Optimization</span>
+                    </div>
+                  </div>
+
+                  <div class="step-rationale-box" id="sim-step-rationale-box">
+                    <div class="rationale-header">
+                      <span class="rationale-icon">📐</span>
+                      <strong>Mathematical Decision Rationale:</strong>
+                    </div>
+                    <p class="rationale-text" id="sim-step-rationale">
+                      Select an algorithm and click Play or Step Forward to observe the step-by-step construction of the Minimum Spanning Tree.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBVIEW 2: PRIM VS KRUSKAL CONVERGENCE & PARITY ANALYSIS -->
+          <div id="mst-view-compare" class="mst-subview" style="display:none;">
+            <div class="compare-toolbar">
+              <div class="sim-ctrl-group">
+                <label class="sim-ctrl-label">Analysis Graph Target:</label>
+                <div class="sim-btn-toggle" id="cmp-context-toggle">
+                  <button class="sim-btn active" id="btn-cmp-ctx-global" data-context="global">
+                    Global Facility Graph (|V|=1,255)
+                  </button>
+                  <button class="sim-btn" id="btn-cmp-ctx-incident" data-context="incident">
+                    Incident-Specific Graph
+                  </button>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-refresh-compare">
+                🔄 Re-evaluate Parity
+              </button>
+            </div>
+
+            <!-- Parity Banner -->
+            <div class="compare-parity-hero" id="cmp-parity-hero">
+              <div class="parity-badge-wrap">
+                <span class="badge badge-success" style="font-size:0.9rem; padding:6px 14px;">✓ Mathematical Parity Confirmed</span>
+              </div>
+              <h3 class="parity-title">Greedy Convergence to Global Minimum</h3>
+              <p class="parity-subtitle" id="cmp-parity-summary">
+                Both Prim's and Kruskal's algorithms produce spanning trees with exact identical total weight (Δ = 0.0000 km) and exactly |V| - 1 edges, verifying graph connectivity and algorithmic equivalence.
+              </p>
+            </div>
+
+            <!-- Dual Architecture Cards Grid -->
+            <div class="compare-grid">
+              <!-- Kruskal Card -->
+              <div class="compare-algo-card">
+                <div class="algo-card-header">
+                  <span class="algo-card-badge kruskal">Kruskal's Algorithm</span>
+                  <h4 class="algo-card-title">Disjoint Set Forest Merging</h4>
+                </div>
+                <div class="algo-card-body">
+                  <div class="algo-metric-row">
+                    <span class="am-label">Total Tree Metric:</span>
+                    <strong class="am-val" id="cmp-kruskal-weight">480.1784 km</strong>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Edges in Spanning Tree:</span>
+                    <strong class="am-val" id="cmp-kruskal-edges">1,254 (V - 1)</strong>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Connected Tree Verified:</span>
+                    <span class="badge badge-success" id="cmp-kruskal-connected">YES</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Core Data Structure:</span>
+                    <span class="am-val">Disjoint Set Union (Rank & Compression)</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Algorithmic Complexity:</span>
+                    <span class="am-val">O(E log E) sort + O(E α(V)) DSU</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Growth Mechanics:</span>
+                    <span class="am-val">Merges disjoint components globally without cycles</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Prim Card -->
+              <div class="compare-algo-card">
+                <div class="algo-card-header">
+                  <span class="algo-card-badge prim">Prim's Algorithm</span>
+                  <h4 class="algo-card-title">Priority Queue Cut Expansion</h4>
+                </div>
+                <div class="algo-card-body">
+                  <div class="algo-metric-row">
+                    <span class="am-label">Total Tree Metric:</span>
+                    <strong class="am-val" id="cmp-prim-weight">480.1784 km</strong>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Edges in Spanning Tree:</span>
+                    <strong class="am-val" id="cmp-prim-edges">1,254 (V - 1)</strong>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Connected Tree Verified:</span>
+                    <span class="badge badge-success" id="cmp-prim-connected">YES</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Core Data Structure:</span>
+                    <span class="am-val">Min-Heap Priority Queue</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Algorithmic Complexity:</span>
+                    <span class="am-val">O(E log V) binary heap operations</span>
+                  </div>
+                  <div class="algo-metric-row">
+                    <span class="am-label">Growth Mechanics:</span>
+                    <span class="am-val">Grows a single continuous tree cut from root vertex</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mathematical Convergence Note -->
+            <div class="compare-proof-card">
+              <h4 style="margin-bottom:8px; color:var(--text-main); font-size:0.95rem;">
+                📚 Mathematical Theorem: Equivalence of Greedy Decisions
+              </h4>
+              <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-bottom:10px;">
+                <strong>Cut Property:</strong> For any cut (S, V \ S) in connected weighted graph G, if edge e is a minimum-weight crossing edge of the cut, then e belongs to at least one Minimum Spanning Tree of G. Prim's algorithm operates directly on this property by expanding cut S step-by-step.
+              </p>
+              <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-bottom:0;">
+                <strong>Cycle Property:</strong> For any cycle C in G, if edge e is a strictly maximum-weight edge on C, then e cannot belong to any Minimum Spanning Tree. Kruskal's algorithm exploits this property via Disjoint Set Union by rejecting any edge whose endpoints are already connected by a path of smaller or equal weight edges.
+              </p>
+            </div>
+          </div>
+
+          <!-- SUBVIEW 3: STATIC FULL SPANNING TREE (Retained for 100% Backward Compatibility) -->
+          <div id="mst-view-static" class="mst-subview" style="display:none;">
+            <!-- Controls Bar -->
+            <div class="mst-controls-row">
+              <div class="algo-toggle-group">
+                <button class="algo-btn active" id="btn-mst-kruskal" data-algo="kruskal">
+                  Kruskal's Algorithm
+                </button>
+                <button class="algo-btn" id="btn-mst-prim" data-algo="prim">
+                  Prim's Algorithm
+                </button>
+              </div>
+              
+              <div class="mst-stats-pills">
+                <span class="mst-pill"><strong>Vertices:</strong> 1,255</span>
+                <span class="mst-pill"><strong>Edges:</strong> 1,254</span>
+                <span class="mst-pill highlight"><strong>Total Tree Length:</strong> 480.1784 km</span>
+                <span class="mst-pill"><strong>Min Edge:</strong> 0.0000 km</span>
+                <span class="mst-pill"><strong>Max Edge:</strong> 7.8256 km</span>
+                <span class="badge badge-gray" style="font-weight:400;">Schematic Links &bull; Topology Only</span>
+              </div>
+            </div>
+
+            <!-- MST Leaflet Map Container -->
+            <div id="mst-map-container" style="height:calc(100vh - 220px); min-height:540px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
+              <div id="mst-leaflet-map" style="height:100%; width:100%;"></div>
+              
+              <!-- Floating Edge Inspector Panel -->
+              <div id="mst-edge-detail-card" class="edge-inspector-card" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="edge-badge">Selected Tree Link</span>
+                  <button class="btn-icon" id="btn-close-edge-card">✕</button>
+                </div>
+                <div class="edge-endpoints">
+                  <div class="endpoint">
+                    <span class="ep-label">Endpoint U</span>
+                    <div class="ep-name" id="edge-u-name">Facility U</div>
+                    <div class="ep-id" id="edge-u-id">ID</div>
+                  </div>
+                  <div class="edge-arrow">⟷</div>
+                  <div class="endpoint">
+                    <span class="ep-label">Endpoint V</span>
+                    <div class="ep-name" id="edge-v-name">Facility V</div>
+                    <div class="ep-id" id="edge-v-id">ID</div>
+                  </div>
+                </div>
+                <div class="edge-metrics-row">
+                  <div><strong>Weight (Haversine):</strong> <span id="edge-weight" style="font-family:var(--font-mono); font-weight:700;">0.0000 km</span></div>
+                  <div><strong>Algorithm:</strong> <span id="edge-algo">Kruskal</span></div>
+                </div>
+                
+                <!-- Operational explanation -->
+                <div class="edge-rationale" id="edge-rationale">
+                  Connects two separate components with minimal weight without creating a cycle.
+                </div>
+
+                <!-- Expandable mathematical detail -->
+                <details class="edge-details-toggle" style="margin-top:8px;">
+                  <summary style="cursor:pointer; color:var(--primary); font-size:0.75rem; font-weight:600;">
+                    Why was this edge selected? (Mathematical Optimality)
+                  </summary>
+                  <div style="margin-top:6px; font-size:0.74rem; color:var(--text-muted); line-height:1.45;">
+                    Under the Cycle Property, any non-tree chord closing a cycle with this path has weight &ge; this link. Verified via LCA binary lifting (0 violations across 785,631 candidate edges).
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
         </section>

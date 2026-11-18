@@ -123,6 +123,18 @@ const API = (function () {
     async getTrace(scenarioId) {
       return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/trace`, { method: "GET" }, 5000);
     },
+
+    async getMstTrace(graph = "global", algo = "kruskal", scenarioId = null) {
+      let url = `/api/mst/trace?graph=${encodeURIComponent(graph)}&algo=${encodeURIComponent(algo)}`;
+      if (scenarioId) url += `&scenario_id=${encodeURIComponent(scenarioId)}`;
+      return request(url, { method: "GET" }, 15000);
+    },
+
+    async getMstCompare(graph = "global", scenarioId = null) {
+      let url = `/api/mst/compare?graph=${encodeURIComponent(graph)}`;
+      if (scenarioId) url += `&scenario_id=${encodeURIComponent(scenarioId)}`;
+      return request(url, { method: "GET" }, 15000);
+    },
   };
 })();
 
