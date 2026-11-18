@@ -179,7 +179,9 @@ def check_scenario_status(scenario_id):
     status_info = get_scenario_status(scenario_id)
     if not status_info:
         return jsonify({"success": False, "error": {"code": "SCENARIO_NOT_FOUND", "message": f"Scenario '{scenario_id}' not found."}}), 404
-    return jsonify({"success": True, "data": status_info}), 200
+    data = dict(status_info)
+    data["stage"] = status_info.get("stage_index", 1)
+    return jsonify({"success": True, "data": data}), 200
 
 
 @scenarios_bp.route("/scenarios/<scenario_id>", methods=["GET"])
@@ -191,7 +193,22 @@ def get_scenario_full_result(scenario_id):
         status_info = get_scenario_status(scenario_id)
         if not status_info:
             return jsonify({"success": False, "error": {"code": "SCENARIO_NOT_FOUND", "message": f"Scenario '{scenario_id}' not found."}}), 404
-        return jsonify({"success": False, "status": status_info["status"], "message": f"Scenario is {status_info['status']} ({status_info['stage_name']})."}), 202
+        if status_info["status"] == "FAILED":
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "PIPELINE_FAILED",
+                    "message": status_info.get("error_message") or "Scenario execution pipeline failed."
+                }
+            }), 500
+        return jsonify({
+            "success": True,
+            "data": None,
+            "status": status_info["status"],
+            "stage_index": status_info["stage_index"],
+            "stage_name": status_info["stage_name"],
+            "message": f"Scenario is {status_info['status']} ({status_info['stage_name']})."
+        }), 202
     return jsonify({"success": True, "data": res}), 200
 
 

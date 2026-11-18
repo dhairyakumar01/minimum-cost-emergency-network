@@ -1064,7 +1064,8 @@ body {
   position: absolute;
   top: 18px;
   right: 18px;
-  width: 360px;
+  width: 390px;
+  max-width: calc(100% - 36px);
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -1094,6 +1095,7 @@ body {
   background: var(--bg-subtle);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
+  gap: 8px;
 }
 
 .endpoint {
@@ -1113,9 +1115,10 @@ body {
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.35;
 }
 
 .ep-id {
@@ -2141,6 +2144,19 @@ body {
   background: #ffffff;
   margin-bottom: 8px;
   transition: all 0.12s ease;
+}
+
+.ranked-card-top {
+  background: #fffbeb;
+  border-color: #fde68a;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.08);
+}
+
+.ranked-card-top .ranked-rank {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #d97706;
+  font-weight: 700;
 }
 
 .ranked-card:hover {

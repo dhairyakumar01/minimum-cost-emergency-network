@@ -29,8 +29,8 @@ const API = (function () {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        const errorMsg = data?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-        const errorCode = data?.error?.code || "HTTP_ERROR";
+        const errorMsg = data?.error?.message || data?.message || `HTTP ${response.status}: ${response.statusText}`;
+        const errorCode = data?.error?.code || data?.code || "HTTP_ERROR";
         const err = new Error(errorMsg);
         err.code = errorCode;
         err.status = response.status;
@@ -39,8 +39,10 @@ const API = (function () {
       }
 
       if (data && data.success === false) {
-        const err = new Error(data.error?.message || "Operation failed");
-        err.code = data.error?.code || "API_ERROR";
+        const errorMsg = data?.error?.message || data?.message || "Operation failed";
+        const errorCode = data?.error?.code || data?.code || "API_ERROR";
+        const err = new Error(errorMsg);
+        err.code = errorCode;
         throw err;
       }
 
@@ -101,15 +103,15 @@ const API = (function () {
       return request("/api/scenarios", {
         method: "POST",
         body: JSON.stringify(payload),
-      }, 10000);
+      }, 15000);
     },
 
     async getScenarioStatus(scenarioId) {
-      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/status`, { method: "GET" }, 4000);
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/status`, { method: "GET" }, 8000);
     },
 
     async getScenarioResult(scenarioId) {
-      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/result`, { method: "GET" }, 8000);
+      return request(`/api/scenarios/${encodeURIComponent(scenarioId)}/result`, { method: "GET" }, 15000);
     },
 
     async listScenarios() {

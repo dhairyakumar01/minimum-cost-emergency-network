@@ -47,6 +47,11 @@
     simAgency: "hospital",
     simRadiusKm: 5.0,
     simMode: "time",
+    compromiseK: 5,
+    simRequestCounter: 0,
+    lastCompletedFingerprint: null,
+    isSimulationStale: false,
+    activeScenarioData: null,
     
     // MST State
     mstAlgorithm: "kruskal",
@@ -360,7 +365,13 @@
 
     const badge = document.getElementById("rendered-facilities-count");
     if (badge) {
-      badge.textContent = `Displaying ${filtered.length.toLocaleString()} of ${State.facilities.length.toLocaleString()} facilities`;
+      if (State.activeSearchTerm && filtered.length === 0) {
+        badge.textContent = "No registered emergency facility matched this query.";
+        badge.className = "badge badge-amber";
+      } else {
+        badge.textContent = `Displaying ${filtered.length.toLocaleString()} of ${State.facilities.length.toLocaleString()} facilities`;
+        badge.className = "badge badge-gray";
+      }
     }
 
     const newMarkers = [];
@@ -401,7 +412,7 @@
       });
     });
 
-    // Facility Search & Geocoding
+    // Facility Search (Registered Facilities Only)
     const searchInput = document.getElementById("facility-map-search");
     if (searchInput) {
       let timer = null;
@@ -413,24 +424,41 @@
         }, 150);
       });
 
-      searchInput.addEventListener("keydown", async (e) => {
+      searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
-          const q = searchInput.value.trim();
+          const q = searchInput.value.trim().toLowerCase();
+          if (q.length >= 2) {
+            const match = State.facilities.find(
+              (f) =>
+                f.facility_name.toLowerCase().includes(q) ||
+                f.facility_id.toLowerCase().includes(q)
+            );
+            if (match) {
+              if (facMap) facMap.setView([match.latitude, match.longitude], 15);
+              showFacilityDetailsCard(match);
+            }
+          }
+        }
+      });
+    }
+
+    // Landmark / Address Geocoding Search (Incident Location Pinning)
+    const incSearchInput = document.getElementById("incident-location-search");
+    if (incSearchInput) {
+      incSearchInput.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter") {
+          const q = incSearchInput.value.trim();
           if (q.length >= 2) {
             try {
               const res = await API.geocode(q);
               const candidates = res.candidates || [];
               if (candidates.length > 0) {
                 const topCand = candidates[0];
-                if (facMap) facMap.setView([topCand.latitude, topCand.longitude], 14);
-                if (topCand.type === "facility" && topCand.facility_id && State.facilitiesById[topCand.facility_id]) {
-                  showFacilityDetailsCard(State.facilitiesById[topCand.facility_id]);
-                } else {
-                  placeIncidentMarker(topCand.latitude, topCand.longitude, topCand.label);
-                }
+                placeIncidentMarker(topCand.latitude, topCand.longitude, topCand.label);
+                if (facMap) facMap.setView([topCand.latitude, topCand.longitude], 15);
               }
             } catch (err) {
-              console.warn("Geocode query failed:", err);
+              console.warn("Incident landmark query failed:", err);
             }
           }
         }
@@ -526,6 +554,35 @@
     }
   }
 
+  function getSimulationFingerprint() {
+    if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
+      return "unset";
+    }
+    return [
+      roundCoord(State.incident.lat).toFixed(5),
+      roundCoord(State.incident.lon).toFixed(5),
+      State.simCategory,
+      State.simAgency,
+      (State.simRadiusKm || 5.0).toFixed(1),
+      State.simMode,
+      State.simMode === "compromise" ? (State.compromiseK !== undefined ? State.compromiseK : 5) : "na",
+    ].join("|");
+  }
+
+  function invalidateSimulationResults(reason) {
+    if (!State.activeScenarioData) return;
+    const currentFp = getSimulationFingerprint();
+    if (currentFp !== State.lastCompletedFingerprint) {
+      State.isSimulationStale = true;
+      const staleEl = document.getElementById("sim-stale-notice");
+      if (staleEl) staleEl.style.display = "flex";
+    } else {
+      State.isSimulationStale = false;
+      const staleEl = document.getElementById("sim-stale-notice");
+      if (staleEl) staleEl.style.display = "none";
+    }
+  }
+
   function placeIncidentMarker(lat, lon, label = "Incident Point") {
     State.incident = {
       lat: roundCoord(lat),
@@ -594,6 +651,7 @@
     }
 
     updateSimulationCandidateCount();
+    invalidateSimulationResults("incident_placed");
   }
 
   function confirmIncidentLocation() {
@@ -635,6 +693,7 @@
 
     setIncidentSelectMode(false);
     updateSimulationUI();
+    invalidateSimulationResults("incident_cleared");
   }
 
   function showFacilityDetailsCard(fac) {
@@ -1413,6 +1472,7 @@
         }
       });
       setText("sum-category", this.getCategoryLabel(catKey));
+      invalidateSimulationResults("category");
     },
 
     selectAgency(agencyKey) {
@@ -1428,11 +1488,13 @@
       setText("sum-agency", `${AGENCY_LABELS[agencyKey]} (${rateInfo.vehicle} &bull; ₹${rateInfo.rate.toFixed(2)}/km)`);
 
       updateSimulationCandidateCount();
+      invalidateSimulationResults("agency");
     },
 
     onRadiusChange(val) {
       State.simRadiusKm = parseFloat(val);
       updateSimulationCandidateCount();
+      invalidateSimulationResults("radius");
     },
 
     selectMode(modeKey) {
@@ -1456,6 +1518,7 @@
         "compromise": `Compromise Trade-Off (k=${State.compromiseK !== undefined ? State.compromiseK : 5}/10)`,
       };
       setText("sum-mode", modeNames[modeKey] || modeKey);
+      invalidateSimulationResults("mode");
     },
 
     onCompromiseKChange(val) {
@@ -1468,6 +1531,7 @@
       if (State.simMode === "compromise") {
         setText("sum-mode", `Compromise Trade-Off (k=${k}/10)`);
       }
+      invalidateSimulationResults("compromise_k");
     },
 
     switchSimTab(tabId) {
@@ -1532,14 +1596,25 @@
       const listEl = document.getElementById("sim-ranked-facilities-list");
       const statusEl = document.getElementById("sim-exec-status");
       const btnRun = document.getElementById("btn-run-simulation");
+      const simErrorBox = document.getElementById("sim-error-box");
+      const simErrorMsg = document.getElementById("sim-error-msg");
+      const staleNotice = document.getElementById("sim-stale-notice");
+
+      if (simErrorBox) simErrorBox.style.display = "none";
 
       if (!State.incident.isSet || State.incident.lat == null || State.incident.lon == null) {
         if (statusEl) statusEl.textContent = "Please place or select an incident location first.";
-        showErrorBanner("Incident location is not set. Place a pin or select a preset.");
+        if (simErrorBox && simErrorMsg) {
+          simErrorMsg.textContent = "Incident location is not set. Place a pin or select a preset.";
+          simErrorBox.style.display = "flex";
+        }
         return;
       }
 
-      hideErrorBanner();
+      // Concurrency tracking: increment request counter
+      const thisRequestId = ++State.simRequestCounter;
+      const thisFingerprint = getSimulationFingerprint();
+
       if (btnRun) {
         btnRun.disabled = true;
         btnRun.innerHTML = `<span>⏳ Analyzing Network...</span>`;
@@ -1595,17 +1670,33 @@
           throw new Error("Backend did not return a scenario_id.");
         }
 
-        if (statusEl) statusEl.textContent = `Scenario ${scenarioId} running...`;
+        // Check if superseded before polling
+        if (thisRequestId !== State.simRequestCounter) return;
 
-        // Polling loop
+        if (statusEl) statusEl.textContent = `Scenario ${scenarioId.substring(0, 8)} running...`;
+
+        // Robust polling loop (up to 45s, interval 600ms, retry resilience)
         const startTime = Date.now();
         let scenarioData = null;
+        let consecutiveErrors = 0;
 
-        while (Date.now() - startTime < 35000) {
-          await new Promise((r) => setTimeout(r, 400));
-          const statusInfo = await API.getScenarioStatus(scenarioId);
+        while (Date.now() - startTime < 45000) {
+          await new Promise((r) => setTimeout(r, 600));
+          if (thisRequestId !== State.simRequestCounter) return;
 
-          const stageNum = statusInfo.stage || 1;
+          let statusInfo;
+          try {
+            statusInfo = await API.getScenarioStatus(scenarioId);
+            consecutiveErrors = 0;
+          } catch (pollErr) {
+            consecutiveErrors++;
+            if (consecutiveErrors > 4) {
+              throw pollErr;
+            }
+            continue;
+          }
+
+          const stageNum = statusInfo.stage_index || statusInfo.stage || 1;
           const stageName = statusInfo.stage_name || "Running";
 
           // Update stage indicators
@@ -1640,8 +1731,27 @@
           }
         }
 
-        // Fetch completed result payload
-        scenarioData = await API.getScenarioResult(scenarioId);
+        if (thisRequestId !== State.simRequestCounter) return;
+
+        // Fetch completed result payload with retry
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            scenarioData = await API.getScenarioResult(scenarioId);
+            if (scenarioData) break;
+          } catch (resErr) {
+            if (attempt === 2) throw resErr;
+            await new Promise((r) => setTimeout(r, 600));
+          }
+        }
+
+        // Final concurrency check before rendering
+        if (thisRequestId !== State.simRequestCounter) return;
+
+        // Store active scenario data and fingerprint
+        State.activeScenarioData = scenarioData;
+        State.lastCompletedFingerprint = thisFingerprint;
+        State.isSimulationStale = false;
+        if (staleNotice) staleNotice.style.display = "none";
 
         // Render Results into All 4 Tabs
         renderScenarioResults(scenarioData);
@@ -1655,7 +1765,10 @@
         }
       } catch (err) {
         console.error("Simulation error:", err);
-        showErrorBanner(`Simulation execution failed: ${err.message}`);
+        if (simErrorBox && simErrorMsg) {
+          simErrorMsg.textContent = `Simulation execution failed: ${err.message}`;
+          simErrorBox.style.display = "flex";
+        }
         if (statusEl) statusEl.textContent = `Error: ${err.message}`;
         if (pipelineBadge) {
           pipelineBadge.className = "badge badge-red";
@@ -1700,7 +1813,7 @@
 
       top3.forEach((fac) => {
         const row = document.createElement("div");
-        row.className = "ranked-card";
+        row.className = fac.rank === 1 ? "ranked-card ranked-card-top" : "ranked-card";
         const vehicle = fac.vehicle_type || AGENCY_RATES[State.simAgency]?.vehicle || "Fleet Unit";
         const agencyLbl = AGENCY_LABELS[fac.agency] || fac.agency;
         const timeMin = fac.travel_time_min !== undefined ? fac.travel_time_min : (fac.travel_time_minutes || (fac.travel_time_ds / 600));
@@ -1921,7 +2034,11 @@
   // --------------------------------------------------------------------------
 
   let simMstMap = null;
-  let simMstLayers = null;
+  let simLayerControl = null;
+  let simBackboneLayer = null;
+  let simDispatchRouteLayer = null;
+  let simFacilitiesLayer = null;
+  let simIncidentLayer = null;
   let simBounds = null;
 
   function renderSimulationNetworkMap(res) {
@@ -1935,14 +2052,29 @@
         zoom: 12,
         zoomControl: true,
       });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(simMstMap);
-      simMstLayers = L.layerGroup().addTo(simMstMap);
+
+      simBackboneLayer = L.layerGroup().addTo(simMstMap);
+      simDispatchRouteLayer = L.layerGroup().addTo(simMstMap);
+      simFacilitiesLayer = L.layerGroup().addTo(simMstMap);
+      simIncidentLayer = L.layerGroup().addTo(simMstMap);
+
+      const overlays = {
+        "🕸️ MST/MSF Backbone": simBackboneLayer,
+        "🚑 Recommended Dispatch Route": simDispatchRouteLayer,
+        "🏢 Connected Facilities": simFacilitiesLayer,
+        "🚨 Incident Location": simIncidentLayer,
+      };
+      simLayerControl = L.control.layers(null, overlays, { collapsed: false, position: "topright" }).addTo(simMstMap);
     }
 
-    simMstLayers.clearLayers();
+    simBackboneLayer.clearLayers();
+    simDispatchRouteLayer.clearLayers();
+    simFacilitiesLayer.clearLayers();
+    simIncidentLayer.clearLayers();
     simBounds = L.latLngBounds();
 
     const inc = res.incident || State.incident;
@@ -2004,7 +2136,7 @@
           </div>
         </div>
       `);
-      simMstLayers.addLayer(incMarker);
+      simIncidentLayer.addLayer(incMarker);
     }
 
     // 3. Collect Facilities in MST
@@ -2038,13 +2170,15 @@
       simBounds.extend(latLng);
 
       const color = agencyColors[fac.agency] || "#dc2626";
+      const isTopRanked = ranking.length > 0 && ranking[0].facility_id === fid;
       const marker = L.circleMarker(latLng, {
-        radius: 6,
-        fillColor: color,
-        color: "#ffffff",
-        weight: 2,
+        radius: isTopRanked ? 9 : 6,
+        fillColor: isTopRanked ? "#f59e0b" : color,
+        color: isTopRanked ? "#78350f" : "#ffffff",
+        weight: isTopRanked ? 3 : 2,
         opacity: 1,
-        fillOpacity: 0.9,
+        fillOpacity: 0.92,
+        zIndexOffset: isTopRanked ? 1500 : 500,
       });
 
       const timeMin = fac.travel_time_min !== undefined ? Number(fac.travel_time_min).toFixed(1) : (fac.travel_time_ds ? (fac.travel_time_ds / 600).toFixed(1) : "N/A");
@@ -2052,6 +2186,7 @@
 
       marker.bindPopup(`
         <div style="font-size:0.80rem; line-height:1.45;">
+          ${isTopRanked ? '<span class="badge badge-amber" style="font-size:0.70rem; margin-bottom:4px; font-weight:700;">⭐ #1 RECOMMENDED DISPATCH FACILITY</span><br/>' : ''}
           <span class="badge ${fac.agency === 'police' ? 'badge-blue' : (fac.agency === 'fire' ? 'badge-amber' : 'badge-red')}" style="font-size:0.68rem; margin-bottom:4px; text-transform:uppercase;">
             ${escapeHtml(fac.agency || "Agency")}
           </span>
@@ -2066,10 +2201,20 @@
         </div>
       `);
 
-      simMstLayers.addLayer(marker);
+      simFacilitiesLayer.addLayer(marker);
     });
 
-    // 4. Render MST / MSF Edges with Genuine Road Geometry
+    // 4. Identify Top Dispatch Recommended Edges
+    const topRankId = ranking.length > 0 ? ranking[0].facility_id : null;
+    const topTelemetry = (res.network_position?.node_telemetry || []).find(t => t.facility_id === topRankId);
+    const topPathNodes = topTelemetry?.path || [];
+    const topPathEdgePairs = new Set();
+    for (let i = 0; i < topPathNodes.length - 1; i++) {
+      topPathEdgePairs.add(`${topPathNodes[i]}__${topPathNodes[i+1]}`);
+      topPathEdgePairs.add(`${topPathNodes[i+1]}__${topPathNodes[i]}`);
+    }
+
+    // 5. Render MST / MSF Edges with Layer Separation & Amber Styling for Dispatch Route
     edges.forEach((edge) => {
       let uCoord = null;
       let vCoord = null;
@@ -2095,23 +2240,30 @@
       const durMin = (((edge.duration_ds || 0) / 10) / 60).toFixed(1);
       const distKm = (((edge.distance_dm || 0) / 10) / 1000).toFixed(2);
 
+      const isTopDispatch = (topRankId && ((edge.u === "incident_0" && edge.v === topRankId) || (edge.v === "incident_0" && edge.u === topRankId))) ||
+                            topPathEdgePairs.has(`${edge.u}__${edge.v}`);
+
       let polyline = null;
       const isGenuineRoad = Boolean(edge.is_road_route && edge.geometry && edge.geometry.length > 1);
 
+      const strokeColor = isTopDispatch ? "#f59e0b" : "#2563eb";
+      const strokeWeight = isTopDispatch ? 5.5 : 3.5;
+      const strokeOpacity = isTopDispatch ? 0.95 : 0.82;
+
       if (isGenuineRoad) {
         polyline = L.polyline(edge.geometry, {
-          color: "#2563eb",
-          weight: 3.5,
-          opacity: 0.82,
+          color: strokeColor,
+          weight: strokeWeight,
+          opacity: strokeOpacity,
           lineJoin: "round",
         });
         edge.geometry.forEach((pt) => simBounds.extend(pt));
       } else {
         polyline = L.polyline([uCoord, vCoord], {
-          color: "#d97706",
-          weight: 2.2,
-          opacity: 0.75,
-          dashArray: "6, 6",
+          color: isTopDispatch ? "#f59e0b" : "#d97706",
+          weight: isTopDispatch ? 4.5 : 2.2,
+          opacity: 0.85,
+          dashArray: isTopDispatch ? "8, 4" : "6, 6",
         });
         simBounds.extend(uCoord);
         simBounds.extend(vCoord);
@@ -2119,6 +2271,7 @@
 
       const popupHtml = `
         <div style="font-size:0.78rem; line-height:1.45;">
+          ${isTopDispatch ? '<span class="badge badge-amber" style="font-size:0.70rem; margin-bottom:4px; font-weight:700;">🚑 TOP RECOMMENDED DISPATCH ROUTE</span><br/>' : ''}
           <span class="badge ${isGenuineRoad ? 'badge-blue' : 'badge-amber'}" style="font-size:0.66rem; margin-bottom:4px;">
             ${isGenuineRoad ? '🛣️ GENUINE ROAD-NETWORK LINK' : '⚠️ SCHEMATIC STRAIGHT-LINE (Fallback)'}
           </span>
@@ -2134,14 +2287,14 @@
       polyline.bindPopup(popupHtml);
 
       polyline.on("mouseover", function () {
-        this.setStyle({ weight: 5, color: "#1d4ed8", opacity: 1 });
+        this.setStyle({ weight: strokeWeight + 2, color: isTopDispatch ? "#d97706" : "#1d4ed8", opacity: 1 });
         const tt = document.getElementById("sim-map-tooltip-card");
         const ttTitle = document.getElementById("sim-tt-title");
         const ttDesc = document.getElementById("sim-tt-desc");
         const ttBadge = document.getElementById("sim-tt-badge");
         if (tt && ttTitle && ttDesc && ttBadge) {
-          ttBadge.className = isGenuineRoad ? "badge badge-blue" : "badge badge-amber";
-          ttBadge.textContent = isGenuineRoad ? "OSRM Road Route" : "Schematic Fallback";
+          ttBadge.className = isTopDispatch ? "badge badge-amber" : (isGenuineRoad ? "badge badge-blue" : "badge badge-amber");
+          ttBadge.textContent = isTopDispatch ? "Top Dispatch Link" : (isGenuineRoad ? "OSRM Road Route" : "Schematic Fallback");
           ttTitle.textContent = `${uName} ⟷ ${vName}`;
           ttDesc.textContent = `Duration: ${durMin} min • Road Dist: ${distKm} km`;
           tt.style.display = "block";
@@ -2150,13 +2303,17 @@
 
       polyline.on("mouseout", function () {
         this.setStyle({
-          weight: isGenuineRoad ? 3.5 : 2.2,
-          color: isGenuineRoad ? "#2563eb" : "#d97706",
-          opacity: isGenuineRoad ? 0.82 : 0.75,
+          weight: strokeWeight,
+          color: strokeColor,
+          opacity: strokeOpacity,
         });
       });
 
-      simMstLayers.addLayer(polyline);
+      if (isTopDispatch) {
+        simDispatchRouteLayer.addLayer(polyline);
+      } else {
+        simBackboneLayer.addLayer(polyline);
+      }
     });
 
     if (simBounds.isValid()) {

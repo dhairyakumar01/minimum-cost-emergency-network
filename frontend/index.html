@@ -112,33 +112,22 @@
         <!-- SECTION 1: DASHBOARD (Operational Overview) -->
         <!-- ================================================================= -->
         <section id="section-dashboard" class="view-section">
-          <!-- Operational Hero Banner -->
+          <!-- Executive Header -->
           <div class="dashboard-hero">
             <div>
               <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
               <p class="dash-subtitle">
-                Discrete Mathematics &amp; Graph Theory (DMGT) &bull; Spatial Optimization for BBMP Bengaluru
+                Graph-Theoretic Topology Optimization &amp; Incident Dispatch for BBMP Bengaluru (DMGT 25BSMA10)
               </p>
-            </div>
-            <div class="dash-actions">
-              <button class="btn btn-primary" onclick="Navigation.navigateTo('simulation')">
-                🚨 Launch Simulation
-              </button>
-              <button class="btn btn-outline" onclick="Navigation.navigateTo('mst-network')">
-                🕸️ Inspect Global MST
-              </button>
-              <button class="btn btn-outline" onclick="Navigation.navigateTo('facilities-map')">
-                🗺️ Facilities Map
-              </button>
             </div>
           </div>
 
           <!-- 4 Primary Key Metric Cards -->
           <div class="metrics-grid">
             <div class="metric-card">
-              <div class="metric-label"><span>🏥</span> Total Facilities</div>
+              <div class="metric-label"><span>🏥</span> Total Registered Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Geocoded municipal facility records</div>
+              <div class="metric-subtext">Geocoded municipal emergency records</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🏢</span> Facility Composition</div>
@@ -150,112 +139,57 @@
               <div class="metric-subtext">Hospitals (87.4%), Police (11.0%), Fire (1.6%)</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label"><span>🔗</span> Global MST Links</div>
+              <div class="metric-label"><span>🔗</span> Total Network Connections</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
               <div class="metric-subtext">Tree edge-count property (|V| − 1 for connected tree)</div>
             </div>
             <div class="metric-card highlight-card">
-              <div class="metric-label"><span>📏</span> Global Network Length</div>
+              <div class="metric-label"><span>📏</span> Total Network Length</div>
               <div class="metric-value" id="metric-mst-length">480.1784 km</div>
               <div class="metric-subtext">Optimal Haversine-distance spanning tree</div>
             </div>
           </div>
 
-          <!-- Dashboard Two-Column Operations Layout -->
-          <div class="dashboard-grid">
-            <!-- Left: Bengaluru GIS Overview Map -->
-            <div class="card" style="margin-bottom:0;">
-              <div class="card-header">
-                <div>
-                  <h3 class="card-title">Geospatial Distribution Overview</h3>
-                  <p class="card-subtitle">BBMP Municipal Boundary &bull; Interactive spatial cluster preview</p>
-                </div>
-                <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
-                  Open Full GIS Map &rarr;
-                </button>
+          <!-- Geographic Network Overview (Full Width) -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Geographic Network Overview</h3>
+                <p class="card-subtitle">Spatial distribution of emergency facilities across the Bruhat Bengaluru Mahanagara Palike (BBMP) jurisdiction</p>
               </div>
-              <div class="overview-map-container">
-                <div id="dashboard-overview-map" class="overview-map-el"></div>
-              </div>
+              <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
+                Open Full Facilities Map &rarr;
+              </button>
             </div>
-
-            <!-- Right: Executive Launchpad & Municipal Scope Card -->
-            <div class="card dash-status-card" style="margin-bottom:0;">
-              <div class="card-header">
-                <div>
-                  <h3 class="card-title">Municipal Emergency Framework</h3>
-                  <p class="card-subtitle">BBMP administrative first-response architecture</p>
-                </div>
-                <span class="badge badge-green">Ready</span>
-              </div>
-
-              <div class="framework-scope-grid">
-                <div class="scope-item">
-                  <div class="scope-icon">📍</div>
-                  <div class="scope-text">
-                    <div class="scope-title">Study Jurisdiction</div>
-                    <div class="scope-desc">Bruhat Bengaluru Mahanagara Palike (198 Wards, 8 Zones)</div>
-                  </div>
-                </div>
-                <div class="scope-item">
-                  <div class="scope-icon">📐</div>
-                  <div class="scope-text">
-                    <div class="scope-title">Complete Graph Topology</div>
-                    <div class="scope-desc"><i>K</i>₁₂₅₅ complete metric graph &bull; 786,885 candidate edges</div>
-                  </div>
-                </div>
-                <div class="scope-item">
-                  <div class="scope-icon">⏱️</div>
-                  <div class="scope-text">
-                    <div class="scope-title">Dual-Layer Optimization</div>
-                    <div class="scope-desc">Layer 1 MST physical backbone + Layer 2 road dispatch</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="launchpad-box" style="margin-top:16px; padding:14px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
-                <div style="font-size:0.78rem; font-weight:700; color:var(--text-main); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Quick Navigation</div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <button class="btn btn-primary" onclick="Navigation.navigateTo('simulation')" style="justify-content:flex-start;">
-                    🚨 Run Incident Simulation &rarr;
-                  </button>
-                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
-                      🗺️ Facilities Map
-                    </button>
-                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('mst-network')">
-                      🕸️ Global MST
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div class="overview-map-container" style="height:420px;">
+              <div id="dashboard-overview-map" class="overview-map-el"></div>
             </div>
           </div>
 
-          <!-- Facility Distribution Breakdown -->
+          <!-- Compact Facility Distribution Summary -->
           <div class="card">
             <div class="card-header">
               <div>
-                <h3 class="card-title">Emergency Response Fleet & Facilities Breakdown</h3>
-                <p class="card-subtitle">Operational inventory across Bengaluru's three primary first-response agencies</p>
+                <h3 class="card-title">Facility Distribution</h3>
+                <p class="card-subtitle">Municipal first-response facilities registered across Bengaluru</p>
               </div>
             </div>
             
             <div class="agency-dist-grid">
               <div class="agency-dist-box box-hospital">
-                <div class="dist-box-title">Hospitals & Clinics</div>
+                <div class="dist-box-title">Hospitals &amp; Healthcare Facilities</div>
                 <div class="dist-box-val">1,097 <span style="font-size:0.85rem; color:#dc2626; font-weight:600;">(87.4%)</span></div>
-                <div class="dist-box-meta">Ambulance Fleet &bull; BLS / ALS Units &bull; Rate: ₹12.50 / km</div>
+                <div class="dist-box-meta">Tertiary hospitals, government medical colleges, trauma care, and community health centers</div>
               </div>
               <div class="agency-dist-box box-police">
-                <div class="dist-box-title">Police Stations</div>
+                <div class="dist-box-title">Police Stations &amp; Law Enforcement</div>
                 <div class="dist-box-val">138 <span style="font-size:0.85rem; color:#2563eb; font-weight:600;">(11.0%)</span></div>
-                <div class="dist-box-meta">Law Enforcement &bull; Hoysala Patrol &bull; Rate: ₹6.25 / km</div>
+                <div class="dist-box-meta">Bengaluru City Police jurisdictional law enforcement stations and traffic command divisions</div>
               </div>
               <div class="agency-dist-box box-fire">
-                <div class="dist-box-title">Fire Stations</div>
+                <div class="dist-box-title">Fire &amp; Emergency Response Stations</div>
                 <div class="dist-box-val">20 <span style="font-size:0.85rem; color:#ea580c; font-weight:600;">(1.6%)</span></div>
-                <div class="dist-box-meta">Rescue & HazMat &bull; Fire Appliance &bull; Rate: ₹18.00 / km</div>
+                <div class="dist-box-meta">Karnataka State Fire &amp; Emergency Services hazmat, rescue, and structural fire stations</div>
               </div>
             </div>
 
@@ -347,6 +281,10 @@
               <div class="coord-field">
                 <label>Lon:</label>
                 <input type="number" id="incident-lon-input" step="0.00001" placeholder="77.5946" />
+              </div>
+              <div class="coord-field" style="flex:1; min-width:220px;">
+                <label>Find Landmark / Address:</label>
+                <input type="text" id="incident-location-search" placeholder="Search landmark (e.g. Majestic, Indiranagar)..." style="width:100%; padding:4px 8px; border:1px solid var(--border-color); border-radius:4px; font-size:0.78rem;" />
               </div>
               <div class="landmarks-list">
                 <span class="landmark-label">Presets:</span>
@@ -1022,11 +960,31 @@
                     <span>4. Ranking Emergency Dispatch Recommendations</span>
                   </div>
                 </div>
+                <!-- Dedicated Simulation Error Banner -->
+                <div id="sim-error-box" class="tab-notice-banner tab-notice-red" style="display:none; margin-top:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
+                  <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-size:1.1rem;">⚠️</span>
+                      <span id="sim-error-msg" style="font-weight:600; font-size:0.80rem;">Simulation execution encountered an issue.</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="btn-retry-simulation" onclick="App.runSimulation()" style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
+                      🔄 Retry Analysis
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- 4-Tab Simulation Results Workspace -->
               <div id="sim-results-output" style="display:none;">
                 
+                <!-- Stale Results Notice -->
+                <div id="sim-stale-notice" class="tab-notice-banner" style="display:none; margin-bottom:12px; background:#fffbeb; border:1px solid #fef3c7; color:#92400e; padding:10px 14px; border-radius:var(--radius-sm); align-items:center; gap:10px;">
+                  <span style="font-size:1.2rem;">⚠️</span>
+                  <div style="font-size:0.80rem; line-height:1.4;">
+                    <strong>Configuration Changed:</strong> Parameters were modified after this analysis was generated. Displayed results reflect prior execution. Click <strong>Run Dispatch Analysis</strong> to recompute.
+                  </div>
+                </div>
+
                 <!-- Results Tab Bar -->
                 <div class="results-tab-bar">
                   <button class="results-tab-btn active" id="btn-tab-dispatch" onclick="App.switchSimTab('dispatch')">
@@ -1072,6 +1030,9 @@
                     <div id="sim-ranked-facilities-list">
                       <!-- Dynamically Populated -->
                     </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px; line-height:1.4; border-top:1px dashed var(--border-color); padding-top:6px;">
+                      ℹ️ <strong>Detour Ratio ($\ge 1.0$):</strong> Actual OSRM road distance divided by straight-line (Haversine) distance. A ratio close to 1.0 indicates a direct straight-line corridor, while higher values reflect urban street winding, one-way systems, or terrain obstacles.
+                    </div>
                   </div>
 
                   <!-- Full Dispatch Table -->
@@ -1085,7 +1046,7 @@
                           <th>Travel Time</th>
                           <th>Road Dist</th>
                           <th>Haversine</th>
-                          <th>Detour</th>
+                          <th>Detour Ratio</th>
                           <th>Est Fuel</th>
                         </tr>
                       </thead>
