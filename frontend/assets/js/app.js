@@ -1619,10 +1619,10 @@
       const triggerResize = () => {
         setTimeout(() => {
           let m = null;
-          if (mapKey === "facilitiesMap") m = facMap;
-          else if (mapKey === "simMap") m = simMap;
-          else if (mapKey === "mstMap") m = mstMap;
-          else if (mapKey === "simMstMap") m = simMstMap;
+          if (mapKey === "facilitiesMap" || mapKey === "facilities") m = facMap;
+          else if (mapKey === "simMap" || mapKey === "sim") m = simMap;
+          else if (mapKey === "mstMap" || mapKey === "mst") m = mstMap;
+          else if (mapKey === "simMstMap" || mapKey === "simMst") m = simMstMap;
           if (m && m.invalidateSize) m.invalidateSize();
         }, 180);
       };

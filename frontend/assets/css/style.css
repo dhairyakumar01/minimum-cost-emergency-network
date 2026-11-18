@@ -3060,3 +3060,50 @@ body {
   background: #ffffff !important;
   border-radius: 0 !important;
 }
+
+/* Progressive Disclosure Details Accordion */
+.sim-details-accordion {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 12px;
+  transition: all 0.15s ease;
+}
+
+.sim-details-summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.sim-details-summary:hover {
+  color: var(--forest-green);
+}
+
+.sim-details-accordion[open] .sim-details-summary {
+  margin-bottom: 8px;
+}
+
+/* Advanced Coordinate Drawer */
+.coord-adv-details {
+  margin-top: 6px;
+  font-size: 0.76rem;
+}
+
+.coord-adv-details summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.74rem;
+  margin-bottom: 6px;
+}
+
+.coord-adv-details summary:hover {
+  color: var(--primary);
+}
