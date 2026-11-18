@@ -122,12 +122,20 @@
             </div>
           </div>
 
+          <!-- Concise Project Summary Card -->
+          <div class="dash-summary-card">
+            <p>
+              An academic mathematical modeling and GIS optimization system for the Bruhat Bengaluru Mahanagara Palike (BBMP) jurisdiction.
+              The application constructs an optimal, minimum-cost emergency communication backbone spanning 1,255 municipal facilities using Minimum Spanning Tree (MST) algorithms, paired with real-time direct directed dispatch routing for first-responder fleets.
+            </p>
+          </div>
+
           <!-- 4 Primary Key Metric Cards -->
           <div class="metrics-grid">
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Registered Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Geocoded municipal emergency records</div>
+              <div class="metric-subtext">Geocoded municipal facility records</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🏢</span> Facility Composition</div>
@@ -302,6 +310,13 @@
           <div id="map-container">
             <div id="leaflet-map"></div>
 
+            <!-- Floating Map Controls Bar -->
+            <div class="map-floating-controls">
+              <button class="map-control-btn" id="btn-fac-map-fullscreen" onclick="App.toggleMapFullscreen('map-container', 'facilities')" title="Toggle Fullscreen">⛶</button>
+              <button class="map-control-btn" id="btn-fac-map-fit" onclick="App.fitFacilitiesMapBounds()" title="Fit Bounds">⊡</button>
+              <button class="map-control-btn" id="btn-fac-map-reset" onclick="App.resetFacilitiesMapView()" title="Reset View">↺</button>
+            </div>
+
             <!-- Floating Facility Details Panel -->
             <div id="selected-facility-card" style="display:none;">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
@@ -404,7 +419,7 @@
                 <div class="sim-scrubber-wrap">
                   <input type="range" id="sim-scrubber" class="sim-slider" min="0" max="0" value="0" />
                   <div class="sim-step-counter">
-                    Step <strong id="sim-step-num">0</strong> of <strong id="sim-total-steps">0</strong>
+                    Event <strong id="sim-step-num">0</strong> of <strong id="sim-total-steps">0</strong>
                   </div>
                 </div>
               </div>
@@ -421,11 +436,11 @@
                 <span class="sim-telem-val highlight" id="sim-telem-weight">0.0000 km</span>
               </div>
               <div class="sim-telem-card">
-                <span class="sim-telem-label">Accepted Edges</span>
+                <span class="sim-telem-label">Accepted Tree Edges</span>
                 <span class="sim-telem-val" id="sim-telem-edges">0 / 0</span>
               </div>
               <div class="sim-telem-card">
-                <span class="sim-telem-label">Remaining Edges</span>
+                <span class="sim-telem-label">Edges Remaining</span>
                 <span class="sim-telem-val" id="sim-telem-remaining">0</span>
               </div>
               <div class="sim-telem-card" id="sim-telem-component-card">
@@ -436,8 +451,15 @@
 
             <!-- Visualizer Map & Step Explanation Panel -->
             <div class="sim-visualizer-grid">
-              <div class="sim-map-container" style="height:560px; position:relative; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color);">
+              <div class="sim-map-container" id="sim-map-container-el" style="height:560px; position:relative; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color);">
                 <div id="sim-leaflet-map" style="height:100%; width:100%;"></div>
+
+                <!-- Floating Map Controls Bar -->
+                <div class="map-floating-controls">
+                  <button class="map-control-btn" id="btn-sim-map-fullscreen" onclick="App.toggleMapFullscreen('sim-map-container-el', 'sim')" title="Toggle Fullscreen">⛶</button>
+                  <button class="map-control-btn" id="btn-sim-map-fit" onclick="App.fitSimulatorMapBounds()" title="Fit Bounds">⊡</button>
+                  <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimulatorMapView()" title="Reset View">↺</button>
+                </div>
                 
                 <div class="sim-legend-overlay">
                   <div class="legend-item"><span class="legend-dot dot-unvisited"></span> Unvisited Vertex</div>
@@ -639,6 +661,13 @@
             <!-- MST Leaflet Map Container -->
             <div id="mst-map-container" style="height:calc(100vh - 220px); min-height:540px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
               <div id="mst-leaflet-map" style="height:100%; width:100%;"></div>
+
+              <!-- Floating Map Controls Bar -->
+              <div class="map-floating-controls">
+                <button class="map-control-btn" id="btn-mst-map-fullscreen" onclick="App.toggleMapFullscreen('mst-map-container', 'mst')" title="Toggle Fullscreen">⛶</button>
+                <button class="map-control-btn" id="btn-mst-map-fit" onclick="App.fitMstMapBounds()" title="Fit Bounds">⊡</button>
+                <button class="map-control-btn" id="btn-mst-map-reset" onclick="App.resetMstMapView()" title="Reset View">↺</button>
+              </div>
               
               <!-- Floating Edge Inspector Panel -->
               <div id="mst-edge-detail-card" class="edge-inspector-card" style="display:none;">
@@ -689,32 +718,35 @@
         <section id="section-simulation" class="view-section" style="display:none;">
           <div class="simulation-layout">
             
-            <!-- Left Column: 6-Step Workflow Configuration -->
+            <!-- Left Column: Compact Workflow Configuration Panel -->
             <div class="sim-workflow-column">
-              
-              <!-- Step 1: Incident Location Selection -->
-              <div class="step-card" id="sim-step-1">
-                <div class="step-header">
-                  <span class="step-number">1</span>
-                  <div>
-                    <h3 class="step-title">Incident Location Origin</h3>
-                    <p class="step-desc">Establish emergency coordinates across the BBMP region.</p>
+              <div class="sim-config-panel">
+                <div class="sim-config-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">⚡</span>
+                    <h3 style="font-size:0.95rem; font-weight:700; margin:0; color:#0f172a;">Simulation Configuration</h3>
                   </div>
+                  <span class="badge badge-blue">Interactive Setup</span>
                 </div>
-                <div class="step-body">
+
+                <!-- Section 1: Incident Location Selection -->
+                <div class="sim-config-section" id="sim-step-1">
+                  <div class="sim-config-label">
+                    <span>1. Incident Location Origin</span>
+                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')" style="font-size:0.72rem; padding:2px 8px;">
+                      📍 Pick on Map
+                    </button>
+                  </div>
                   <div class="sim-incident-box">
                     <div class="sim-incident-info">
-                      <span id="sim-incident-coords" style="font-family:var(--font-mono); font-size:0.86rem; font-weight:700; color:#0f172a;">
+                      <span id="sim-incident-coords" style="font-family:var(--font-mono); font-size:0.84rem; font-weight:700; color:#0f172a;">
                         12.97810° N, 77.56960° E (Majestic / KSR Railway Station)
                       </span>
                       <span id="sim-incident-badge" class="badge badge-blue">Preset Location</span>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
-                      📍 Pick on Map
-                    </button>
                   </div>
 
-                  <div style="margin-top:10px;">
+                  <div style="margin-top:8px;">
                     <div class="landmarks-list">
                       <span class="landmark-label">Presets:</span>
                       <button class="landmark-pill" onclick="App.setIncidentLocation(12.9781, 77.5696, 'Majestic (KSR Railway Station)')">Majestic</button>
@@ -726,61 +758,45 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Step 2: Emergency Category Context -->
-              <div class="step-card" id="sim-step-2">
-                <div class="step-header">
-                  <span class="step-number">2</span>
-                  <div>
-                    <h3 class="step-title">Emergency Category</h3>
-                    <p class="step-desc">Select incident type to match agency fleet context.</p>
-                  </div>
-                </div>
-                <div class="step-body">
+                <!-- Section 2: Emergency Category Context -->
+                <div class="sim-config-section" id="sim-step-2">
+                  <div class="sim-config-label">2. Emergency Category</div>
                   <div class="category-cards-grid">
                     <div class="category-card active" data-category="medical" onclick="App.selectCategory('medical')">
                       <span class="cat-icon">🚑</span>
-                      <div class="cat-name">Medical Emergency</div>
-                      <div class="cat-desc">Cardiac, trauma, acute triage</div>
+                      <div class="cat-name">Medical</div>
+                      <div class="cat-desc">Cardiac, trauma, triage</div>
                     </div>
                     <div class="category-card" data-category="fire" onclick="App.selectCategory('fire')">
                       <span class="cat-icon">🚒</span>
-                      <div class="cat-name">Structural Fire / HazMat</div>
-                      <div class="cat-desc">Blaze, chemical spill, extrication</div>
+                      <div class="cat-name">Fire / HazMat</div>
+                      <div class="cat-desc">Blaze, chemical spill</div>
                     </div>
                     <div class="category-card" data-category="police" onclick="App.selectCategory('police')">
                       <span class="cat-icon">🚓</span>
-                      <div class="cat-name">Public Safety / Crime</div>
-                      <div class="cat-desc">Disturbance, security response</div>
+                      <div class="cat-name">Public Safety</div>
+                      <div class="cat-desc">Security response</div>
                     </div>
                     <div class="category-card" data-category="traffic" onclick="App.selectCategory('traffic')">
                       <span class="cat-icon">🚗</span>
-                      <div class="cat-name">Road Traffic Accident</div>
-                      <div class="cat-desc">Arterial crash, pileup rescue</div>
+                      <div class="cat-name">Road Traffic</div>
+                      <div class="cat-desc">Arterial crash rescue</div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Step 3: Single Response Agency -->
-              <div class="step-card" id="sim-step-3">
-                <div class="step-header">
-                  <span class="step-number">3</span>
-                  <div>
-                    <h3 class="step-title">Response Agency</h3>
-                    <p class="step-desc">Single agency dispatched per simulation run.</p>
-                  </div>
-                </div>
-                <div class="step-body">
+                <!-- Section 3: Single Response Agency -->
+                <div class="sim-config-section" id="sim-step-3">
+                  <div class="sim-config-label">3. Response Agency (Single Fleet Dispatch)</div>
                   <div class="agency-selection-grid">
                     <div class="agency-card active" id="sim-agency-hospital" onclick="App.selectAgency('hospital')">
                       <div>
                         <div class="agency-card-top">
                           <span class="agency-pill pill-red">Healthcare & Ambulance</span>
                         </div>
-                        <div class="agency-vehicle">Ambulance Fleet (BLS / ALS)</div>
-                        <div class="agency-meta">1,097 Facilities &bull; Force Traveller / Winger</div>
+                        <div class="agency-vehicle">Ambulance (BLS/ALS)</div>
+                        <div class="agency-meta">1,097 Facilities &bull; Force Traveller</div>
                       </div>
                       <div class="agency-rate">₹12.50 / km</div>
                     </div>
@@ -791,7 +807,7 @@
                           <span class="agency-pill pill-blue">Law Enforcement</span>
                         </div>
                         <div class="agency-vehicle">Police Patrol (Hoysala)</div>
-                        <div class="agency-meta">138 Stations &bull; Mahindra Bolero</div>
+                        <div class="agency-meta">138 Stations &bull; Bolero</div>
                       </div>
                       <div class="agency-rate">₹6.25 / km</div>
                     </div>
@@ -799,7 +815,7 @@
                     <div class="agency-card" id="sim-agency-fire" onclick="App.selectAgency('fire_station')">
                       <div>
                         <div class="agency-card-top">
-                          <span class="agency-pill pill-orange">Fire & Rescue Services</span>
+                          <span class="agency-pill pill-orange">Fire & Rescue</span>
                         </div>
                         <div class="agency-vehicle">Fire Engine Appliance</div>
                         <div class="agency-meta">20 Stations &bull; Heavy Water Tender</div>
@@ -808,18 +824,10 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Step 4: Search Radius -->
-              <div class="step-card" id="sim-step-4">
-                <div class="step-header">
-                  <span class="step-number">4</span>
-                  <div>
-                    <h3 class="step-title">Search Radius (<i>R<sub>s</sub></i>)</h3>
-                    <p class="step-desc">Filter eligible facilities around the incident origin.</p>
-                  </div>
-                </div>
-                <div class="step-body">
+                <!-- Section 4: Search Radius -->
+                <div class="sim-config-section" id="sim-step-4">
+                  <div class="sim-config-label">4. Search Radius (<i>R<sub>s</sub></i>)</div>
                   <div class="radius-control-box">
                     <div class="radius-slider-wrap">
                       <input type="range" id="sim-radius-slider" min="2" max="15" step="0.5" value="5.0" oninput="App.onRadiusChange(this.value)" />
@@ -837,112 +845,97 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Step 5: Optimization Mode -->
-              <div class="step-card" id="sim-step-5">
-                <div class="step-header">
-                  <span class="step-number">5</span>
-                  <div>
-                    <h3 class="step-title">Optimization Objective Mode</h3>
-                    <p class="step-desc">Three discrete modes for network backbone evaluation (No independent fuel-cost mode).</p>
-                  </div>
-                </div>
-                <div class="step-body">
+                <!-- Section 5: Optimization Mode -->
+                <div class="sim-config-section" id="sim-step-5">
+                  <div class="sim-config-label">5. Optimization Objective Mode</div>
                   <div class="mode-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
                       <div class="mode-icon">⏱️</div>
-                      <div class="mode-title">Mode 1: Minimum Time</div>
-                      <div class="mode-desc">Minimizes total symmetric travel-time backbone (<i>S<sub>T</sub></i>).</div>
+                      <div class="mode-title">Mode 1: Min Time</div>
+                      <div class="mode-desc">Minimizes travel time backbone (<i>S<sub>T</sub></i>).</div>
                     </div>
                     <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
                       <div class="mode-icon">📏</div>
-                      <div class="mode-title">Mode 2: Minimum Road Distance (along fastest routes)</div>
-                      <div class="mode-desc">Minimizes physical road distance along the fastest-route profile (<i>S<sub>D</sub></i>).</div>
+                      <div class="mode-title">Mode 2: Min Road Distance</div>
+                      <div class="mode-desc">Minimizes physical distance (<i>S<sub>D</sub></i>).</div>
                     </div>
                     <div class="mode-card" data-mode="compromise" onclick="App.selectMode('compromise')">
                       <div class="mode-icon">⚖️</div>
                       <div class="mode-title">Mode 3: Compromise</div>
-                      <div class="mode-desc">Supported trade-off solutions: <i>N<sub>e</sub></i> = <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.</div>
+                      <div class="mode-desc">Trade-off: <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.</div>
                     </div>
                   </div>
                   
                   <!-- Compromise k-parameter slider -->
-                  <div id="compromise-slider-wrap" style="display:none; margin-top:12px; padding:10px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                  <div id="compromise-slider-wrap" style="display:none; margin-top:8px; padding:8px 10px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                      <span style="font-size:0.76rem; font-weight:700; color:var(--text-main);">Compromise Weight (<i>k</i> / 10):</span>
-                      <span id="compromise-k-display" style="font-family:var(--font-mono); font-weight:800; color:var(--primary); font-size:0.86rem;">k = 5 (λ = 0.5)</span>
+                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-main);">Compromise Weight (<i>k</i> / 10):</span>
+                      <span id="compromise-k-display" style="font-family:var(--font-mono); font-weight:800; color:var(--primary); font-size:0.84rem;">k = 5 (λ = 0.5)</span>
                     </div>
                     <input type="range" id="sim-compromise-k-slider" min="0" max="10" step="1" value="5" oninput="App.onCompromiseKChange(this.value)" style="width:100%; accent-color:var(--primary);" />
-                    <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-light); margin-top:3px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-light); margin-top:2px;">
                       <span>k=0 (Pure Distance)</span>
                       <span>k=5 (Balanced)</span>
                       <span>k=10 (Pure Time)</span>
                     </div>
                   </div>
 
-                  <div style="font-size:0.72rem; color:var(--text-light); margin-top:8px;">
-                    ℹ️ Note: Vehicle operating cost is strictly proportional to distance under any single-agency run (<i>C = D × R<sub>a</sub></i>), so cost-minimization is mathematically isomorphic to distance-minimization and does not form an independent MST mode.
+                  <div style="font-size:0.70rem; color:var(--text-light); margin-top:6px;">
+                    ℹ️ Note: Fuel cost is strictly proportional to distance (<i>C = D × R<sub>a</sub></i>); thus cost-minimization is isomorphic to distance-minimization.
                   </div>
                 </div>
-              </div>
 
-              <!-- Step 6: Dispatch Execution Summary -->
-              <div class="step-card" id="sim-step-6">
-                <div class="step-header">
-                  <span class="step-number">6</span>
-                  <div>
-                    <h3 class="step-title">Dispatch Staging & Execution</h3>
-                    <p class="step-desc">Review parameters and trigger analysis pipeline.</p>
-                  </div>
-                </div>
-                <div class="step-body">
+                <!-- Section 6: Dispatch Staging & Run Button -->
+                <div class="sim-config-section" id="sim-step-6" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                  <div class="sim-config-label">6. Parameter Review & Dispatch Trigger</div>
                   <div class="dispatch-summary-box">
                     <div class="summary-item">
                       <span class="sum-lbl">Incident Location:</span>
                       <span class="sum-val" id="sum-incident">Majestic (12.9781°N, 77.5696°E)</span>
                     </div>
                     <div class="summary-item">
-                      <span class="sum-lbl">Incident Category:</span>
+                      <span class="sum-lbl">Category:</span>
                       <span class="sum-val" id="sum-category">Medical Emergency</span>
                     </div>
                     <div class="summary-item">
-                      <span class="sum-lbl">Agency Fleet:</span>
+                      <span class="sum-lbl">Agency:</span>
                       <span class="sum-val" id="sum-agency">Healthcare & Ambulance</span>
                     </div>
                     <div class="summary-item">
-                      <span class="sum-lbl">Search Radius:</span>
+                      <span class="sum-lbl">Radius:</span>
                       <span class="sum-val" id="sum-radius">5.0 km</span>
                     </div>
                     <div class="summary-item">
-                      <span class="sum-lbl">Objective Mode:</span>
+                      <span class="sum-lbl">Mode:</span>
                       <span class="sum-val" id="sum-mode">Minimum Time (S_T)</span>
                     </div>
                   </div>
 
-                  <div style="margin-top:14px; display:flex; align-items:center; gap:12px;">
-                    <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()" style="padding:10px 20px;">
+                  <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+                    <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()" style="padding:9px 18px; font-weight:700;">
                       🚀 Run Dispatch Analysis
                     </button>
-                    <span id="sim-exec-status" style="font-size:0.80rem; color:var(--text-muted);">
+                    <span id="sim-exec-status" style="font-size:0.78rem; color:var(--text-muted);">
                       Ready for analysis
                     </span>
                   </div>
                 </div>
               </div>
-
             </div>
 
             <!-- Right Column: Staged Progress & Simulation Results Workspace -->
             <div class="sim-results-column">
               
-              <!-- Staged Execution Pipeline Visualizer -->
-              <div class="execution-pipeline">
-                <div class="pipeline-header">
-                  <span>Execution Pipeline Stages</span>
+              <!-- Staged Execution Pipeline Accordion -->
+              <details class="pipeline-accordion" id="pipeline-accordion">
+                <summary class="pipeline-summary">
+                  <span style="font-weight:700; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
+                    ⚙️ Execution Pipeline
+                  </span>
                   <span class="badge badge-blue" id="pipeline-status-badge">Standby</span>
-                </div>
-                <div class="pipeline-stages">
+                </summary>
+                <div class="pipeline-stages" style="margin-top:10px;">
                   <div class="pipeline-stage" id="stage-validate">
                     <span class="stage-dot"></span>
                     <span>1. Validating Incident Coordinates & Boundary</span>
@@ -961,18 +954,18 @@
                   </div>
                 </div>
                 <!-- Dedicated Simulation Error Banner -->
-                <div id="sim-error-box" class="tab-notice-banner tab-notice-red" style="display:none; margin-top:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
+                <div id="sim-error-box" class="tab-notice-banner tab-notice-red" style="display:none; margin-top:10px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
                   <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                     <div style="display:flex; align-items:center; gap:8px;">
                       <span style="font-size:1.1rem;">⚠️</span>
                       <span id="sim-error-msg" style="font-weight:600; font-size:0.80rem;">Simulation execution encountered an issue.</span>
                     </div>
-                    <button class="btn btn-outline btn-sm" id="btn-retry-simulation" onclick="App.runSimulation()" style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
+                    <button class="btn btn-outline btn-sm" id="btn-retry-simulation" onclick="App.runSimulationPreview()" style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
                       🔄 Retry Analysis
                     </button>
                   </div>
                 </div>
-              </div>
+              </details>
 
               <!-- 4-Tab Simulation Results Workspace -->
               <div id="sim-results-output" style="display:none;">
@@ -1005,7 +998,7 @@
                 <div id="tab-content-dispatch" class="sim-tab-panel">
                   <div class="tab-notice-banner tab-notice-blue">
                     <span>🚑</span>
-                    <span>Facilities ranked strictly by estimated direct travel time to the incident. (Independent of MST backbone).</span>
+                    <span>Facilities ranked strictly by estimated direct travel time to the incident (independent of MST backbone topology).</span>
                   </div>
 
                   <!-- Scenario Summary KPI Row -->
@@ -1024,15 +1017,16 @@
                     </div>
                   </div>
 
-                  <!-- Top 3 Recommendations -->
-                  <div class="card" style="padding:14px; margin-bottom:12px; border-left:4px solid var(--primary);">
-                    <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:8px;">Top 3 Dispatch Recommendations</h4>
-                    <div id="sim-ranked-facilities-list">
-                      <!-- Dynamically Populated -->
-                    </div>
-                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px; line-height:1.4; border-top:1px dashed var(--border-color); padding-top:6px;">
-                      ℹ️ <strong>Detour Ratio ($\ge 1.0$):</strong> Actual OSRM road distance divided by straight-line (Haversine) distance. A ratio close to 1.0 indicates a direct straight-line corridor, while higher values reflect urban street winding, one-way systems, or terrain obstacles.
-                    </div>
+                  <!-- Top Recommendations Container: Dominant #1 Hero Card + Secondary Alternatives -->
+                  <div id="sim-ranked-facilities-list" style="margin-bottom:14px;">
+                    <!-- Populated dynamically -->
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0 6px 0;">
+                    <span style="font-size:0.82rem; font-weight:700; color:var(--text-main);">Comprehensive Candidate Dispatch Rankings</span>
+                    <button class="btn btn-outline btn-sm" onclick="App.switchSimTab('network')" style="font-size:0.74rem; padding:3px 10px;">
+                      🗺️ Inspect Geographic MST Map &rarr;
+                    </button>
                   </div>
 
                   <!-- Full Dispatch Table -->
@@ -1054,6 +1048,10 @@
                         <!-- Populated dynamically -->
                       </tbody>
                     </table>
+                  </div>
+
+                  <div style="font-size:0.74rem; color:var(--text-muted); margin-top:8px; line-height:1.4;">
+                    ℹ️ <strong>Detour Ratio ($\ge 1.0$):</strong> Actual OSRM road distance divided by straight-line (Haversine) distance. A ratio close to 1.0 indicates a direct straight-line corridor, while higher values reflect urban street winding, one-way systems, or terrain obstacles.
                   </div>
                 </div>
 
@@ -1082,8 +1080,45 @@
                     <div id="sim-map-wrapper">
                       <div id="sim-mst-leaflet-map"></div>
 
+                      <!-- Floating Map Controls -->
+                      <div class="map-floating-controls">
+                        <button class="map-control-btn" id="btn-sim-map-fullscreen" onclick="App.toggleMapFullscreen('sim-map-wrapper', 'simMstMap')" title="Toggle Fullscreen">⛶</button>
+                        <button class="map-control-btn" id="btn-fit-sim-map-float" onclick="App.fitSimMapBounds()" title="Fit Network Bounds">⊡</button>
+                        <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimMapView()" title="Reset View">↺</button>
+                      </div>
+
                       <!-- Floating Interactive Legend -->
                       <div class="sim-map-legend">
+                        <div class="sim-legend-title">Network Legend</div>
+                        <div class="sim-legend-item">
+                          <span style="font-size:1rem;">🚨</span>
+                          <span>Incident Location</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-marker marker-node"></span>
+                          <span id="sim-legend-fac-label">Connected Facilities</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-line line-road"></span>
+                          <span>OSRM Road Route</span>
+                        </div>
+                        <div class="sim-legend-item">
+                          <span class="sim-legend-line line-schematic"></span>
+                          <span>Schematic Fallback</span>
+                        </div>
+                      </div>
+
+                      <!-- Floating Edge / Facility Detail Tooltip Card -->
+                      <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                          <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected Link</span>
+                          <button class="btn-icon" style="padding:0; font-size:0.75rem;" onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
+                        </div>
+                        <div id="sim-tt-title" style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">Endpoint U ⟷ Endpoint V</div>
+                        <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Road Route: 3.2 km &bull; 4.5 min</div>
+                      </div>
+                    </div>
+                  </div>
                         <div class="sim-legend-title">Network Legend</div>
                         <div class="sim-legend-item">
                           <span style="font-size:1rem;">🚨</span>
@@ -1198,6 +1233,20 @@
                     <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom:10px;">
                       Every facility in the BBMP registry is accounted for as eligible or excluded with a documented reason code.
                     </p>
+                    <div class="results-metrics-grid" style="margin-bottom:12px;">
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Total BBMP Facilities</div>
+                        <div class="res-val">1,255</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Eligible Candidates</div>
+                        <div class="res-val" id="excl-summary-eligible">0</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Excluded Candidates</div>
+                        <div class="res-val" id="excl-summary-excluded">0</div>
+                      </div>
+                    </div>
                     <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
                       <table class="data-table">
                         <thead>
@@ -1339,6 +1388,11 @@
                     <div class="bench-val" style="color:var(--primary);">3.18 &times;</div>
                     <div class="bench-sub">Kruskal faster on dense graph</div>
                   </div>
+                </div>
+
+                <!-- Benchmark Honesty & Environment Disclosure -->
+                <div style="font-size:0.73rem; color:var(--text-muted); background:var(--bg-subtle); padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-top:10px; line-height:1.45;">
+                  <strong>Benchmark Conditions &amp; Measurement Honesty:</strong> Evaluated across <i>K</i>₁₂₅₅ (786,885 edges) with fixed seed and cold-start purge. Median runtime reported with Interquartile Range (IQR); hardware platform: Windows 11 x64, Python 3.11 runtime, single-threaded CPU execution. Pure integer arithmetic (deciseconds / millimetres) avoids IEEE-754 drift. Results reflect local execution context and should not be generalized to C/C++ or GPU-accelerated graph implementations without qualification.
                 </div>
 
                 <!-- Optimization Modes Matrix -->

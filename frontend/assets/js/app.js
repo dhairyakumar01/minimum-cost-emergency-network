@@ -572,14 +572,33 @@
   function invalidateSimulationResults(reason) {
     if (!State.activeScenarioData) return;
     const currentFp = getSimulationFingerprint();
+    const outEl = document.getElementById("sim-results-output");
+    const staleEl = document.getElementById("sim-stale-notice");
+    const pBadge = document.getElementById("pipeline-status-badge");
+    const execStat = document.getElementById("sim-exec-status");
+
     if (currentFp !== State.lastCompletedFingerprint) {
       State.isSimulationStale = true;
-      const staleEl = document.getElementById("sim-stale-notice");
       if (staleEl) staleEl.style.display = "flex";
+      if (outEl) outEl.classList.add("results-stale");
+      if (pBadge) {
+        pBadge.className = "badge badge-amber";
+        pBadge.textContent = "Configuration Changed (Re-run Required)";
+      }
+      if (execStat) {
+        execStat.textContent = "⚠️ Parameters modified. Results displayed are stale.";
+      }
     } else {
       State.isSimulationStale = false;
-      const staleEl = document.getElementById("sim-stale-notice");
       if (staleEl) staleEl.style.display = "none";
+      if (outEl) outEl.classList.remove("results-stale");
+      if (pBadge) {
+        pBadge.className = "badge badge-green";
+        pBadge.textContent = "Analysis Complete";
+      }
+      if (execStat) {
+        execStat.textContent = "Analysis up-to-date.";
+      }
     }
   }
 
@@ -693,7 +712,27 @@
 
     setIncidentSelectMode(false);
     updateSimulationUI();
-    invalidateSimulationResults("incident_cleared");
+
+    // Clear simulation results completely
+    State.activeScenarioData = null;
+    State.lastCompletedFingerprint = null;
+    State.isSimulationStale = false;
+    const outEl = document.getElementById("sim-results-output");
+    if (outEl) {
+      outEl.style.display = "none";
+      outEl.classList.remove("results-stale");
+    }
+    const staleEl = document.getElementById("sim-stale-notice");
+    if (staleEl) staleEl.style.display = "none";
+    const pBadge = document.getElementById("pipeline-status-badge");
+    if (pBadge) {
+      pBadge.className = "badge badge-blue";
+      pBadge.textContent = "Standby";
+    }
+    const execStat = document.getElementById("sim-exec-status");
+    if (execStat) {
+      execStat.textContent = "Incident cleared. Set an incident to begin.";
+    }
   }
 
   function showFacilityDetailsCard(fac) {
@@ -1567,6 +1606,89 @@
       }
     },
 
+    resetSimMapView() {
+      if (simMstMap) {
+        simMstMap.setView([12.9781, 77.5696], 12);
+      }
+    },
+
+    toggleMapFullscreen(containerId, mapKey) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+
+      const triggerResize = () => {
+        setTimeout(() => {
+          let m = null;
+          if (mapKey === "facilitiesMap") m = facMap;
+          else if (mapKey === "simMap") m = simMap;
+          else if (mapKey === "mstMap") m = mstMap;
+          else if (mapKey === "simMstMap") m = simMstMap;
+          if (m && m.invalidateSize) m.invalidateSize();
+        }, 180);
+      };
+
+      if (!document.fullscreenElement) {
+        if (el.requestFullscreen) {
+          el.requestFullscreen().then(triggerResize).catch(() => {
+            el.classList.toggle("map-fullscreen-fallback");
+            triggerResize();
+          });
+        } else {
+          el.classList.toggle("map-fullscreen-fallback");
+          triggerResize();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().then(triggerResize).catch(() => {
+            el.classList.remove("map-fullscreen-fallback");
+            triggerResize();
+          });
+        } else {
+          el.classList.remove("map-fullscreen-fallback");
+          triggerResize();
+        }
+      }
+    },
+
+    fitFacilitiesMapBounds() {
+      if (facMap && State.facilities && State.facilities.length > 0) {
+        const bounds = L.latLngBounds(State.facilities.map(f => [f.latitude, f.longitude]));
+        facMap.fitBounds(bounds, { padding: [30, 30] });
+      }
+    },
+
+    resetFacilitiesMapView() {
+      if (facMap) {
+        facMap.setView([12.9781, 77.5696], 11);
+      }
+    },
+
+    fitSimulatorMapBounds() {
+      if (simMap && State.facilities && State.facilities.length > 0) {
+        const bounds = L.latLngBounds(State.facilities.map(f => [f.latitude, f.longitude]));
+        simMap.fitBounds(bounds, { padding: [30, 30] });
+      }
+    },
+
+    resetSimulatorMapView() {
+      if (simMap) {
+        simMap.setView([12.9781, 77.5696], 11);
+      }
+    },
+
+    fitMstMapBounds() {
+      if (mstMap && State.facilities && State.facilities.length > 0) {
+        const bounds = L.latLngBounds(State.facilities.map(f => [f.latitude, f.longitude]));
+        mstMap.fitBounds(bounds, { padding: [30, 30] });
+      }
+    },
+
+    resetMstMapView() {
+      if (mstMap) {
+        mstMap.setView([12.9781, 77.5696], 11);
+      }
+    },
+
     switchResultsSubTab(subTabId) {
       const isResults = subTabId === "results";
       const resPanel = document.getElementById("section-project-analysis");
@@ -1620,6 +1742,9 @@
         btnRun.innerHTML = `<span>⏳ Analyzing Network...</span>`;
       }
       if (statusEl) statusEl.textContent = "Initializing simulation in execution pipeline...";
+
+      const acc = document.getElementById("pipeline-accordion");
+      if (acc) acc.open = true;
 
       // Pipeline stage visualizer setup
       const stageVal = document.getElementById("stage-validate");
@@ -1757,6 +1882,7 @@
         renderScenarioResults(scenarioData);
 
         if (resultsContainer) resultsContainer.style.display = "block";
+        if (acc) acc.open = false;
         if (statusEl) {
           const evalTotal = scenarioData?.summary?.total_candidates_in_radius || scenarioData?.dispatch_ranking?.length || 0;
           const roadGeoms = scenarioData?.network_mst?.road_geometries_count || 0;
@@ -1765,6 +1891,7 @@
         }
       } catch (err) {
         console.error("Simulation error:", err);
+        if (acc) acc.open = true;
         if (simErrorBox && simErrorMsg) {
           simErrorMsg.textContent = `Simulation execution failed: ${err.message}`;
           simErrorBox.style.display = "flex";
@@ -1805,36 +1932,77 @@
     setText("res-agency-name", AGENCY_LABELS[State.simAgency] || params.agency);
     setText("res-radius-val", `${(params.radius_km || State.simRadiusKm).toFixed(1)} km`);
 
-    // Top 3 Cards
+    // Top Recommendations: Rank 1 Dominant Hero Card, Rank 2 & 3 Secondary Alternatives
     const listEl = document.getElementById("sim-ranked-facilities-list");
     if (listEl) {
       listEl.innerHTML = "";
       const top3 = ranking.slice(0, 3);
 
       top3.forEach((fac) => {
-        const row = document.createElement("div");
-        row.className = fac.rank === 1 ? "ranked-card ranked-card-top" : "ranked-card";
         const vehicle = fac.vehicle_type || AGENCY_RATES[State.simAgency]?.vehicle || "Fleet Unit";
         const agencyLbl = AGENCY_LABELS[fac.agency] || fac.agency;
         const timeMin = fac.travel_time_min !== undefined ? fac.travel_time_min : (fac.travel_time_minutes || (fac.travel_time_ds / 600));
         const roadKm = fac.road_distance_km !== undefined ? fac.road_distance_km : ((fac.road_distance_dm || 0) / 10000);
         const fuelCost = fac.fuel_cost_est_inr !== undefined ? fac.fuel_cost_est_inr : (fac.estimated_fuel_cost_inr || 0);
         const detour = fac.detour_ratio !== undefined ? fac.detour_ratio : 1.0;
+        const rateStr = (AGENCY_RATES[fac.agency]?.rate || 12.50).toFixed(2);
 
-        row.innerHTML = `
-          <div style="display:flex; align-items:center; gap:12px; min-width:0;">
-            <div class="ranked-rank">#${fac.rank}</div>
-            <div class="ranked-details">
-              <div class="ranked-name">${escapeHtml(fac.facility_name)}</div>
-              <div class="ranked-meta">ID: <code>${fac.facility_id}</code> &bull; ${vehicle} &bull; ${agencyLbl}</div>
+        if (fac.rank === 1) {
+          const heroDiv = document.createElement("div");
+          heroDiv.className = "ranked-card ranked-card-top dispatch-hero-card";
+          heroDiv.id = "dispatch-hero-card";
+          heroDiv.innerHTML = `
+            <div class="dispatch-hero-badge">⭐ #1 PRIMARY DISPATCH RECOMMENDATION</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px; margin-bottom:10px;">
+              <div class="ranked-rank" style="width:34px; height:34px; font-size:0.95rem; background:#f59e0b; color:#fff; border-color:#d97706;">#1</div>
+              <div class="ranked-details" style="margin-left:0;">
+                <div class="ranked-name dispatch-hero-title" style="margin-bottom:2px; font-size:1.15rem;">${escapeHtml(fac.facility_name)}</div>
+                <div class="ranked-meta dispatch-hero-meta">ID: <code>${fac.facility_id}</code> &bull; ${vehicle} &bull; ${agencyLbl}</div>
+              </div>
             </div>
-          </div>
-          <div class="ranked-metrics">
-            <div class="ranked-dist">${Number(timeMin).toFixed(1)} min &bull; ${Number(roadKm).toFixed(2)} km</div>
-            <div class="ranked-cost">₹${Number(fuelCost).toFixed(2)} fuel &bull; Detour: ${Number(detour).toFixed(2)}x</div>
-          </div>
-        `;
-        listEl.appendChild(row);
+            <div class="dispatch-hero-grid">
+              <div class="dispatch-hero-metric">
+                <span class="hero-m-lbl">Direct Travel Time</span>
+                <span class="hero-m-val ranked-dist">${Number(timeMin).toFixed(1)} min</span>
+                <span class="hero-m-note">Fastest road corridor</span>
+              </div>
+              <div class="dispatch-hero-metric">
+                <span class="hero-m-lbl">Road Distance</span>
+                <span class="hero-m-val">${Number(roadKm).toFixed(2)} km</span>
+                <span class="hero-m-note">Actual OSRM street path</span>
+              </div>
+              <div class="dispatch-hero-metric">
+                <span class="hero-m-lbl">Est. Operating Fuel</span>
+                <span class="hero-m-val">₹${Number(fuelCost).toFixed(2)}</span>
+                <span class="hero-m-note">@ ₹${rateStr}/km benchmark</span>
+              </div>
+              <div class="dispatch-hero-metric">
+                <span class="hero-m-lbl">Detour Ratio</span>
+                <span class="hero-m-val">${Number(detour).toFixed(2)}x</span>
+                <span class="hero-m-note">Road / Haversine (≥ 1.0)</span>
+              </div>
+            </div>
+          `;
+          listEl.appendChild(heroDiv);
+        } else {
+          const secDiv = document.createElement("div");
+          secDiv.className = "ranked-card";
+          secDiv.innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+              <div class="ranked-rank">#${fac.rank}</div>
+              <div class="ranked-details">
+                <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">#${fac.rank} Secondary Alternative</div>
+                <div class="ranked-name">${escapeHtml(fac.facility_name)}</div>
+                <div class="ranked-meta">ID: <code>${fac.facility_id}</code> &bull; ${vehicle} &bull; ${agencyLbl}</div>
+              </div>
+            </div>
+            <div class="ranked-metrics">
+              <div class="ranked-dist">${Number(timeMin).toFixed(1)} min &bull; ${Number(roadKm).toFixed(2)} km</div>
+              <div class="ranked-cost">₹${Number(fuelCost).toFixed(2)} fuel &bull; Detour: ${Number(detour).toFixed(2)}x</div>
+            </div>
+          `;
+          listEl.appendChild(secDiv);
+        }
       });
     }
 
@@ -2004,6 +2172,8 @@
     if (exclBadge) {
       exclBadge.textContent = `${exclusions.length} Excluded`;
     }
+    setText("excl-summary-eligible", evalCount.toString());
+    setText("excl-summary-excluded", exclusions.length.toString());
 
     const tbodyExcl = document.getElementById("tbody-exclusions-list");
     if (tbodyExcl) {
@@ -2387,4 +2557,14 @@
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+
+  // Uniform map resize handler on fullscreen transitions
+  document.addEventListener("fullscreenchange", () => {
+    setTimeout(() => {
+      if (facMap && facMap.invalidateSize) facMap.invalidateSize();
+      if (simMap && simMap.invalidateSize) simMap.invalidateSize();
+      if (mstMap && mstMap.invalidateSize) mstMap.invalidateSize();
+      if (simMstMap && simMstMap.invalidateSize) simMstMap.invalidateSize();
+    }, 160);
+  });
 })();
