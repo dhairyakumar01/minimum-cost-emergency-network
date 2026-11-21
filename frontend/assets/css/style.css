@@ -1784,6 +1784,28 @@ body {
   gap: 3px;
 }
 
+/* Active Selection Indicator */
+.active-check {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-card.active .active-check,
+.agency-card.active .active-check,
+.mode-card.active .active-check,
+.algo-card.active .active-check {
+  display: inline-flex !important;
+}
+
 /* Step 2: Emergency Category Grid */
 .category-cards-grid {
   display: grid;
@@ -1792,41 +1814,41 @@ body {
 }
 
 .category-card {
-  padding: 10px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
+  padding: 11px 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   flex-direction: column;
 }
 
 .category-card:hover {
-  background-color: var(--bg-subtle);
-  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .category-card.active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  box-shadow: 0 0 0 1px var(--primary);
+  border: 2px solid var(--primary) !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
 }
 
 .cat-icon {
-  font-size: 1.25rem;
+  font-size: 1.30rem;
   margin-bottom: 4px;
 }
 
 .cat-name {
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #0f172a;
 }
 
 .cat-desc {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.76rem;
+  color: #475569;
   line-height: 1.35;
   margin-top: 2px;
 }
@@ -1839,26 +1861,26 @@ body {
 }
 
 .agency-card {
-  padding: 10px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .agency-card:hover {
-  background-color: var(--bg-subtle);
-  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .agency-card.active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  box-shadow: 0 0 0 1px var(--primary);
+  border: 2px solid var(--primary) !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
 }
 
 .agency-card-top {
@@ -1880,21 +1902,21 @@ body {
 .pill-orange { background: var(--fire-bg); color: var(--fire-color); border: 1px solid var(--fire-border); }
 
 .agency-vehicle {
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #0f172a;
   margin-top: 3px;
 }
 
 .agency-meta {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.76rem;
+  color: #475569;
 }
 
 .agency-rate {
   font-size: 0.86rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: #0f172a;
   font-family: var(--font-mono);
 }
 
@@ -1945,47 +1967,84 @@ body {
 /* Step 5: Optimization Modes Grid */
 .mode-cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .mode-card {
-  padding: 10px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
+  padding: 12px 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
+  text-align: left;
 }
 
 .mode-card:hover {
-  background-color: var(--bg-subtle);
-  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  border-color: #94a3b8;
 }
 
 .mode-card.active {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  box-shadow: 0 0 0 1px var(--primary);
+  border: 2px solid var(--primary) !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
 }
 
 .mode-icon {
-  font-size: 1.1rem;
+  font-size: 1.20rem;
   margin-bottom: 4px;
 }
 
 .mode-title {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #0f172a;
+  line-height: 1.35;
 }
 
-.mode-desc {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+/* Step 6: Algorithm Selection Grid */
+.algo-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.algo-card {
+  padding: 10px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.algo-card:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.algo-card.active {
+  border: 2px solid var(--primary) !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
+}
+
+.algo-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.algo-desc {
+  font-size: 0.76rem;
+  color: #475569;
+  margin-top: 3px;
   line-height: 1.35;
-  margin-top: 2px;
 }
 
 /* Step 6: Dispatch Execution Summary */

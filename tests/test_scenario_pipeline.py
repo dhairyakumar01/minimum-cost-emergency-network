@@ -79,3 +79,61 @@ def test_corrupted_spanning_tree_rejection():
     assert cert["is_optimal"] is False
     assert cert["violations_count"] > 0
 
+
+def test_algorithm_selection_modes():
+    """Verify Automatic Selection, Prim, and Kruskal execution in scenario pipeline."""
+    # 1. Explicit Prim's Algorithm
+    sc_prim = ss.create_and_run_scenario(
+        incident_lat=12.9781,
+        incident_lon=77.5696,
+        incident_label="Majestic",
+        agency="fire",
+        radius_km=5.0,
+        optimization_mode="time",
+        async_mode=False,
+        algorithm="prim",
+        bypass_cache=True,
+    )
+    res_prim = ss.get_scenario_result(sc_prim)
+    assert res_prim["parameters"]["algorithm_selected"] == "prim"
+    assert "prim" in res_prim["network_mst"]["algorithm"].lower()
+    assert res_prim["validation"]["structural"]["is_valid_tree"] is True
+
+    # 2. Explicit Kruskal's Algorithm
+    sc_kruskal = ss.create_and_run_scenario(
+        incident_lat=12.9781,
+        incident_lon=77.5696,
+        incident_label="Majestic",
+        agency="fire",
+        radius_km=5.0,
+        optimization_mode="time",
+        async_mode=False,
+        algorithm="kruskal",
+        bypass_cache=True,
+    )
+    res_kruskal = ss.get_scenario_result(sc_kruskal)
+    assert res_kruskal["parameters"]["algorithm_selected"] == "kruskal"
+    assert "kruskal" in res_kruskal["network_mst"]["algorithm"].lower()
+    assert res_kruskal["validation"]["structural"]["is_valid_tree"] is True
+
+    # 3. Automatic Selection
+    sc_auto = ss.create_and_run_scenario(
+        incident_lat=12.9781,
+        incident_lon=77.5696,
+        incident_label="Majestic",
+        agency="fire",
+        radius_km=5.0,
+        optimization_mode="time",
+        async_mode=False,
+        algorithm="auto",
+        bypass_cache=True,
+    )
+    res_auto = ss.get_scenario_result(sc_auto)
+    assert res_auto["parameters"]["algorithm_selected"] in ("prim", "kruskal")
+    assert "Automatic Selection" in res_auto["parameters"]["algorithm_rationale"]
+    assert res_auto["validation"]["structural"]["is_valid_tree"] is True
+
+    # Verify both algorithms yield the identical minimal tree weight
+    assert res_prim["network_mst"]["total_integer_weight"] == res_kruskal["network_mst"]["total_integer_weight"]
+
+

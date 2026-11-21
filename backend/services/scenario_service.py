@@ -98,7 +98,8 @@ def compute_scenario_cache_key(
     incident_category: str = "Medical Emergency",
     dataset_sha256: Optional[str] = None,
     routing_profile: str = "car",
-    model_version: str = "v2.1",
+    model_version: str = "v2.2",
+    algorithm: str = "auto",
 ) -> str:
     """Generate deterministic provenance cache key based on all computation-relevant inputs."""
     norm_agency = normalize_agency(agency)
@@ -110,7 +111,7 @@ def compute_scenario_cache_key(
             dataset_sha256 = "canonical_bbmp"
     raw = (
         f"{incident_lat:.5f}_{incident_lon:.5f}_{norm_agency}_{radius_km:.2f}_"
-        f"{optimization_mode}_{k_param}_{incident_category}_{dataset_sha256}_"
+        f"{optimization_mode}_{k_param}_{incident_category}_{algorithm.lower()}_{dataset_sha256}_"
         f"{routing_profile}_{model_version}"
     )
     return hashlib.sha256(raw.encode()).hexdigest()
@@ -233,12 +234,13 @@ def execute_scenario_pipeline(
     optimization_mode: str = "time",
     k_param: int = 5,
     incident_category: str = "Medical Emergency",
-    bypass_cache: bool = False
+    bypass_cache: bool = False,
+    algorithm: str = "auto",
 ) -> None:
     """Synchronous or asynchronous execution of the 9-stage pipeline with real-time provenance."""
     conn = get_scenario_db()
     cache_key = compute_scenario_cache_key(
-        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category
+        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category, algorithm=algorithm
     )
 
     def update_stage(idx: int, name: str, status: str = "RUNNING"):
@@ -363,29 +365,77 @@ def execute_scenario_pipeline(
             })
 
         # Stage 5: Running Graph Optimization
-        update_stage(5, f"Optimizing Network ({optimization_mode.upper()} Mode)")
-        mst_time_res = kruskal_mst(vertex_ids, time_edges, track_trace=True)
-        mst_dist_res = kruskal_mst(vertex_ids, dist_edges, track_trace=True)
-        prim_time_res = prim_mst(vertex_ids, time_edges, start_vertex="incident_0", track_trace=True)
+        num_v = len(vertex_ids)
+        num_e = len(symmetric_edges)
+        max_possible_edges = (num_v * (num_v - 1)) // 2 if num_v > 1 else 1
+        graph_density = (num_e / max_possible_edges) if max_possible_edges > 0 else 0.0
 
-        selected_mst_res = mst_time_res
-        if optimization_mode == "distance":
-            selected_mst_res = mst_dist_res
-        elif optimization_mode == "compromise":
-            tradeoff = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
-            match_point = next((p for p in tradeoff["tradeoff_points"] if p["k"] == k_param), tradeoff["tradeoff_points"][5])
-            selected_mst_res = {
-                "algorithm": "kruskal_compromise",
-                "mst_edges": match_point["edges"],
-                "edge_count": match_point["edge_count"],
-                "total_integer_weight": match_point["tree_time_ds"],
-                "is_connected": mst_time_res["is_connected"],
-                "num_components": mst_time_res["num_components"],
-                "components": mst_time_res["components"],
-                "trace": mst_time_res["trace"],
-                "compromise_point": match_point,
-                "tradeoff_sweep": tradeoff,
-            }
+        algo_req = str(algorithm or "auto").lower()
+        if algo_req == "prim":
+            selected_algorithm = "prim"
+            algo_rationale = "User-selected Prim's Algorithm (priority-queue cut frontier growing from incident origin)."
+        elif algo_req == "kruskal":
+            selected_algorithm = "kruskal"
+            algo_rationale = "User-selected Kruskal's Algorithm (global edge sorting & Disjoint Set Union)."
+        else:
+            # Automatic selection logic:
+            # For dense candidate networks (density >= 0.50 and V >= 8), Prim's algorithm
+            # growing outward from incident_0 is optimal (O((V+E)log V)).
+            # For compact or sparse networks (density < 0.50 or V < 8), Kruskal's algorithm
+            # with DSU edge sorting is optimal (O(E log V)).
+            if num_v >= 8 and graph_density >= 0.50:
+                selected_algorithm = "prim"
+                algo_rationale = f"Automatic Selection: Prim's algorithm chosen (dense candidate network: |V|={num_v}, |E|={num_e}, density={graph_density:.2f} ≥ 0.50). Cut frontier expansion from incident origin is optimal."
+            else:
+                selected_algorithm = "kruskal"
+                algo_rationale = f"Automatic Selection: Kruskal's algorithm chosen (sparse/compact network: |V|={num_v}, |E|={num_e}, density={graph_density:.2f} < 0.50). Global DSU edge sorting is optimal."
+
+        update_stage(5, f"Optimizing Network ({selected_algorithm.title()} / {optimization_mode.upper()} Mode)")
+        mst_kruskal_time = kruskal_mst(vertex_ids, time_edges, track_trace=True)
+        mst_kruskal_dist = kruskal_mst(vertex_ids, dist_edges, track_trace=True)
+        mst_prim_time = prim_mst(vertex_ids, time_edges, start_vertex="incident_0", track_trace=True)
+        mst_prim_dist = prim_mst(vertex_ids, dist_edges, start_vertex="incident_0", track_trace=True)
+
+        if selected_algorithm == "prim":
+            if optimization_mode == "distance":
+                selected_mst_res = mst_prim_dist
+            elif optimization_mode == "compromise":
+                tradeoff = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
+                match_point = next((p for p in tradeoff["tradeoff_points"] if p["k"] == k_param), tradeoff["tradeoff_points"][5])
+                selected_mst_res = {
+                    "algorithm": "prim_compromise",
+                    "mst_edges": match_point["edges"],
+                    "edge_count": match_point["edge_count"],
+                    "total_integer_weight": match_point["tree_time_ds"],
+                    "is_connected": mst_prim_time["is_connected"],
+                    "num_components": mst_prim_time["num_components"],
+                    "components": mst_prim_time["components"],
+                    "trace": mst_prim_time.get("trace"),
+                    "compromise_point": match_point,
+                    "tradeoff_sweep": tradeoff,
+                }
+            else:
+                selected_mst_res = mst_prim_time
+        else:
+            if optimization_mode == "distance":
+                selected_mst_res = mst_kruskal_dist
+            elif optimization_mode == "compromise":
+                tradeoff = compute_compromise_tradeoff_sweep(vertex_ids, time_edges)
+                match_point = next((p for p in tradeoff["tradeoff_points"] if p["k"] == k_param), tradeoff["tradeoff_points"][5])
+                selected_mst_res = {
+                    "algorithm": "kruskal_compromise",
+                    "mst_edges": match_point["edges"],
+                    "edge_count": match_point["edge_count"],
+                    "total_integer_weight": match_point["tree_time_ds"],
+                    "is_connected": mst_kruskal_time["is_connected"],
+                    "num_components": mst_kruskal_time["num_components"],
+                    "components": mst_kruskal_time["components"],
+                    "trace": mst_kruskal_time.get("trace"),
+                    "compromise_point": match_point,
+                    "tradeoff_sweep": tradeoff,
+                }
+            else:
+                selected_mst_res = mst_kruskal_time
 
         # Stage 6: Validating Results
         update_stage(6, "Validating Optimality & Cycle Property")
@@ -504,6 +554,11 @@ def execute_scenario_pipeline(
                 "optimization_mode": optimization_mode,
                 "k_param": k_param,
                 "fuel_rate_inr_km": fuel_rate,
+                "algorithm_requested": algo_req,
+                "algorithm_selected": selected_algorithm,
+                "algorithm_display": "Prim's Algorithm" if selected_algorithm == "prim" else "Kruskal's Algorithm",
+                "algorithm_rationale": algo_rationale,
+                "graph_density": round(graph_density, 3),
             },
             "summary": {
                 "total_candidates_in_radius": len(eligible_candidates),
@@ -516,6 +571,8 @@ def execute_scenario_pipeline(
                 "num_components": num_comps,
                 "is_forest": is_forest,
                 "network_type": net_type,
+                "algorithm_selected": selected_algorithm,
+                "algorithm_display": "Prim's Algorithm" if selected_algorithm == "prim" else "Kruskal's Algorithm",
                 "incident_connected_count": len(incident_connected_members) - 1,
                 "unreachable_facilities_count": len(unreachable_facs),
                 "kendall_tau_b": kendall_tau,
@@ -524,6 +581,9 @@ def execute_scenario_pipeline(
             "dispatch_ranking": dispatch_rows,
             "network_mst": {
                 "algorithm": selected_mst_res["algorithm"],
+                "algorithm_selected": selected_algorithm,
+                "algorithm_display": "Prim's Algorithm" if selected_algorithm == "prim" else "Kruskal's Algorithm",
+                "algorithm_rationale": algo_rationale,
                 "network_type": net_type,
                 "is_forest": is_forest,
                 "edges": active_edges_with_geom,
@@ -540,7 +600,7 @@ def execute_scenario_pipeline(
             "validation": {
                 "structural": struct_val,
                 "optimality": optimality_cert,
-                "prim_kruskal_parity": (mst_time_res["total_integer_weight"] == prim_time_res["total_integer_weight"]),
+                "prim_kruskal_parity": (mst_kruskal_time["total_integer_weight"] == mst_prim_time["total_integer_weight"]),
             },
             "tradeoff_analysis": tradeoff_summary,
             "network_position": net_pos,
@@ -549,8 +609,8 @@ def execute_scenario_pipeline(
                 "exclusions": exclusions,
             },
             "traces": {
-                "kruskal": mst_time_res["trace"][:50] if mst_time_res["trace"] else [],
-                "prim": prim_time_res["trace"][:50] if prim_time_res["trace"] else [],
+                "kruskal": mst_kruskal_time["trace"][:50] if mst_kruskal_time.get("trace") else [],
+                "prim": mst_prim_time["trace"][:50] if mst_prim_time.get("trace") else [],
             },
         }
 
@@ -577,17 +637,18 @@ def create_and_run_scenario(
     incident_lon: float,
     incident_label: str,
     agency: str,
-    radius_km: float,
+    radius_km: float = 5.0,
     optimization_mode: str = "time",
     k_param: int = 5,
     async_mode: bool = True,
     incident_category: str = "Medical Emergency",
     bypass_cache: bool = False,
+    algorithm: str = "auto",
 ) -> str:
     """Creates a new scenario in SQLite and triggers execution pipeline."""
     scenario_id = str(uuid.uuid4())
     cache_key = compute_scenario_cache_key(
-        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category
+        incident_lat, incident_lon, agency, radius_km, optimization_mode, k_param, incident_category, algorithm=algorithm
     )
     conn = get_scenario_db()
     with conn:
@@ -601,13 +662,13 @@ def create_and_run_scenario(
     if async_mode:
         t = threading.Thread(
             target=execute_scenario_pipeline,
-            args=(scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache),
+            args=(scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache, algorithm),
             daemon=True
         )
         t.start()
     else:
         execute_scenario_pipeline(
-            scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache
+            scenario_id, incident_lat, incident_lon, incident_label, agency, radius_km, optimization_mode, k_param, incident_category, bypass_cache, algorithm
         )
 
     return scenario_id

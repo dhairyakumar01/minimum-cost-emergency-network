@@ -47,6 +47,7 @@
     simAgency: "hospital",
     simRadiusKm: 5.0,
     simMode: "time",
+    simDispatchAlgorithm: "auto",
     compromiseK: 5,
     simRequestCounter: 0,
     lastCompletedFingerprint: null,
@@ -174,6 +175,16 @@
           }, 100);
         } else if (sectionId === "simulation") {
           updateSimulationUI();
+          setTimeout(() => {
+            if (simMstMap) {
+              simMstMap.invalidateSize();
+              if (simBounds && simBounds.isValid()) {
+                simMstMap.fitBounds(simBounds, { padding: [30, 30] });
+              }
+            } else {
+              initSimInitialMap();
+            }
+          }, 120);
         }
       } catch (navErr) {
         console.warn("Navigation map refresh caught safely:", navErr);
@@ -566,6 +577,7 @@
       (State.simRadiusKm || 5.0).toFixed(1),
       State.simMode,
       State.simMode === "compromise" ? (State.compromiseK !== undefined ? State.compromiseK : 5) : "na",
+      State.simDispatchAlgorithm || "auto",
     ].join("|");
   }
 
@@ -669,6 +681,20 @@
       showFacilityDetailsCard(State.selectedFacility);
     }
 
+    if (simMstMap && simIncidentLayer) {
+      simIncidentLayer.clearLayers();
+      const incLatLng = [lat, lon];
+      const incIcon = L.divIcon({
+        className: "incident-sim-pin-wrap",
+        html: `<div class="incident-sim-pin" title="Incident Origin">🚨</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+      const incMarker = L.marker(incLatLng, { icon: incIcon, zIndexOffset: 2000 });
+      incMarker.bindPopup(`<b>🚨 Incident Origin</b><br/>${escapeHtml(label)}<br/>${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E`);
+      simIncidentLayer.addLayer(incMarker);
+    }
+
     updateSimulationCandidateCount();
     invalidateSimulationResults("incident_placed");
   }
@@ -711,6 +737,9 @@
     if (distBox) distBox.style.display = "none";
 
     setIncidentSelectMode(false);
+    if (simIncidentLayer) {
+      simIncidentLayer.clearLayers();
+    }
     updateSimulationUI();
 
     // Clear simulation results completely
@@ -1552,12 +1581,37 @@
       }
 
       const modeNames = {
-        "time": "Minimum Time (S_T)",
-        "distance": "Minimum Road Distance (along fastest routes)",
-        "compromise": `Compromise Trade-Off (k=${State.compromiseK !== undefined ? State.compromiseK : 5}/10)`,
+        "time": "Mode 1 — Minimum Time",
+        "distance": "Mode 2 — Minimum Road Distance",
+        "compromise": "Mode 3 — Overall Optimization",
       };
-      setText("sum-mode", modeNames[modeKey] || modeKey);
+      const modeBadge = document.getElementById("sim-map-mode-badge");
+      if (modeBadge) {
+        modeBadge.textContent = modeNames[modeKey] || modeKey;
+      }
       invalidateSimulationResults("mode");
+    },
+
+    selectAlgorithm(algoKey) {
+      State.simDispatchAlgorithm = algoKey;
+      document.querySelectorAll(".algo-card").forEach((card) => {
+        if (card.getAttribute("data-algo") === algoKey) {
+          card.classList.add("active");
+        } else {
+          card.classList.remove("active");
+        }
+      });
+
+      const algoLabels = {
+        "auto": "Automatic Selection",
+        "prim": "Prim's Algorithm",
+        "kruskal": "Kruskal's Algorithm",
+      };
+      const badge = document.getElementById("sim-map-algo-badge");
+      if (badge) {
+        badge.textContent = algoLabels[algoKey] || algoKey;
+      }
+      invalidateSimulationResults("algorithm");
     },
 
     onCompromiseKChange(val) {
@@ -1565,10 +1619,7 @@
       State.compromiseK = k;
       const disp = document.getElementById("compromise-k-display");
       if (disp) {
-        disp.textContent = `k = ${k}/10 (${k * 10}% Time, ${(10 - k) * 10}% Distance)`;
-      }
-      if (State.simMode === "compromise") {
-        setText("sum-mode", `Compromise Trade-Off (k=${k}/10)`);
+        disp.textContent = `Balanced (${k * 10}% Time / ${(10 - k) * 10}% Distance)`;
       }
       invalidateSimulationResults("compromise_k");
     },
@@ -1785,6 +1836,7 @@
         radius_km: State.simRadiusKm || 5.0,
         optimization_mode: State.simMode || "time",
         k_param: State.compromiseK !== undefined ? State.compromiseK : 5,
+        algorithm: State.simDispatchAlgorithm || "auto",
       };
 
       try {
@@ -1931,6 +1983,11 @@
     setText("res-eligible-count", evalCount.toString());
     setText("res-agency-name", AGENCY_LABELS[State.simAgency] || params.agency);
     setText("res-radius-val", `${(params.radius_km || State.simRadiusKm).toFixed(1)} km`);
+    const algoDisplay = params.algorithm_display || (params.algorithm_selected === "prim" ? "Prim's Algorithm" : "Kruskal's Algorithm");
+    setText("res-algo-name", algoDisplay);
+    setText("tech-algo-rationale", params.algorithm_rationale || "Optimal algorithm executed.");
+    const countSpan = document.getElementById("summary-table-count");
+    if (countSpan) countSpan.textContent = ranking.length;
 
     // Top Recommendations: Rank 1 Dominant Hero Card, Rank 2 & 3 Secondary Alternatives
     const listEl = document.getElementById("sim-ranked-facilities-list");
@@ -2211,34 +2268,62 @@
   let simIncidentLayer = null;
   let simBounds = null;
 
+  function initSimInitialMap() {
+    const mapEl = document.getElementById("sim-mst-leaflet-map");
+    if (!mapEl || !window.L || simMstMap) return;
+
+    simMstMap = L.map("sim-mst-leaflet-map", {
+      center: (State.incident && State.incident.lat != null) ? [State.incident.lat, State.incident.lon] : [12.9781, 77.5696],
+      zoom: 12,
+      zoomControl: true,
+    });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(simMstMap);
+
+    simBackboneLayer = L.layerGroup().addTo(simMstMap);
+    simDispatchRouteLayer = L.layerGroup().addTo(simMstMap);
+    simFacilitiesLayer = L.layerGroup().addTo(simMstMap);
+    simIncidentLayer = L.layerGroup().addTo(simMstMap);
+
+    const overlays = {
+      "🕸️ MST Backbone": simBackboneLayer,
+      "🚑 Recommended Route": simDispatchRouteLayer,
+      "🏢 Connected Facilities": simFacilitiesLayer,
+      "🚨 Incident Location": simIncidentLayer,
+    };
+    simLayerControl = L.control.layers(null, overlays, { collapsed: false, position: "topright" }).addTo(simMstMap);
+
+    if (State.incident && State.incident.lat != null && State.incident.lon != null) {
+      const incLatLng = [State.incident.lat, State.incident.lon];
+      const incIcon = L.divIcon({
+        className: "incident-sim-pin-wrap",
+        html: `<div class="incident-sim-pin" title="Incident Origin">🚨</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+      const incMarker = L.marker(incLatLng, { icon: incIcon, zIndexOffset: 2000 });
+      incMarker.bindPopup(`
+        <div style="font-size:0.80rem; line-height:1.45;">
+          <span class="badge badge-red" style="font-size:0.68rem; margin-bottom:4px;">🚨 INCIDENT ORIGIN</span>
+          <h4 style="font-size:0.88rem; font-weight:700; margin:2px 0;">${escapeHtml(State.incident.label || "Incident Location")}</h4>
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
+            Coordinates: ${State.incident.lat.toFixed(5)}° N, ${State.incident.lon.toFixed(5)}° E
+          </div>
+        </div>
+      `);
+      simIncidentLayer.addLayer(incMarker);
+    }
+  }
+
   function renderSimulationNetworkMap(res) {
     const mapEl = document.getElementById("sim-mst-leaflet-map");
     if (!mapEl || !window.L) return;
 
     // 1. Initialize Map instance once
     if (!simMstMap) {
-      simMstMap = L.map("sim-mst-leaflet-map", {
-        center: [12.9781, 77.5696],
-        zoom: 12,
-        zoomControl: true,
-      });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(simMstMap);
-
-      simBackboneLayer = L.layerGroup().addTo(simMstMap);
-      simDispatchRouteLayer = L.layerGroup().addTo(simMstMap);
-      simFacilitiesLayer = L.layerGroup().addTo(simMstMap);
-      simIncidentLayer = L.layerGroup().addTo(simMstMap);
-
-      const overlays = {
-        "🕸️ MST/MSF Backbone": simBackboneLayer,
-        "🚑 Recommended Dispatch Route": simDispatchRouteLayer,
-        "🏢 Connected Facilities": simFacilitiesLayer,
-        "🚨 Incident Location": simIncidentLayer,
-      };
-      simLayerControl = L.control.layers(null, overlays, { collapsed: false, position: "topright" }).addTo(simMstMap);
+      initSimInitialMap();
     }
 
     simBackboneLayer.clearLayers();
@@ -2257,11 +2342,22 @@
     const modeBadge = document.getElementById("sim-map-mode-badge");
     if (modeBadge) {
       const modeLabels = {
-        time: "Mode 1: Minimum Time (S_T)",
-        distance: "Mode 2: Minimum Distance (S_D)",
-        compromise: `Mode 3: Compromise (k=${params.k_param !== undefined ? params.k_param : 5})`,
+        time: "Mode 1 — Minimum Time",
+        distance: "Mode 2 — Minimum Road Distance",
+        compromise: "Mode 3 — Overall Optimization",
       };
-      modeBadge.textContent = modeLabels[params.optimization_mode] || "MST Backbone";
+      modeBadge.textContent = modeLabels[params.optimization_mode] || "Mode 1 — Minimum Time";
+    }
+
+    // Update algo badge on map header
+    const algoBadge = document.getElementById("sim-map-algo-badge");
+    if (algoBadge) {
+      const algoDisplay = params.algorithm_display || net.algorithm_display || res.algorithm_display || (params.algorithm_selected === "prim" ? "Prim's Algorithm" : "Kruskal's Algorithm");
+      if (params.algorithm_requested === "auto" || params.algorithm === "auto" || State.simDispatchAlgorithm === "auto") {
+        algoBadge.textContent = `Auto: ${algoDisplay}`;
+      } else {
+        algoBadge.textContent = algoDisplay;
+      }
     }
 
     // Update geometry badge

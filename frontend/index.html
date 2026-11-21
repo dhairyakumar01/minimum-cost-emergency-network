@@ -143,7 +143,7 @@
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Registered Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Geocoded municipal facility records</div>
+              <div class="metric-subtext">Geocoded municipal emergency records</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🏢</span> Facility Composition</div>
@@ -304,10 +304,13 @@
               </div>
             </div>
 
-            <div class="incident-coords-row" id="incident-coords-bar" style="display:none; flex-wrap:wrap; gap:10px; align-items:center;">
+            <div class="incident-coords-row" id="incident-coords-bar"
+              style="display:none; flex-wrap:wrap; gap:10px; align-items:center;">
               <div class="coord-field" style="flex:1; min-width:240px;">
                 <label>Find Landmark / Incident Address:</label>
-                <input type="text" id="incident-location-search" placeholder="Search landmark (e.g. Majestic, Indiranagar)..." style="width:100%; padding:5px 9px; border:1px solid var(--border-color); border-radius:4px; font-size:0.78rem;" />
+                <input type="text" id="incident-location-search"
+                  placeholder="Search landmark (e.g. Majestic, Indiranagar)..."
+                  style="width:100%; padding:5px 9px; border:1px solid var(--border-color); border-radius:4px; font-size:0.78rem;" />
               </div>
               <div class="landmarks-list" style="flex:2; min-width:320px;">
                 <span class="landmark-label">Presets:</span>
@@ -329,11 +332,13 @@
                 <div style="display:flex; gap:12px; margin-top:4px;">
                   <div class="coord-field">
                     <label>Latitude (°N):</label>
-                    <input type="number" id="incident-lat-input" step="0.00001" placeholder="12.9716" style="padding:4px 8px; font-size:0.78rem;" />
+                    <input type="number" id="incident-lat-input" step="0.00001" placeholder="12.9716"
+                      style="padding:4px 8px; font-size:0.78rem;" />
                   </div>
                   <div class="coord-field">
                     <label>Longitude (°E):</label>
-                    <input type="number" id="incident-lon-input" step="0.00001" placeholder="77.5946" style="padding:4px 8px; font-size:0.78rem;" />
+                    <input type="number" id="incident-lon-input" step="0.00001" placeholder="77.5946"
+                      style="padding:4px 8px; font-size:0.78rem;" />
                   </div>
                 </div>
               </details>
@@ -678,10 +683,14 @@
               </summary>
               <div class="compare-proof-card" style="margin-top:10px; border:none; padding:0; background:transparent;">
                 <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:8px;">
-                  <strong>Cut Property (Prim's Algorithm):</strong> For any cut (S, V \ S) in connected weighted graph G, if edge e is a minimum-weight crossing edge of the cut, then e belongs to at least one Minimum Spanning Tree of G. Prim's algorithm expands cut S greedily step-by-step.
+                  <strong>Cut Property (Prim's Algorithm):</strong> For any cut (S, V \ S) in connected weighted graph
+                  G, if edge e is a minimum-weight crossing edge of the cut, then e belongs to at least one Minimum
+                  Spanning Tree of G. Prim's algorithm expands cut S greedily step-by-step.
                 </p>
                 <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:0;">
-                  <strong>Cycle Property (Kruskal's Algorithm):</strong> For any cycle C in G, if edge e is a strictly maximum-weight edge on C, then e cannot belong to any Minimum Spanning Tree. Kruskal's algorithm rejects any edge connecting already-connected components via Disjoint Set Union.
+                  <strong>Cycle Property (Kruskal's Algorithm):</strong> For any cycle C in G, if edge e is a strictly
+                  maximum-weight edge on C, then e cannot belong to any Minimum Spanning Tree. Kruskal's algorithm
+                  rejects any edge connecting already-connected components via Disjoint Set Union.
                 </p>
               </div>
             </details>
@@ -771,36 +780,35 @@
         </section>
 
         <!-- ================================================================= -->
-        <!-- SECTION 4: EMERGENCY SIMULATION (Progressive Workspace) -->
+        <!-- SECTION 4: EMERGENCY SIMULATION (Simplified Dispatch Interface) -->
         <!-- ================================================================= -->
         <section id="section-simulation" class="view-section" style="display:none;">
           <div class="simulation-layout">
 
-            <!-- Left Column: Compact Workflow Configuration Panel -->
+            <!-- Left Column: Clean Configuration Panel -->
             <div class="sim-workflow-column">
               <div class="sim-config-panel">
                 <div class="sim-config-header">
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:1.1rem;">⚡</span>
-                    <h3 style="font-size:0.95rem; font-weight:700; margin:0; color:#0f172a;">Simulation Configuration
-                    </h3>
+                    <span style="font-size:1.15rem;">🚨</span>
+                    <h3 style="font-size:1.0rem; font-weight:700; margin:0; color:#0f172a;">Emergency Dispatch Setup</h3>
                   </div>
-                  <span class="badge badge-blue">Interactive Setup</span>
+                  <span class="badge badge-blue">Dispatch Parameters</span>
                 </div>
 
-                <!-- Section 1: Incident Location Selection -->
+                <!-- 1. Incident Location -->
                 <div class="sim-config-section" id="sim-step-1">
                   <div class="sim-config-label">
-                    <span>1. Incident Location Origin</span>
+                    <span>1. Incident Location</span>
                     <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')"
-                      style="font-size:0.72rem; padding:2px 8px;">
+                      style="font-size:0.75rem; padding:3px 10px; font-weight:600;">
                       📍 Pick on Map
                     </button>
                   </div>
                   <div class="sim-incident-box">
                     <div class="sim-incident-info">
                       <span id="sim-incident-coords"
-                        style="font-family:var(--font-mono); font-size:0.84rem; font-weight:700; color:#0f172a;">
+                        style="font-family:var(--font-mono); font-size:0.86rem; font-weight:700; color:#0f172a;">
                         12.97810° N, 77.56960° E (Majestic / KSR Railway Station)
                       </span>
                       <span id="sim-incident-badge" class="badge badge-blue">Preset Location</span>
@@ -826,46 +834,61 @@
                   </div>
                 </div>
 
-                <!-- Section 2: Emergency Category Context -->
+                <!-- 2. Emergency Category -->
                 <div class="sim-config-section" id="sim-step-2">
                   <div class="sim-config-label">2. Emergency Category</div>
                   <div class="category-cards-grid">
                     <div class="category-card active" data-category="medical" onclick="App.selectCategory('medical')">
-                      <span class="cat-icon">🚑</span>
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚑</span>
+                        <span class="active-check">✓</span>
+                      </div>
                       <div class="cat-name">Medical</div>
                       <div class="cat-desc">Cardiac, trauma, triage</div>
                     </div>
                     <div class="category-card" data-category="fire" onclick="App.selectCategory('fire')">
-                      <span class="cat-icon">🚒</span>
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚒</span>
+                        <span class="active-check">✓</span>
+                      </div>
                       <div class="cat-name">Fire / HazMat</div>
                       <div class="cat-desc">Blaze, chemical spill</div>
                     </div>
                     <div class="category-card" data-category="police" onclick="App.selectCategory('police')">
-                      <span class="cat-icon">🚓</span>
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚓</span>
+                        <span class="active-check">✓</span>
+                      </div>
                       <div class="cat-name">Public Safety</div>
                       <div class="cat-desc">Security response</div>
                     </div>
                     <div class="category-card" data-category="traffic" onclick="App.selectCategory('traffic')">
-                      <span class="cat-icon">🚗</span>
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚗</span>
+                        <span class="active-check">✓</span>
+                      </div>
                       <div class="cat-name">Road Traffic</div>
                       <div class="cat-desc">Arterial crash rescue</div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Section 3: Single Response Agency -->
+                <!-- 3. Response Agency / Vehicle -->
                 <div class="sim-config-section" id="sim-step-3">
-                  <div class="sim-config-label">3. Response Agency (Single Fleet Dispatch)</div>
+                  <div class="sim-config-label">3. Response Agency / Vehicle</div>
                   <div class="agency-selection-grid">
                     <div class="agency-card active" id="sim-agency-hospital" onclick="App.selectAgency('hospital')">
                       <div>
                         <div class="agency-card-top">
                           <span class="agency-pill pill-red">Healthcare & Ambulance</span>
                         </div>
-                        <div class="agency-vehicle">Ambulance (BLS/ALS)</div>
-                        <div class="agency-meta">1,097 Facilities &bull; Force Traveller</div>
+                        <div class="agency-vehicle">Ambulance (Force Traveller)</div>
+                        <div class="agency-meta">1,097 Facilities</div>
                       </div>
-                      <div class="agency-rate">₹12.50 / km</div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹12.50 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
                     </div>
 
                     <div class="agency-card" id="sim-agency-police" onclick="App.selectAgency('police_station')">
@@ -873,10 +896,13 @@
                         <div class="agency-card-top">
                           <span class="agency-pill pill-blue">Law Enforcement</span>
                         </div>
-                        <div class="agency-vehicle">Police Patrol (Hoysala)</div>
-                        <div class="agency-meta">138 Stations &bull; Bolero</div>
+                        <div class="agency-vehicle">Police Patrol (Bolero)</div>
+                        <div class="agency-meta">138 Stations</div>
                       </div>
-                      <div class="agency-rate">₹6.25 / km</div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹6.25 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
                     </div>
 
                     <div class="agency-card" id="sim-agency-fire" onclick="App.selectAgency('fire_station')">
@@ -884,17 +910,20 @@
                         <div class="agency-card-top">
                           <span class="agency-pill pill-orange">Fire & Rescue</span>
                         </div>
-                        <div class="agency-vehicle">Fire Engine Appliance</div>
-                        <div class="agency-meta">20 Stations &bull; Heavy Water Tender</div>
+                        <div class="agency-vehicle">Fire Engine (Heavy Water Tender)</div>
+                        <div class="agency-meta">20 Stations</div>
                       </div>
-                      <div class="agency-rate">₹18.00 / km</div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹18.00 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Section 4: Search Radius -->
+                <!-- 4. Search Radius -->
                 <div class="sim-config-section" id="sim-step-4">
-                  <div class="sim-config-label">4. Search Radius (<i>R<sub>s</sub></i>)</div>
+                  <div class="sim-config-label">4. Search Radius</div>
                   <div class="radius-control-box">
                     <div class="radius-slider-wrap">
                       <input type="range" id="sim-radius-slider" min="2" max="15" step="0.5" value="5.0"
@@ -914,512 +943,336 @@
                   </div>
                 </div>
 
-                <!-- Section 5: Optimization Mode -->
+                <!-- 5. Optimization Mode -->
                 <div class="sim-config-section" id="sim-step-5">
-                  <div class="sim-config-label">5. Optimization Objective Mode</div>
-                  <div class="mode-cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+                  <div class="sim-config-label">5. Optimization Mode</div>
+                  <div class="mode-cards-grid">
                     <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
-                      <div class="mode-icon">⏱️</div>
-                      <div class="mode-title">Mode 1: Min Time</div>
-                      <div class="mode-desc">Minimizes travel time backbone (<i>S<sub>T</sub></i>).</div>
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">⏱️</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="mode-title">Mode 1 — Minimum Time</div>
                     </div>
                     <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
-                      <div class="mode-icon">📏</div>
-                      <div class="mode-title">Mode 2: Min Road Distance</div>
-                      <div class="mode-desc">Minimizes physical distance (<i>S<sub>D</sub></i>).</div>
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">📏</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="mode-title">Mode 2 — Minimum Road Distance</div>
                     </div>
                     <div class="mode-card" data-mode="compromise" onclick="App.selectMode('compromise')">
-                      <div class="mode-icon">⚖️</div>
-                      <div class="mode-title">Mode 3: Compromise</div>
-                      <div class="mode-desc">Trade-off: <i>kS<sub>T</sub>D*</i> + (10-<i>k</i>)<i>S<sub>D</sub>T*</i>.
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">⚖️</div>
+                        <span class="active-check">✓</span>
                       </div>
+                      <div class="mode-title">Mode 3 — Overall Optimization</div>
                     </div>
                   </div>
 
-                  <!-- Compromise k-parameter slider -->
+                  <!-- Compromise Slider (shown only when Mode 3 is active) -->
                   <div id="compromise-slider-wrap"
-                    style="display:none; margin-top:8px; padding:8px 10px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                    style="display:none; margin-top:8px; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                      <span style="font-size:0.75rem; font-weight:700; color:var(--text-main);">Compromise Weight
-                        (<i>k</i> / 10):</span>
+                      <span style="font-size:0.78rem; font-weight:700; color:var(--text-main);">Optimization Balance:</span>
                       <span id="compromise-k-display"
-                        style="font-family:var(--font-mono); font-weight:800; color:var(--primary); font-size:0.84rem;">k
-                        = 5 (λ = 0.5)</span>
+                        style="font-family:var(--font-mono); font-weight:700; color:var(--primary); font-size:0.80rem;">Balanced (50% Time / 50% Distance)</span>
                     </div>
                     <input type="range" id="sim-compromise-k-slider" min="0" max="10" step="1" value="5"
                       oninput="App.onCompromiseKChange(this.value)" style="width:100%; accent-color:var(--primary);" />
-                    <div
-                      style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-light); margin-top:2px;">
-                      <span>k=0 (Pure Distance)</span>
-                      <span>k=5 (Balanced)</span>
-                      <span>k=10 (Pure Time)</span>
+                    <div style="display:flex; justify-content:space-between; font-size:0.70rem; color:var(--text-muted); margin-top:2px;">
+                      <span>Distance Priority</span>
+                      <span>Balanced</span>
+                      <span>Time Priority</span>
                     </div>
-                  </div>
-
-                  <div style="font-size:0.70rem; color:var(--text-light); margin-top:6px;">
-                    ℹ️ Note: Fuel cost is strictly proportional to distance (<i>C = D × R<sub>a</sub></i>); thus
-                    cost-minimization is isomorphic to distance-minimization.
                   </div>
                 </div>
 
-                <!-- Section 6: Dispatch Staging & Run Button -->
-                <div class="sim-config-section" id="sim-step-6"
-                  style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                  <div class="sim-config-label">6. Parameter Review & Dispatch Trigger</div>
-                  <div class="dispatch-summary-box">
-                    <div class="summary-item">
-                      <span class="sum-lbl">Incident Location:</span>
-                      <span class="sum-val" id="sum-incident">Majestic (12.9781°N, 77.5696°E)</span>
+                <!-- 6. Algorithm Selection -->
+                <div class="sim-config-section" id="sim-step-6">
+                  <div class="sim-config-label">6. Algorithm Selection</div>
+                  <div class="algo-cards-grid">
+                    <div class="algo-card active" data-algo="auto" onclick="App.selectAlgorithm('auto')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🤖 Automatic Selection</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Automatically selects optimal algorithm based on candidate network density</div>
                     </div>
-                    <div class="summary-item">
-                      <span class="sum-lbl">Category:</span>
-                      <span class="sum-val" id="sum-category">Medical Emergency</span>
+                    <div class="algo-card" data-algo="prim" onclick="App.selectAlgorithm('prim')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🌳 Prim's Algorithm</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Priority-queue cut frontier growing outward from incident origin</div>
                     </div>
-                    <div class="summary-item">
-                      <span class="sum-lbl">Agency:</span>
-                      <span class="sum-val" id="sum-agency">Healthcare & Ambulance</span>
-                    </div>
-                    <div class="summary-item">
-                      <span class="sum-lbl">Radius:</span>
-                      <span class="sum-val" id="sum-radius">5.0 km</span>
-                    </div>
-                    <div class="summary-item">
-                      <span class="sum-lbl">Mode:</span>
-                      <span class="sum-val" id="sum-mode">Minimum Time (S_T)</span>
+                    <div class="algo-card" data-algo="kruskal" onclick="App.selectAlgorithm('kruskal')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🔗 Kruskal's Algorithm</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Global edge sorting with Disjoint Set Union (DSU) component merging</div>
                     </div>
                   </div>
+                </div>
 
-                  <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+                <!-- 7. Run Dispatch Analysis Button -->
+                <div class="sim-config-section" id="sim-step-7"
+                  style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                  <div style="display:flex; flex-direction:column; gap:8px;">
                     <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()"
-                      style="padding:9px 18px; font-weight:700;">
+                      style="padding:12px 24px; font-size:0.95rem; font-weight:700; width:100%; justify-content:center; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
                       🚀 Run Dispatch Analysis
                     </button>
-                    <span id="sim-exec-status" style="font-size:0.78rem; color:var(--text-muted);">
-                      Ready for analysis
-                    </span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.78rem;">
+                      <span id="sim-exec-status" style="font-weight:600; color:var(--text-main);">
+                        Ready for analysis
+                      </span>
+                      <span id="pipeline-status-badge" class="badge badge-gray" style="display:none;">Standby</span>
+                    </div>
                   </div>
                 </div>
+
               </div>
             </div>
 
-            <!-- Right Column: Staged Progress & Simulation Results Workspace -->
+            <!-- Right Column: Results Workspace (Route Map + Ranked Recommendations) -->
             <div class="sim-results-column">
 
-              <!-- Staged Execution Pipeline Accordion -->
-              <details class="pipeline-accordion" id="pipeline-accordion">
-                <summary class="pipeline-summary">
-                  <span style="font-weight:700; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
-                    ⚙️ Execution Pipeline
-                  </span>
-                  <span class="badge badge-blue" id="pipeline-status-badge">Standby</span>
-                </summary>
-                <div class="pipeline-stages" style="margin-top:10px;">
-                  <div class="pipeline-stage" id="stage-validate">
-                    <span class="stage-dot"></span>
-                    <span>1. Validating Incident Coordinates & Boundary</span>
+              <!-- Dedicated Simulation Error Banner -->
+              <div id="sim-error-box" class="tab-notice-banner tab-notice-red"
+                style="display:none; margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
+                <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">⚠️</span>
+                    <span id="sim-error-msg" style="font-weight:600; font-size:0.80rem;">Simulation execution encountered an issue.</span>
                   </div>
-                  <div class="pipeline-stage" id="stage-candidates">
-                    <span class="stage-dot"></span>
-                    <span>2. Evaluating Facility Candidates in Search Radius</span>
-                  </div>
-                  <div class="pipeline-stage" id="stage-network">
-                    <span class="stage-dot"></span>
-                    <span>3. Constructing Subgraph & Spanning Backbone</span>
-                  </div>
-                  <div class="pipeline-stage" id="stage-rank">
-                    <span class="stage-dot"></span>
-                    <span>4. Ranking Emergency Dispatch Recommendations</span>
-                  </div>
+                  <button class="btn btn-outline btn-sm" id="btn-retry-simulation"
+                    onclick="App.runSimulationPreview()"
+                    style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
+                    🔄 Retry Analysis
+                  </button>
                 </div>
-                <!-- Dedicated Simulation Error Banner -->
-                <div id="sim-error-box" class="tab-notice-banner tab-notice-red"
-                  style="display:none; margin-top:10px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
-                  <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span style="font-size:1.1rem;">⚠️</span>
-                      <span id="sim-error-msg" style="font-weight:600; font-size:0.80rem;">Simulation execution
-                        encountered an issue.</span>
-                    </div>
-                    <button class="btn btn-outline btn-sm" id="btn-retry-simulation"
-                      onclick="App.runSimulationPreview()"
-                      style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
-                      🔄 Retry Analysis
+              </div>
+
+              <!-- Stale Results Notice -->
+              <div id="sim-stale-notice" class="tab-notice-banner"
+                style="display:none; margin-bottom:12px; background:#fffbeb; border:1px solid #fef3c7; color:#92400e; padding:10px 14px; border-radius:var(--radius-sm); align-items:center; gap:10px;">
+                <span style="font-size:1.2rem;">⚠️</span>
+                <div style="font-size:0.80rem; line-height:1.4;">
+                  <strong>Configuration Changed:</strong> Parameters were modified. Displayed results reflect prior execution. Click <strong>Run Dispatch Analysis</strong> to recompute.
+                </div>
+              </div>
+
+              <!-- Route Visualization & Network Map (Prominently Visible at Top) -->
+              <div class="card" style="padding:0; margin-bottom:14px; overflow:hidden; border:1px solid var(--border-color);">
+                <div style="padding:10px 14px; background:var(--bg-card); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.92rem; font-weight:700; color:var(--text-main);">🗺️ Dispatch Route & Network Map</span>
+                    <span class="badge badge-blue" id="sim-map-mode-badge">Mode 1 — Minimum Time</span>
+                    <span class="badge badge-green" id="sim-map-algo-badge">Automatic Selection</span>
+                    <span class="badge badge-green" id="sim-map-geom-badge" style="display:none;">Road Geometry</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn btn-outline btn-sm" id="btn-fit-sim-map" onclick="App.fitSimMapBounds()"
+                      title="Zoom to fit route and network">
+                      ⛶ Fit Route Bounds
                     </button>
                   </div>
                 </div>
-              </details>
 
-              <!-- 4-Tab Simulation Results Workspace -->
-              <div id="sim-results-output" style="display:none;">
+                <div id="sim-map-wrapper">
+                  <div id="sim-mst-leaflet-map" style="height:380px;"></div>
 
-                <!-- Stale Results Notice -->
-                <div id="sim-stale-notice" class="tab-notice-banner"
-                  style="display:none; margin-bottom:12px; background:#fffbeb; border:1px solid #fef3c7; color:#92400e; padding:10px 14px; border-radius:var(--radius-sm); align-items:center; gap:10px;">
-                  <span style="font-size:1.2rem;">⚠️</span>
-                  <div style="font-size:0.80rem; line-height:1.4;">
-                    <strong>Configuration Changed:</strong> Parameters were modified after this analysis was generated.
-                    Displayed results reflect prior execution. Click <strong>Run Dispatch Analysis</strong> to
-                    recompute.
+                  <!-- Floating Map Controls -->
+                  <div class="map-floating-controls">
+                    <button class="map-control-btn" id="btn-sim-map-fullscreen"
+                      onclick="App.toggleMapFullscreen('sim-map-wrapper', 'simMstMap')"
+                      title="Toggle Fullscreen">⛶</button>
+                    <button class="map-control-btn" id="btn-fit-sim-map-float" onclick="App.fitSimMapBounds()"
+                      title="Fit Network Bounds">⊡</button>
+                    <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimMapView()"
+                      title="Reset View">↺</button>
+                  </div>
+
+                  <!-- Floating Map Legend -->
+                  <div class="sim-map-legend">
+                    <div class="sim-legend-title">Map Legend</div>
+                    <div class="sim-legend-item">
+                      <span style="font-size:1rem;">🚨</span>
+                      <span>Incident Origin</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-marker marker-node" style="background:#f59e0b; border-color:#78350f;"></span>
+                      <span>Recommended Facility (#1)</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-line line-road" style="background:#f59e0b; height:4px;"></span>
+                      <span>Recommended Route</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-line line-road" style="background:#2563eb;"></span>
+                      <span>Network Link</span>
+                    </div>
+                  </div>
+
+                  <!-- Floating Edge / Facility Tooltip Card -->
+                  <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected Link</span>
+                      <button class="btn-icon" style="padding:0; font-size:0.75rem;"
+                        onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
+                    </div>
+                    <div id="sim-tt-title" style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">
+                      Endpoint U ⟷ Endpoint V
+                    </div>
+                    <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+                      Road Route: 3.2 km &bull; 4.5 min
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dispatch Results Container (Populated dynamically on analysis run) -->
+              <div id="sim-results-output">
+
+                <!-- Scenario Summary KPI Row -->
+                <div class="results-metrics-grid" style="margin-bottom:14px;">
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Available Facilities in Radius</div>
+                    <div class="res-val" id="res-eligible-count">0</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Selected Fleet</div>
+                    <div class="res-val" id="res-agency-name" style="font-size:0.90rem;">Healthcare</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Search Radius</div>
+                    <div class="res-val" id="res-radius-val">5.0 km</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Selected Algorithm</div>
+                    <div class="res-val" id="res-algo-name" style="font-size:0.88rem;">Automatic</div>
                   </div>
                 </div>
 
-                <!-- Results Tab Bar -->
-                <div class="results-tab-bar">
-                  <button class="results-tab-btn active" id="btn-tab-dispatch" onclick="App.switchSimTab('dispatch')">
-                    🚑 1. Dispatch Ranking
-                  </button>
-                  <button class="results-tab-btn" id="btn-tab-network" onclick="App.switchSimTab('network')">
-                    🕸️ 2. Network Backbone (MST)
-                  </button>
-                  <button class="results-tab-btn" id="btn-tab-validation" onclick="App.switchSimTab('validation')">
-                    ✅ 3. Validation
-                  </button>
-                  <button class="results-tab-btn" id="btn-tab-exclusions" onclick="App.switchSimTab('exclusions')">
-                    📋 4. Candidates & Exclusions
-                  </button>
-                </div>
-
-                <!-- TAB 1: Dispatch Ranking (Default Tab) -->
-                <div id="tab-content-dispatch" class="sim-tab-panel">
-                  <div class="tab-notice-banner tab-notice-blue">
-                    <span>🚑</span>
-                    <span>Facilities ranked strictly by estimated direct travel time to the incident (independent of MST
-                      backbone topology).</span>
-                  </div>
-
-                  <!-- Scenario Summary KPI Row -->
-                  <div class="results-metrics-grid" style="margin-bottom:12px;">
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Evaluated Candidates</div>
-                      <div class="res-val" id="res-eligible-count">0</div>
-                    </div>
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Agency Fleet</div>
-                      <div class="res-val" id="res-agency-name" style="font-size:0.90rem;">Healthcare</div>
-                    </div>
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Candidate Radius</div>
-                      <div class="res-val" id="res-radius-val">5.0 km</div>
-                    </div>
-                  </div>
-
-                  <!-- Top Recommendations Container: Dominant #1 Hero Card + Secondary Alternatives -->
-                  <div id="sim-ranked-facilities-list" style="margin-bottom:14px;">
-                    <!-- Populated dynamically -->
-                  </div>
-
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0 8px 0;">
-                    <span style="font-size:0.82rem; font-weight:700; color:var(--text-main);">Comprehensive Dispatch Rankings</span>
-                    <button class="btn btn-outline btn-sm" onclick="App.switchSimTab('network')" style="font-size:0.74rem; padding:4px 12px; font-weight:600;">
-                      🗺️ Inspect Geographic MST Map &rarr;
-                    </button>
-                  </div>
-
-                  <!-- Full Dispatch Table inside Progressive Disclosure Accordion -->
-                  <details class="sim-details-accordion">
-                    <summary class="sim-details-summary">
-                      <span>📋 View Complete Candidate Ranking Table (All Radius Facilities)</span>
-                      <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Table ▼</span>
-                    </summary>
-                    <div class="table-responsive" style="margin-top:8px; max-height:360px; overflow-y:auto;">
-                      <table class="data-table" id="table-dispatch-full">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Facility Name</th>
-                            <th>Agency</th>
-                            <th>Travel Time</th>
-                            <th>Road Dist</th>
-                            <th>Haversine</th>
-                            <th>Detour Ratio</th>
-                            <th>Est Fuel</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tbody-dispatch-full">
-                          <!-- Populated dynamically -->
-                        </tbody>
-                      </table>
-                    </div>
-                  </details>
-
-                  <div style="font-size:0.74rem; color:var(--text-muted); margin-top:8px; line-height:1.4;">
-                    ℹ️ <strong>Detour Ratio ($\ge 1.0$):</strong> Actual OSRM road distance divided by straight-line
-                    (Haversine) distance. A ratio close to 1.0 indicates a direct straight-line corridor, while higher
-                    values reflect urban street winding, one-way systems, or terrain obstacles.
-                  </div>
-                </div>
-
-                <!-- TAB 2: Network Backbone (MST / Forest) -->
-                <div id="tab-content-network" class="sim-tab-panel" style="display:none;">
-                  <div class="tab-notice-banner tab-notice-purple">
-                    <span>🕸️</span>
-                    <span>Incident-Specific Minimum-Weight Network Backbone (MST/MSF). This displays physical
-                      communication links, NOT vehicular dispatch.</span>
-                  </div>
-
-                  <!-- Dedicated Incident-Specific Geographic MST Map -->
-                  <div class="card"
-                    style="padding:0; margin-bottom:14px; overflow:hidden; border:1px solid var(--border-color);">
-                    <div
-                      style="padding:10px 14px; background:var(--bg-card); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:0.90rem; font-weight:700; color:var(--text-main);">🗺️ Incident MST
-                          Geographic Network Map</span>
-                        <span class="badge badge-blue" id="sim-map-mode-badge">Mode 1: Minimum Time</span>
-                        <span class="badge badge-green" id="sim-map-geom-badge">Genuine Road Geometry</span>
-                      </div>
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <button class="btn btn-outline btn-sm" id="btn-fit-sim-map" onclick="App.fitSimMapBounds()"
-                          title="Zoom to fit all network facilities">
-                          ⛶ Fit Network Bounds
-                        </button>
-                      </div>
-                    </div>
-
-                    <div id="sim-map-wrapper">
-                      <div id="sim-mst-leaflet-map"></div>
-
-                      <!-- Floating Map Controls -->
-                      <div class="map-floating-controls">
-                        <button class="map-control-btn" id="btn-sim-map-fullscreen"
-                          onclick="App.toggleMapFullscreen('sim-map-wrapper', 'simMstMap')"
-                          title="Toggle Fullscreen">⛶</button>
-                        <button class="map-control-btn" id="btn-fit-sim-map-float" onclick="App.fitSimMapBounds()"
-                          title="Fit Network Bounds">⊡</button>
-                        <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimMapView()"
-                          title="Reset View">↺</button>
-                      </div>
-
-                      <!-- Floating Interactive Legend -->
-                      <div class="sim-map-legend">
-                        <div class="sim-legend-title">Network Legend</div>
-                        <div class="sim-legend-item">
-                          <span style="font-size:1rem;">🚨</span>
-                          <span>Incident Location</span>
-                        </div>
-                        <div class="sim-legend-item">
-                          <span class="sim-legend-marker marker-node"></span>
-                          <span id="sim-legend-fac-label">Connected Facilities</span>
-                        </div>
-                        <div class="sim-legend-item">
-                          <span class="sim-legend-line line-road"></span>
-                          <span>OSRM Road Route</span>
-                        </div>
-                        <div class="sim-legend-item">
-                          <span class="sim-legend-line line-schematic"></span>
-                          <span>Schematic Fallback</span>
-                        </div>
-                      </div>
-
-                      <!-- Floating Edge / Facility Detail Tooltip Card -->
-                      <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
-                        <div
-                          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                          <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected
-                            Link</span>
-                          <button class="btn-icon" style="padding:0; font-size:0.75rem;"
-                            onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
-                        </div>
-                        <div id="sim-tt-title"
-                          style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">
-                          Endpoint U ⟷ Endpoint V</div>
-                        <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Road
-                          Route: 3.2 km &bull; 4.5 min</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="results-metrics-grid" style="margin-bottom:12px;">
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Spanning Edges</div>
-                      <div class="res-val" id="res-tree-edges">0</div>
-                    </div>
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Total Tree Weight</div>
-                      <div class="res-val" id="res-tree-length">0.00 km</div>
-                    </div>
-                    <div class="res-metric-box">
-                      <div class="res-lbl">Connected Components</div>
-                      <div class="res-val" id="res-components-count">1 (Tree)</div>
-                    </div>
-                  </div>
-                  <div class="sim-legend-item">
-                    <span class="sim-legend-line line-road"></span>
-                    <span>OSRM Road Route</span>
-                  </div>
-
-                  <!-- Tree Edges Table inside Progressive Disclosure Accordion -->
-                  <details class="sim-details-accordion">
-                    <summary class="sim-details-summary">
-                      <span>📋 View Complete Spanning Tree Edge List</span>
-                      <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Table ▼</span>
-                    </summary>
-                    <div class="table-responsive" style="margin-top:8px; max-height:360px; overflow-y:auto;">
-                      <table class="data-table">
-                        <thead>
-                          <tr>
-                            <th>Endpoint U</th>
-                            <th>Endpoint V</th>
-                            <th>Road Duration (S_T)</th>
-                            <th>Road Distance (S_D)</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tbody-scenario-mst-edges">
-                          <!-- Populated dynamically -->
-                        </tbody>
-                      </table>
-                    </div>
-                  </details>
-                </div>
-
-                <!-- Floating Edge / Facility Detail Tooltip Card -->
-                <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected Link</span>
-                    <button class="btn-icon" style="padding:0; font-size:0.75rem;"
-                      onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
-                  </div>
-                  <div id="sim-tt-title"
-                    style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">Endpoint U ⟷
-                    Endpoint V</div>
-                  <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">Road Route:
-                    3.2 km &bull; 4.5 min</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="results-metrics-grid" style="margin-bottom:12px;">
-              <div class="res-metric-box">
-                <div class="res-lbl">Spanning Edges</div>
-                <div class="res-val" id="res-tree-edges">0</div>
-              </div>
-              <div class="res-metric-box">
-                <div class="res-lbl">Total Tree Weight</div>
-                <div class="res-val" id="res-tree-length">0.00 km</div>
-              </div>
-              <div class="res-metric-box">
-                <div class="res-lbl">Connected Components</div>
-                <div class="res-val" id="res-components-count">1 (Tree)</div>
-              </div>
-            </div>
-
-            <!-- MST Position & Stretch Ratio Analysis -->
-            <div class="card" style="padding:14px; margin-bottom:12px;">
-              <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:6px;">MST Network Position & Stretch Summary
-              </h4>
-              <div style="font-size:0.80rem; color:var(--text-muted); line-height:1.5;">
-                <div><strong>Direct Haversine Link:</strong> <span id="res-direct-dist"
-                    style="font-family:var(--font-mono); font-weight:700;">0.00 km</span></div>
-                <div><strong>Cumulative MST Backbone Path:</strong> <span id="res-mst-path-dist"
-                    style="font-family:var(--font-mono); font-weight:700;">0.00 km</span></div>
-                <div style="margin-top:4px;"><strong>Rank Correlation (Kendall &tau;<sub>b</sub>):</strong> <span
-                    id="res-kendall-tau" style="font-family:var(--font-mono); font-weight:700;">N/A</span> (dispatch vs
-                  tree hops)</div>
-              </div>
-            </div>
-
-            <!-- Tree Edges Table -->
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Endpoint U</th>
-                    <th>Endpoint V</th>
-                    <th>Road Duration (S_T)</th>
-                    <th>Road Distance (S_D)</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-scenario-mst-edges">
+                <!-- Top Recommendations: Rank 1 Dominant Hero Card + Secondary Alternatives (Rank 2 & 3) -->
+                <div id="sim-ranked-facilities-list" style="margin-bottom:14px;">
                   <!-- Populated dynamically -->
-                </tbody>
-              </table>
+                </div>
+
+                <!-- Full Candidate Rankings Accordion -->
+                <details class="sim-details-accordion" style="margin-bottom:14px;">
+                  <summary class="sim-details-summary">
+                    <span>📋 View Complete Candidate Ranking Table (<span id="summary-table-count">All</span> Facilities in Radius)</span>
+                    <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Table ▼</span>
+                  </summary>
+                  <div class="table-responsive" style="margin-top:8px; max-height:360px; overflow-y:auto;">
+                    <table class="data-table" id="table-dispatch-full">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Facility Name</th>
+                          <th>Agency</th>
+                          <th>Travel Time</th>
+                          <th>Road Dist</th>
+                          <th>Estimated Cost</th>
+                          <th>Detour Ratio</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbody-dispatch-full">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <!-- Technical Execution & Invariants Accordion (Keeps academic proofs without cluttering main view) -->
+                <details class="sim-details-accordion" style="margin-bottom:14px;">
+                  <summary class="sim-details-summary">
+                    <span>⚙️ Technical Execution & Mathematical Verification</span>
+                    <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">View Details ▼</span>
+                  </summary>
+                  <div style="margin-top:12px;">
+                    <!-- Algorithm Selection Rationale -->
+                    <div class="card" style="padding:12px; margin-bottom:10px; background:var(--bg-subtle);">
+                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:4px; color:var(--text-main);">
+                        Algorithmic Selection & Network Density
+                      </div>
+                      <div id="tech-algo-rationale" style="font-size:0.78rem; color:var(--text-muted); line-height:1.45;">
+                        Evaluating algorithm selection rationale...
+                      </div>
+                    </div>
+
+                    <!-- Network Metrics -->
+                    <div class="results-metrics-grid" style="margin-bottom:10px;">
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Network Spanning Edges</div>
+                        <div class="res-val" id="res-tree-edges">0</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Total Tree Weight</div>
+                        <div class="res-val" id="res-tree-length">0.00 km</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Connected Components</div>
+                        <div class="res-val" id="res-components-count">1 (Tree)</div>
+                      </div>
+                    </div>
+
+                    <!-- Mathematical Invariants -->
+                    <div class="card" style="padding:12px; margin-bottom:10px;">
+                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px;">Mathematical Verification Report</div>
+                      <div class="system-status-item" style="margin-bottom:6px;">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">Structural Tree Invariants (|E| = |V| - 1):</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-structural-desc">Acyclic, covers all vertices.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-structural-badge">PASS</span>
+                      </div>
+                      <div class="system-status-item" style="margin-bottom:6px;">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">LCA Cycle-Property Optimality:</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-optimality-desc">Every chord &ge; max tree path edge.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-optimality-badge">0 Violations</span>
+                      </div>
+                      <div class="system-status-item">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">Prim / Kruskal Weight Parity:</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-parity-desc">Both algorithms yield identical weight.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-parity-badge">Exact Parity</span>
+                      </div>
+                    </div>
+
+                    <!-- Spanning Tree Edge List Table -->
+                    <div style="margin-top:8px;">
+                      <div style="font-size:0.78rem; font-weight:700; margin-bottom:6px;">Spanning Tree Edge List</div>
+                      <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
+                        <table class="data-table">
+                          <thead>
+                            <tr>
+                              <th>Endpoint U</th>
+                              <th>Endpoint V</th>
+                              <th>Road Duration</th>
+                              <th>Road Distance</th>
+                            </tr>
+                          </thead>
+                          <tbody id="tbody-scenario-mst-edges">
+                            <!-- Populated dynamically -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+              </div>
             </div>
+
           </div>
-
-          <!-- TAB 3: Validation Report -->
-          <div id="tab-content-validation" class="sim-tab-panel" style="display:none;">
-            <div class="card" style="padding:14px; margin-bottom:12px;">
-              <h4 style="font-size:0.86rem; font-weight:700; margin-bottom:10px;">Independent Mathematical Validation
-                Report</h4>
-              <div class="system-status-item" style="margin-bottom:8px;">
-                <div>
-                  <strong>1. Structural Tree Invariants:</strong>
-                  <div style="font-size:0.74rem; color:var(--text-muted);" id="val-structural-desc">Acyclic, covers all
-                    vertices, |E| = |V| - c.</div>
-                </div>
-                <span class="badge badge-green" id="val-structural-badge">PASS</span>
-              </div>
-
-              <div class="system-status-item" style="margin-bottom:8px;">
-                <div>
-                  <strong>2. LCA Cycle-Property Optimality:</strong>
-                  <div style="font-size:0.74rem; color:var(--text-muted);" id="val-optimality-desc">Every non-tree chord
-                    &ge; maximum tree path edge.</div>
-                </div>
-                <span class="badge badge-green" id="val-optimality-badge">0 Violations</span>
-              </div>
-
-              <div class="system-status-item">
-                <div>
-                  <strong>3. Prim / Kruskal Weight Parity:</strong>
-                  <div style="font-size:0.74rem; color:var(--text-muted);" id="val-parity-desc">Both algorithms converge
-                    on identical integer weight.</div>
-                </div>
-                <span class="badge badge-green" id="val-parity-badge">Exact Parity</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 4: Candidates & Exclusions Reconciliation -->
-          <div id="tab-content-exclusions" class="sim-tab-panel" style="display:none;">
-            <div class="card" style="padding:14px; margin-bottom:12px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h4 style="font-size:0.86rem; font-weight:700;">Candidate Eligibility & Exclusion Reconciliation</h4>
-                <span class="badge badge-gray" id="exclusions-count-badge">0 Excluded</span>
-              </div>
-              <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom:10px;">
-                Every facility in the BBMP registry is accounted for as eligible or excluded with a documented reason
-                code.
-              </p>
-              <div class="results-metrics-grid" style="margin-bottom:12px;">
-                <div class="res-metric-box">
-                  <div class="res-lbl">Total BBMP Facilities</div>
-                  <div class="res-val">1,255</div>
-                </div>
-                <div class="res-metric-box">
-                  <div class="res-lbl">Eligible Candidates</div>
-                  <div class="res-val" id="excl-summary-eligible">0</div>
-                </div>
-                <div class="res-metric-box">
-                  <div class="res-lbl">Excluded Candidates</div>
-                  <div class="res-val" id="excl-summary-excluded">0</div>
-                </div>
-              </div>
-              <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Facility ID</th>
-                      <th>Facility Name</th>
-                      <th>Reason Code</th>
-                      <th>Explanation</th>
-                      <th>Haversine</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody-exclusions-list">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-      </div>
-
-  </div>
-
-  </div>
-  </section>
+        </section>
 
   <!-- ================================================================= -->
   <!-- SECTION 5: RESULTS & STATISTICS (Integrated Results & Methodology) -->
@@ -1511,55 +1364,58 @@
           </div>
         </div>
 
-            <!-- Zero-Weight Edge Investigation Card inside Progressive Disclosure Accordion -->
-            <details class="sim-details-accordion" style="margin-top:16px;">
-              <summary class="sim-details-summary">
-                <span>🔍 Special Case Audit: Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</span>
-                <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
-              </summary>
-              <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-top:10px;">
-                <p>
-                  During the mathematical audit of 786,885 candidate edges, exactly one edge possessed a weight of <strong>0.0000 km</strong>:
-                </p>
-                <div class="math-callout" style="margin:8px 0; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); font-size:0.80rem;">
-                  <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br/>
-                  Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
-                </div>
-                <p>
-                  <strong>Resolution:</strong> Both Prim and Kruskal prioritized this link with zero incremental weight without inducing cycles. Strict lexicographical tie-breaking eliminates nondeterminism across executions.
-                </p>
-              </div>
-            </details>
+        <!-- Zero-Weight Edge Investigation Card inside Progressive Disclosure Accordion -->
+        <details class="sim-details-accordion" style="margin-top:16px;">
+          <summary class="sim-details-summary">
+            <span>🔍 Special Case Audit: Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</span>
+            <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
+          </summary>
+          <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-top:10px;">
+            <p>
+              During the mathematical audit of 786,885 candidate edges, exactly one edge possessed a weight of
+              <strong>0.0000 km</strong>:
+            </p>
+            <div class="math-callout"
+              style="margin:8px 0; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); font-size:0.80rem;">
+              <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br />
+              Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
+            </div>
+            <p>
+              <strong>Resolution:</strong> Both Prim and Kruskal prioritized this link with zero incremental weight
+              without inducing cycles. Strict lexicographical tie-breaking eliminates nondeterminism across executions.
+            </p>
           </div>
-
-        </div>
-
+        </details>
       </div>
 
-      <!-- Zero-Weight Edge Investigation Card -->
-      <div class="card" style="margin-top:20px;">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</h3>
-            <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
-          </div>
-        </div>
-        <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
-          <p>
-            During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of
-            <strong>0.0000 km</strong>:
-          </p>
-          <div class="math-callout">
-            <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br />
-            Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
-          </div>
-          <p>
-            <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental
-            weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across
-            executions.
-          </p>
+    </div>
+
+    </div>
+
+    <!-- Zero-Weight Edge Investigation Card -->
+    <div class="card" style="margin-top:20px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</h3>
+          <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
         </div>
       </div>
+      <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
+        <p>
+          During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of
+          <strong>0.0000 km</strong>:
+        </p>
+        <div class="math-callout">
+          <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br />
+          Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
+        </div>
+        <p>
+          <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental
+          weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across
+          executions.
+        </p>
+      </div>
+    </div>
     </div>
 
     <!-- Sub-Tab 2: Academic Methodology Guide -->
@@ -1577,13 +1433,15 @@
           </summary>
           <div class="method-content">
             <p>The municipal emergency network is modeled as a weighted undirected graph <i>G</i> = (<i>V</i>, <i>E</i>,
-              <i>w</i>), where:</p>
+              <i>w</i>), where:
+            </p>
             <ul style="padding-left:20px; margin:8px 0;">
               <li><i>V</i> is the set of all registered emergency facilities in Bengaluru (|<i>V</i>| = 1,255).</li>
               <li><i>E</i> is the complete set of unordered facility pairs (|<i>E</i>| = |<i>V</i>|(|<i>V</i>| - 1)/2 =
                 786,885 edges).</li>
               <li><i>w</i>(<i>u</i>, <i>v</i>) is the spherical Haversine geodesic distance computed using Earth radius
-                <i>R</i> = 6,371.0088 km.</li>
+                <i>R</i> = 6,371.0088 km.
+              </li>
             </ul>
             <p>A Minimum Spanning Tree (MST) <i>T</i> = (<i>V</i>, <i>E<sub>T</sub></i>) is a connected acyclic subgraph
               spanning all 1,255 vertices with exactly |<i>V</i>| − 1 = 1,254 edges (satisfying the fundamental tree
@@ -1700,7 +1558,8 @@
               and <strong>Mode 3 (Supported Compromise <i>N<sub>e</sub></i>)</strong>.</p>
             <p><strong>Cost-Distance Isomorphism Theorem:</strong> In any single-agency emergency dispatch run, vehicle
               operating fuel cost is modeled strictly as <i>C<sub>uv</sub></i> = <i>D<sub>uv</sub></i> &times;
-              <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate parameter.</p>
+              <i>R<sub>a</sub></i>, where <i>R<sub>a</sub></i> is the per-kilometer fuel rate parameter.
+            </p>
             <div class="math-callout">
               <i>C<sub>uv</sub></i> &prop; <i>D<sub>uv</sub></i> &implies; argmin &sum; <i>C<sub>uv</sub></i> &equiv;
               argmin &sum; <i>D<sub>uv</sub></i>

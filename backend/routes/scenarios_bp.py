@@ -132,6 +132,10 @@ def create_scenario():
     k_param = int(data.get("k_param", 5))
     k_param = max(0, min(10, k_param))
 
+    algorithm = str(data.get("algorithm") or "auto").lower()
+    if algorithm not in ("auto", "prim", "kruskal"):
+        algorithm = "auto"
+
     # Trigger scenario
     sc_id = create_and_run_scenario(
         incident_lat=lat,
@@ -143,7 +147,8 @@ def create_scenario():
         k_param=k_param,
         async_mode=True,
         incident_category=incident_category,
-        bypass_cache=bypass_cache
+        bypass_cache=bypass_cache,
+        algorithm=algorithm,
     )
 
     return jsonify({
