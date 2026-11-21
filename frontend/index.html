@@ -1383,36 +1383,6 @@
         </details>
       </div>
 
-    </div>
-
-    </div>
-
-    <!-- Zero-Weight Edge Investigation Card -->
-    <div class="card" style="margin-top:20px;">
-      <div class="card-header">
-        <div>
-          <h3 class="card-title">Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</h3>
-          <p class="card-subtitle">Resolution of duplicate coordinate records in OpenStreetMap BBMP data</p>
-        </div>
-      </div>
-      <div style="font-size:0.86rem; color:var(--text-muted); line-height:1.65;">
-        <p>
-          During the mathematical audit of the 786,885 candidate edges, exactly one edge possessed a weight of
-          <strong>0.0000 km</strong>:
-        </p>
-        <div class="math-callout">
-          <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br />
-          Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
-        </div>
-        <p>
-          <strong>Handling:</strong> Both Prim and Kruskal correctly prioritized this link with zero incremental
-          weight without inducing cycles. Deterministic lexicographical tie-breaking eliminates nondeterminism across
-          executions.
-        </p>
-      </div>
-    </div>
-    </div>
-
     <!-- Prim vs Kruskal Analysis Section -->
     <div class="card" style="margin-top:20px;">
       <div class="card-header" style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
@@ -1562,6 +1532,7 @@
         </div>
 
       </div>
+    </div>
 
       <!-- Section E: Key Findings Card (Computed Dynamically) -->
       <div class="key-findings-card" id="key-findings-card" style="margin-top:20px; padding:18px; background:var(--bg-subtle); border:1px solid var(--border-color); border-radius:var(--radius-sm);">
