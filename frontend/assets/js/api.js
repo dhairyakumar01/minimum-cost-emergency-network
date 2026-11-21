@@ -71,6 +71,10 @@ const API = (function () {
       return request("/api/benchmarks", { method: "GET" }, 4000);
     },
 
+    async getMstAnalysisData() {
+      return request("/api/mst/analysis-data", { method: "GET" }, 8000);
+    },
+
     async getManifest() {
       return request("/api/methodology/manifest", { method: "GET" }, 5000);
     },

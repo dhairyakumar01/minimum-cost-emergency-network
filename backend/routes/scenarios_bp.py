@@ -328,6 +328,85 @@ def get_algorithm_benchmarks():
     }), 200
 
 
+@scenarios_bp.route("/mst/analysis-data", methods=["GET"])
+def get_mst_analysis_data():
+    """Return parsed results from benchmark.json, validation_report.json, and the Prim and Kruskal MST CSVs."""
+    from pathlib import Path
+    import csv
+
+    base_dir = Path(__file__).resolve().parent.parent.parent / "results"
+
+    # 1. Benchmark data
+    bench_path = base_dir / "benchmark.json"
+    bench_data = None
+    if bench_path.exists():
+        try:
+            with open(bench_path, "r", encoding="utf-8") as f:
+                bench_data = json.load(f)
+        except Exception:
+            bench_data = None
+
+    # 2. Validation report data
+    val_path = base_dir / "validation_report.json"
+    val_data = None
+    if val_path.exists():
+        try:
+            with open(val_path, "r", encoding="utf-8") as f:
+                val_data = json.load(f)
+        except Exception:
+            val_data = None
+
+    # 3. Prim MST edges CSV
+    prim_path = base_dir / "prim_mst_edges.csv"
+    prim_edges = []
+    if prim_path.exists():
+        try:
+            with open(prim_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    prim_edges.append({
+                        "u": r.get("u", ""),
+                        "v": r.get("v", ""),
+                        "u_name": r.get("u_name", ""),
+                        "v_name": r.get("v_name", ""),
+                        "u_type": r.get("u_type", ""),
+                        "v_type": r.get("v_type", ""),
+                        "weight_km": float(r.get("weight_km", 0.0)),
+                    })
+        except Exception:
+            prim_edges = []
+
+    # 4. Kruskal MST edges CSV
+    kruskal_path = base_dir / "kruskal_mst_edges.csv"
+    kruskal_edges = []
+    if kruskal_path.exists():
+        try:
+            with open(kruskal_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    kruskal_edges.append({
+                        "u": r.get("u", ""),
+                        "v": r.get("v", ""),
+                        "u_name": r.get("u_name", ""),
+                        "v_name": r.get("v_name", ""),
+                        "u_type": r.get("u_type", ""),
+                        "v_type": r.get("v_type", ""),
+                        "weight_km": float(r.get("weight_km", 0.0)),
+                    })
+        except Exception:
+            kruskal_edges = []
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "benchmark": bench_data,
+            "validation": val_data,
+            "prim_edges": prim_edges,
+            "kruskal_edges": kruskal_edges,
+        }
+    }), 200
+
+
 @scenarios_bp.route("/methodology/manifest", methods=["GET"])
 def get_methodology_manifest():
     """Return immutable system parameters, dataset hash, and mathematical references."""

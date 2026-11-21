@@ -27,12 +27,8 @@ const Navigation = (function () {
         e.preventDefault();
         let target = link.getAttribute("data-target");
         if (target && ALIASES[target]) {
-          const subTarget = target;
           target = ALIASES[target];
           navigateTo(target);
-          if (window.App && typeof window.App.switchResultsSubTab === "function") {
-            window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
-          }
           return;
         }
         if (target && SECTIONS[target]) {
@@ -44,14 +40,8 @@ const Navigation = (function () {
     // Check URL hash on load
     let hash = window.location.hash.replace("#", "").trim();
     if (hash && ALIASES[hash]) {
-      const subTarget = hash;
       hash = ALIASES[hash];
       navigateTo(hash, false);
-      setTimeout(() => {
-        if (window.App && typeof window.App.switchResultsSubTab === "function") {
-          window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
-        }
-      }, 50);
     } else if (hash && SECTIONS[hash]) {
       navigateTo(hash, false);
     } else {
@@ -62,13 +52,9 @@ const Navigation = (function () {
     window.addEventListener("hashchange", () => {
       let h = window.location.hash.replace("#", "").trim();
       if (h && ALIASES[h]) {
-        const subTarget = h;
         h = ALIASES[h];
         if (h !== currentSection) {
           navigateTo(h, false);
-        }
-        if (window.App && typeof window.App.switchResultsSubTab === "function") {
-          window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
         }
       } else if (h && SECTIONS[h] && h !== currentSection) {
         navigateTo(h, false);
@@ -78,11 +64,7 @@ const Navigation = (function () {
 
   function navigateTo(sectionId, updateHash = true) {
     if (ALIASES[sectionId]) {
-      const subTarget = sectionId;
       sectionId = ALIASES[sectionId];
-      if (window.App && typeof window.App.switchResultsSubTab === "function") {
-        window.App.switchResultsSubTab(subTarget === "help" ? "methodology" : "results");
-      }
     }
 
     if (!SECTIONS[sectionId]) return;
