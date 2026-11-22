@@ -1711,6 +1711,24 @@ body {
   grid-template-columns: 1fr 1.05fr;
   gap: 20px;
   align-items: start;
+  transition: all 0.25s ease;
+}
+
+.simulation-layout.setup-collapsed {
+  display: block;
+  grid-template-columns: 1fr;
+}
+
+.simulation-layout.setup-collapsed .sim-workflow-column {
+  display: none !important;
+}
+
+.simulation-layout.setup-collapsed .sim-results-column {
+  width: 100%;
+}
+
+.simulation-layout.setup-collapsed #sim-mst-leaflet-map {
+  height: 560px !important;
 }
 
 .sim-workflow-column {

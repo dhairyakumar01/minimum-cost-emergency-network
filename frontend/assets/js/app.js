@@ -1663,6 +1663,23 @@
       }
     },
 
+    toggleSimulationSetup() {
+      const simLayout = document.querySelector(".simulation-layout");
+      if (!simLayout) return;
+      simLayout.classList.toggle("setup-collapsed");
+      const isCollapsed = simLayout.classList.contains("setup-collapsed");
+      const btnText = document.getElementById("toggle-setup-text");
+      if (btnText) btnText.textContent = isCollapsed ? "Modify Parameters" : "Hide Setup";
+      setTimeout(() => {
+        if (simMstMap) {
+          simMstMap.invalidateSize();
+          if (simBounds && simBounds.isValid()) {
+            simMstMap.fitBounds(simBounds, { padding: [30, 30] });
+          }
+        }
+      }, 300);
+    },
+
     resetSimMapView() {
       if (simMstMap) {
         simMstMap.setView([12.9781, 77.5696], 12);
@@ -1938,6 +1955,24 @@
 
         // Render Results into All 4 Tabs
         renderScenarioResults(scenarioData);
+
+        // Collapse setup column for expansive full-width command view
+        const simLayout = document.querySelector(".simulation-layout");
+        if (simLayout) simLayout.classList.add("setup-collapsed");
+        const btnToggle = document.getElementById("btn-toggle-sim-setup");
+        if (btnToggle) {
+          btnToggle.style.display = "inline-flex";
+          const btnText = document.getElementById("toggle-setup-text");
+          if (btnText) btnText.textContent = "Modify Parameters";
+        }
+        setTimeout(() => {
+          if (simMstMap) {
+            simMstMap.invalidateSize();
+            if (simBounds && simBounds.isValid()) {
+              simMstMap.fitBounds(simBounds, { padding: [40, 40] });
+            }
+          }
+        }, 300);
 
         if (resultsContainer) resultsContainer.style.display = "block";
         if (acc) acc.open = false;
@@ -2267,7 +2302,6 @@
   // --------------------------------------------------------------------------
 
   let simMstMap = null;
-  let simLayerControl = null;
   let simBackboneLayer = null;
   let simDispatchRouteLayer = null;
   let simFacilitiesLayer = null;
@@ -2292,14 +2326,6 @@
     simDispatchRouteLayer = L.layerGroup().addTo(simMstMap);
     simFacilitiesLayer = L.layerGroup().addTo(simMstMap);
     simIncidentLayer = L.layerGroup().addTo(simMstMap);
-
-    const overlays = {
-      "🕸️ MST Backbone": simBackboneLayer,
-      "🚑 Recommended Route": simDispatchRouteLayer,
-      "🏢 Connected Facilities": simFacilitiesLayer,
-      "🚨 Incident Location": simIncidentLayer,
-    };
-    simLayerControl = L.control.layers(null, overlays, { collapsed: false, position: "topright" }).addTo(simMstMap);
 
     if (State.incident && State.incident.lat != null && State.incident.lon != null) {
       const incLatLng = [State.incident.lat, State.incident.lon];
@@ -2441,16 +2467,41 @@
       const latLng = [fac.latitude, fac.longitude];
       simBounds.extend(latLng);
 
-      const color = agencyColors[fac.agency] || "#dc2626";
-      const isTopRanked = ranking.length > 0 && ranking[0].facility_id === fid;
+      const rankIdx = ranking.findIndex((r) => r.facility_id === fid);
+      const isTopRanked = rankIdx === 0;
+      const isTopAlt = rankIdx >= 1 && rankIdx <= 4;
+
+      let markerRadius = 2.0;
+      let markerFill = "#64748b";
+      let markerBorder = "#475569";
+      let markerWeight = 0.8;
+      let markerOpacity = 0.35;
+      let markerZIndex = 100;
+
+      if (isTopRanked) {
+        markerRadius = 11;
+        markerFill = "#f59e0b";
+        markerBorder = "#ffffff";
+        markerWeight = 3.5;
+        markerOpacity = 1.0;
+        markerZIndex = 3000;
+      } else if (isTopAlt) {
+        markerRadius = 7;
+        markerFill = "#2563eb";
+        markerBorder = "#ffffff";
+        markerWeight = 2.5;
+        markerOpacity = 0.95;
+        markerZIndex = 2000;
+      }
+
       const marker = L.circleMarker(latLng, {
-        radius: isTopRanked ? 9 : 6,
-        fillColor: isTopRanked ? "#f59e0b" : color,
-        color: isTopRanked ? "#78350f" : "#ffffff",
-        weight: isTopRanked ? 3 : 2,
+        radius: markerRadius,
+        fillColor: markerFill,
+        color: markerBorder,
+        weight: markerWeight,
         opacity: 1,
-        fillOpacity: 0.92,
-        zIndexOffset: isTopRanked ? 1500 : 500,
+        fillOpacity: markerOpacity,
+        zIndexOffset: markerZIndex,
       });
 
       const timeMin = fac.travel_time_min !== undefined ? Number(fac.travel_time_min).toFixed(1) : (fac.travel_time_ds ? (fac.travel_time_ds / 600).toFixed(1) : "N/A");
@@ -2459,6 +2510,7 @@
       marker.bindPopup(`
         <div style="font-size:0.80rem; line-height:1.45;">
           ${isTopRanked ? '<span class="badge badge-amber" style="font-size:0.70rem; margin-bottom:4px; font-weight:700;">⭐ #1 RECOMMENDED DISPATCH FACILITY</span><br/>' : ''}
+          ${isTopAlt ? `<span class="badge badge-blue" style="font-size:0.68rem; margin-bottom:4px; font-weight:600;">Rank #${rankIdx + 1} Alternative</span><br/>` : ''}
           <span class="badge ${fac.agency === 'police' ? 'badge-blue' : (fac.agency === 'fire' ? 'badge-amber' : 'badge-red')}" style="font-size:0.68rem; margin-bottom:4px; text-transform:uppercase;">
             ${escapeHtml(fac.agency || "Agency")}
           </span>
@@ -2518,9 +2570,9 @@
       let polyline = null;
       const isGenuineRoad = Boolean(edge.is_road_route && edge.geometry && edge.geometry.length > 1);
 
-      const strokeColor = isTopDispatch ? "#f59e0b" : "#1e3a8a";
-      const strokeWeight = isTopDispatch ? 5.5 : 3.5;
-      const strokeOpacity = isTopDispatch ? 0.95 : 0.90;
+      const strokeColor = isTopDispatch ? "#ea580c" : "#1e3a8a";
+      const strokeWeight = isTopDispatch ? 5.5 : 2.4;
+      const strokeOpacity = isTopDispatch ? 0.95 : 0.70;
 
       if (isGenuineRoad) {
         polyline = L.polyline(edge.geometry, {
@@ -2532,10 +2584,10 @@
         edge.geometry.forEach((pt) => simBounds.extend(pt));
       } else {
         polyline = L.polyline([uCoord, vCoord], {
-          color: isTopDispatch ? "#f59e0b" : "#d97706",
-          weight: isTopDispatch ? 4.5 : 2.2,
-          opacity: 0.85,
-          dashArray: isTopDispatch ? "8, 4" : "6, 6",
+          color: strokeColor,
+          weight: isTopDispatch ? 4.5 : 1.8,
+          opacity: isTopDispatch ? 0.90 : 0.55,
+          dashArray: isTopDispatch ? "8, 4" : "4, 4",
         });
         simBounds.extend(uCoord);
         simBounds.extend(vCoord);
