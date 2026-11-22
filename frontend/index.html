@@ -1150,109 +1150,9 @@
           <div id="section-project-analysis" class="results-subpanel">
             <!-- Alias anchor for legacy #section-help / #help routing without displaying methodology guide -->
             <div id="section-help" style="display:none;" aria-hidden="true"></div>
-            <div class="analysis-grid">
-
-              <!-- Card 1: Prim vs Kruskal Comprehensive Audit Table -->
-              <div class="card" style="margin-bottom:0;">
-                <div class="card-header">
-                  <div>
-                    <h3 class="card-title">Prim vs Kruskal Algorithm Benchmark Audit</h3>
-                    <p class="card-subtitle">Empirical and architectural comparison on 1,255 emergency facilities.</p>
-                  </div>
-                </div>
-                <div class="table-responsive">
-                  <table class="data-table">
-                    <thead>
-                      <tr>
-                        <th>Property</th>
-                        <th>Prim's Algorithm</th>
-                        <th>Kruskal's Algorithm</th>
-                        <th>Audit Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><strong>Vertex Count (Facilities)</strong></td>
-                        <td>1,255</td>
-                        <td>1,255</td>
-                        <td><span class="badge badge-green">Exact Match</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Spanning Edges (Links)</strong></td>
-                        <td>1,254</td>
-                        <td>1,254</td>
-                        <td><span class="badge badge-green">Tree Edge Property (1,254 Links)</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Total Tree Length</strong></td>
-                        <td>480.1784 km</td>
-                        <td>480.1784 km</td>
-                        <td><span class="badge badge-green">Exact Match</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Theoretical Complexity</strong></td>
-                        <td>Prim's Min-Heap</td>
-                        <td>Kruskal's Sorted Edges</td>
-                        <td><span class="badge badge-sage">Optimal Complexity</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Primary Data Structure</strong></td>
-                        <td>Binary Min-Heap</td>
-                        <td>Disjoint Set Forest</td>
-                        <td><span class="badge badge-sage">Standard</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Optimizations Applied</strong></td>
-                        <td>Visited Bitset</td>
-                        <td>Union-by-Rank + Path Compression</td>
-                        <td><span class="badge badge-sage">Optimal</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>Candidate Graph Size</strong></td>
-                        <td>786,885 edges</td>
-                        <td>786,885 edges</td>
-                        <td><span class="badge badge-green">All Facility Pairs (786,885)</span></td>
-                      </tr>
-                      <tr>
-                        <td><strong>LCA Cycle Test</strong></td>
-                        <td>785,631 edges verified</td>
-                        <td>785,631 edges verified</td>
-                        <td><span class="badge badge-green">0 Violations</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Zero-Weight Edge Investigation Card inside Progressive Disclosure Accordion -->
-              <details class="sim-details-accordion" style="margin-top:16px;">
-                <summary class="sim-details-summary">
-                  <span>🔍 Special Case Audit: Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</span>
-                  <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
-                </summary>
-                <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-top:10px;">
-                  <p>
-                    During the verification audit of 786,885 candidate edges, exactly one edge possessed a weight of
-                    <strong>0.0000 km</strong>:
-                  </p>
-                  <div class="callout-box"
-                    style="margin:8px 0; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); font-size:0.80rem;">
-                    <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare
-                    Facility)<br />
-                    Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
-                  </div>
-                  <p>
-                    <strong>Resolution:</strong> Both Prim and Kruskal prioritized this link with zero incremental
-                    weight
-                    without inducing cycles. Strict lexicographical tie-breaking eliminates nondeterminism across
-                    executions.
-                  </p>
-                </div>
-              </details>
-            </div> <!-- Closes .analysis-grid -->
 
             <!-- Prim vs Kruskal Analysis Section -->
-  <div class="card" style="margin-top:20px;">
+  <div class="card" style="margin-top:0;">
     <div class="card-header"
       style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
       <div>
@@ -1422,6 +1322,29 @@
         <li>Loading verified dataset telemetry...</li>
       </ul>
     </div>
+
+    <!-- Special Case Audit: Zero-Weight Edge Investigation Accordion (Preserved at bottom) -->
+    <details class="sim-details-accordion" style="margin-top:16px;">
+      <summary class="sim-details-summary">
+        <span>🔍 Special Case Audit: Zero-Weight Edge Investigation &amp; Deterministic Tie-Breaking</span>
+        <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
+      </summary>
+      <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-top:10px;">
+        <p>
+          During the verification audit of 786,885 candidate edges, exactly one edge possessed a weight of
+          <strong>0.0000 km</strong>:
+        </p>
+        <div class="callout-box"
+          style="margin:8px 0; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); font-size:0.80rem;">
+          <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare Facility)<br />
+          Coordinates: (12.954158° N, 77.660837° E) &bull; Distance = 0.000000 km
+        </div>
+        <p>
+          <strong>Resolution:</strong> Both Prim and Kruskal prioritized this link with zero incremental weight
+          without inducing cycles. Strict lexicographical tie-breaking eliminates nondeterminism across executions.
+        </p>
+      </div>
+    </details>
 
           </div> <!-- Closes #section-project-analysis -->
         </section> <!-- Closes #section-results-stats -->
