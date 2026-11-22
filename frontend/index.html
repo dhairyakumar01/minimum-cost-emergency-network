@@ -41,7 +41,6 @@
     <!-- Sidebar Navigation -->
     <aside id="sidebar">
       <div class="brand-header">
-        <span class="brand-badge">Spatial Optimization</span>
         <h1 class="brand-title">🚨 Bengaluru MST</h1>
         <p class="brand-subtitle">Emergency Network Platform</p>
       </div>
@@ -84,7 +83,6 @@
           <span class="status-indicator"></span>
           <span>System Operational</span>
         </div>
-        <div style="margin-top:2px; font-size:0.75rem; color:var(--text-light);">1,255 Registered Facilities</div>
       </div>
     </aside>
 
@@ -117,23 +115,10 @@
         <!-- ================================================================= -->
         <section id="section-dashboard" class="view-section">
           <!-- Executive Header -->
-          <div class="dashboard-hero">
+          <div class="dashboard-hero" style="margin-bottom:18px;">
             <div>
               <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
-              <p class="dash-subtitle">
-                Graph-Theoretic Topology Optimization &amp; Incident Dispatch for Bengaluru
-              </p>
             </div>
-          </div>
-
-          <!-- Concise Project Summary Card -->
-          <div class="dash-summary-card">
-            <p>
-              A high-performance emergency response and network optimization platform for Bengaluru.
-              The application constructs an optimal, minimum-cost emergency communication backbone spanning 1,255
-              municipal facilities using Minimum Spanning Tree (MST) algorithms, paired with real-time direct
-              dispatch routing for first-responder fleets.
-            </p>
           </div>
 
           <!-- 4 Primary Key Metric Cards -->
@@ -141,7 +126,6 @@
             <div class="metric-card">
               <div class="metric-label"><span>🏥</span> Total Registered Facilities</div>
               <div class="metric-value" id="metric-total-facilities">1,255</div>
-              <div class="metric-subtext">Geocoded municipal emergency records</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🏢</span> Facility Composition</div>
@@ -153,17 +137,14 @@
                 <span title="Fire"><span style="color:#ea580c;">●</span> <strong id="metric-fire">20</strong>
                   <small>Fire</small></span>
               </div>
-              <div class="metric-subtext">Hospitals (87.4%), Police (11.0%), Fire (1.6%)</div>
             </div>
             <div class="metric-card">
               <div class="metric-label"><span>🔗</span> Total Network Connections</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
-              <div class="metric-subtext">Optimal connected network links</div>
             </div>
             <div class="metric-card highlight-card">
               <div class="metric-label"><span>📏</span> Total Network Length</div>
               <div class="metric-value" id="metric-mst-length">480.1784 km</div>
-              <div class="metric-subtext">Optimal Haversine-distance spanning tree</div>
             </div>
           </div>
 
