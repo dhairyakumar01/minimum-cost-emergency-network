@@ -1242,9 +1242,9 @@
     const principleEl = document.getElementById("sim-step-principle");
     if (principleEl) {
       if (State.simAlgorithm === "kruskal") {
-        principleEl.textContent = "Global Edge Sort & Disjoint Set Union (DSU)";
+        principleEl.textContent = "Kruskal's Algorithm";
       } else {
-        principleEl.textContent = "Priority Queue Cut Crossing Selection";
+        principleEl.textContent = "Prim's Algorithm";
       }
     }
 
@@ -3333,7 +3333,7 @@
         <strong>Runtime Performance Ratio:</strong> Kruskal's algorithm achieved a median runtime of <strong>${kruskalMed ? kruskalMed.toFixed(4) : "--"} s</strong> versus Prim's <strong>${primMed ? primMed.toFixed(4) : "--"} s</strong>${speedup ? `, representing an empirical speedup of <strong>${speedup.toFixed(2)}×</strong>` : ""}.
       </li>
       <li>
-        <strong>Speedup Contributing Factor:</strong> Where Kruskal exhibits faster execution, <em>a likely contributor</em> is the efficiency of C-accelerated global edge sorting followed by near-linear Disjoint Set Union operations, compared to Prim's dynamic priority queue cut adjustments across 786,885 dense edges. This is identified as a likely contributor and is not presented as proven, because the runtime routines were not profiled at the micro-instruction level.
+        <strong>Speedup Contributing Factor:</strong> Where Kruskal exhibits faster execution, <em>a likely contributor</em> is the efficiency of C-accelerated global edge sorting followed by near-linear component merging, compared to Prim's cut adjustments across 786,885 dense edges. This is identified as a likely contributor and is not presented as proven, because the runtime routines were not profiled at the micro-instruction level.
       </li>
       <li>
         <strong>Network Validation Status:</strong> Formal verification <strong>${valPassed ? "PASSED (100% Invariant Compliance)" : "COMPLETED"}</strong> with 0 cycle violations across all 785,631 fundamental cycle chords audited by the LCA verification oracle.

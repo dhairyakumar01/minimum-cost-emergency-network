@@ -369,9 +369,6 @@
               <button class="mst-tab-btn active" id="tab-mst-sim" data-target="mst-view-sim">
                 ⚡ Construction Simulator
               </button>
-              <button class="mst-tab-btn" id="tab-mst-compare" data-target="mst-view-compare">
-                ⚖️ Prim vs Kruskal Convergence
-              </button>
               <button class="mst-tab-btn" id="tab-mst-static" data-target="mst-view-static">
                 🌐 Static Spanning Tree (1,254 Links)
               </button>
@@ -401,10 +398,10 @@
                   <label class="sim-ctrl-label">Algorithm:</label>
                   <div class="sim-btn-toggle" id="sim-algo-toggle">
                     <button class="sim-btn active" id="btn-sim-algo-kruskal" data-algo="kruskal">
-                      Kruskal's Algorithm (DSU)
+                      Kruskal's Algorithm
                     </button>
                     <button class="sim-btn" id="btn-sim-algo-prim" data-algo="prim">
-                      Prim's Algorithm (Priority Queue)
+                      Prim's Algorithm
                     </button>
                   </div>
                 </div>
@@ -547,128 +544,8 @@
             </div>
           </div>
 
-          <!-- SUBVIEW 2: PRIM VS KRUSKAL CONVERGENCE & PARITY ANALYSIS -->
-          <div id="mst-view-compare" class="mst-subview" style="display:none;">
-            <div class="compare-toolbar">
-              <div class="sim-ctrl-group">
-                <label class="sim-ctrl-label">Analysis Graph Target:</label>
-                <div class="sim-btn-toggle" id="cmp-context-toggle">
-                  <button class="sim-btn active" id="btn-cmp-ctx-global" data-context="global">
-                    Global Facility Graph (1,255 Facilities)
-                  </button>
-                  <button class="sim-btn" id="btn-cmp-ctx-incident" data-context="incident">
-                    Incident-Specific Graph
-                  </button>
-                </div>
-              </div>
-              <button class="btn btn-primary btn-sm" id="btn-refresh-compare">
-                🔄 Re-evaluate Parity
-              </button>
-            </div>
-
-            <!-- Parity Banner -->
-            <div class="compare-parity-hero" id="cmp-parity-hero">
-              <div class="parity-badge-wrap">
-                <span class="badge badge-success" style="font-size:0.9rem; padding:6px 14px;">✓ Algorithmic Parity Confirmed</span>
-              </div>
-              <h3 class="parity-title">Greedy Convergence to Global Minimum</h3>
-              <p class="parity-subtitle" id="cmp-parity-summary">
-                Both Prim's and Kruskal's algorithms produce spanning trees with exact identical total weight (480.1784 km)
-                and 1,254 edges, verifying full network connectivity and algorithmic equivalence.
-              </p>
-            </div>
-
-            <!-- Dual Architecture Cards Grid -->
-            <div class="compare-grid">
-              <!-- Kruskal Card -->
-              <div class="compare-algo-card">
-                <div class="algo-card-header">
-                  <span class="algo-card-badge kruskal">Kruskal's Algorithm</span>
-                  <h4 class="algo-card-title">Disjoint Set Forest Merging</h4>
-                </div>
-                <div class="algo-card-body">
-                  <div class="algo-metric-row">
-                    <span class="am-label">Total Tree Metric:</span>
-                    <strong class="am-val" id="cmp-kruskal-weight">480.1784 km</strong>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Edges in Spanning Tree:</span>
-                    <strong class="am-val" id="cmp-kruskal-edges">1,254 Links</strong>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Connected Tree Verified:</span>
-                    <span class="badge badge-success" id="cmp-kruskal-connected">YES</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Core Data Structure:</span>
-                    <span class="am-val">Disjoint Set Union (Rank & Compression)</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Algorithmic Complexity:</span>
-                    <span class="am-val">Disjoint Set Forest Merging</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Growth Mechanics:</span>
-                    <span class="am-val">Merges disjoint components globally without cycles</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Prim Card -->
-              <div class="compare-algo-card">
-                <div class="algo-card-header">
-                  <span class="algo-card-badge prim">Prim's Algorithm</span>
-                  <h4 class="algo-card-title">Priority Queue Cut Expansion</h4>
-                </div>
-                <div class="algo-card-body">
-                  <div class="algo-metric-row">
-                    <span class="am-label">Total Tree Metric:</span>
-                    <strong class="am-val" id="cmp-prim-weight">480.1784 km</strong>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Edges in Spanning Tree:</span>
-                    <strong class="am-val" id="cmp-prim-edges">1,254 Links</strong>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Connected Tree Verified:</span>
-                    <span class="badge badge-success" id="cmp-prim-connected">YES</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Core Data Structure:</span>
-                    <span class="am-val">Min-Heap Priority Queue</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Algorithmic Complexity:</span>
-                    <span class="am-val">Priority Queue Greedy Cut Expansion</span>
-                  </div>
-                  <div class="algo-metric-row">
-                    <span class="am-label">Growth Mechanics:</span>
-                    <span class="am-val">Grows a single continuous tree cut from root vertex</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mathematical Convergence Note inside Progressive Disclosure Accordion -->
-            <details class="sim-details-accordion" style="margin-top:16px;">
-              <summary class="sim-details-summary">
-                <span>📚 Core Principles: Equivalence of Greedy Decisions</span>
-                <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
-              </summary>
-              <div class="compare-proof-card" style="margin-top:10px; border:none; padding:0; background:transparent;">
-                <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:8px;">
-                  <strong>Cut Property (Prim's Algorithm):</strong> For any partition of facilities in a connected network,
-                  if a link is the shortest connection crossing the boundary, it belongs to the optimal network.
-                  Prim's algorithm expands this boundary step-by-step.
-                </p>
-                <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:0;">
-                  <strong>Cycle Property (Kruskal's Algorithm):</strong> For any circular loop in the network, the longest
-                  connection on that loop cannot belong to an optimal minimum-cost tree. Kruskal's algorithm connects
-                  facilities without creating redundant cycles.
-                </p>
-              </div>
-            </details>
-          </div>
+          <!-- SUBVIEW 2: Placeholder for DOM compatibility -->
+          <div id="mst-view-compare" style="display:none;" aria-hidden="true"></div>
 
           <!-- SUBVIEW 3: STATIC FULL SPANNING TREE (Retained for 100% Backward Compatibility) -->
           <div id="mst-view-static" class="mst-subview" style="display:none;">
@@ -980,14 +857,14 @@
                         <div class="algo-title">🌳 Prim's Algorithm</div>
                         <span class="active-check">✓</span>
                       </div>
-                      <div class="algo-desc">Priority-queue cut frontier growing outward from incident origin</div>
+                      <div class="algo-desc">Cut frontier growing outward from incident origin</div>
                     </div>
                     <div class="algo-card" data-algo="kruskal" onclick="App.selectAlgorithm('kruskal')">
                       <div style="display:flex; align-items:center; justify-content:space-between;">
                         <div class="algo-title">🔗 Kruskal's Algorithm</div>
                         <span class="active-check">✓</span>
                       </div>
-                      <div class="algo-desc">Global edge sorting with Disjoint Set Union (DSU) component merging</div>
+                      <div class="algo-desc">Global edge sorting with component merging</div>
                     </div>
                   </div>
                 </div>
@@ -1310,14 +1187,14 @@
                       </tr>
                       <tr>
                         <td><strong>Theoretical Complexity</strong></td>
-                        <td>Priority Queue Min-Heap</td>
-                        <td>Sorted Edge Disjoint Sets</td>
+                        <td>Prim's Min-Heap</td>
+                        <td>Kruskal's Sorted Edges</td>
                         <td><span class="badge badge-sage">Optimal Complexity</span></td>
                       </tr>
                       <tr>
                         <td><strong>Primary Data Structure</strong></td>
                         <td>Binary Min-Heap</td>
-                        <td>Disjoint Set Union (DSU)</td>
+                        <td>Disjoint Set Forest</td>
                         <td><span class="badge badge-sage">Standard</span></td>
                       </tr>
                       <tr>
@@ -1397,8 +1274,8 @@
         <div class="chart-card-header">
           <h4 class="chart-card-title">1. Algorithm Runtime Comparison</h4>
           <div class="chart-legend-custom">
-            <span class="legend-dot" style="background:#16a34a;"></span> Prim (Min-Heap)
-            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal (DSU)
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim's
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal's
           </div>
         </div>
         <div class="chart-canvas-wrap" style="height:260px; position:relative;">
