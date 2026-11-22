@@ -993,6 +993,16 @@
       btn.classList.toggle("active", btn.getAttribute("data-algo") === algorithm);
     });
 
+    // Update legend styles dynamically based on algorithm
+    const activeTreeColor = algorithm === "prim" ? "#064e3b" : "#1e3a8a";
+    const activeTreeBorder = algorithm === "prim" ? "#022c22" : "#0f172a";
+    const inTreeDot = document.querySelector(".dot-intree");
+    const acceptedLine = document.querySelector(".line-accepted");
+    const candLine = document.querySelector(".line-candidate");
+    if (inTreeDot) { inTreeDot.style.background = activeTreeColor; inTreeDot.style.borderColor = activeTreeBorder; }
+    if (acceptedLine) acceptedLine.style.background = activeTreeColor;
+    if (candLine) candLine.style.background = "#f59e0b";
+
     // Show loading state
     const telemStatus = document.getElementById("sim-telem-status");
     if (telemStatus) {
@@ -1113,6 +1123,9 @@
       simRejectedEdgeLayer.clearLayers();
 
       const isSequentialNext = stepIndex === prevIndex + 1;
+      const algo = State.simAlgorithm || "kruskal";
+      const acceptedColor = algo === "prim" ? "#064e3b" : "#1e3a8a";
+      const acceptedNodeBorder = algo === "prim" ? "#022c22" : "#0f172a";
 
       if (!isSequentialNext) {
         // Full rebuild of accepted edges
@@ -1128,17 +1141,17 @@
           const ev = events[i];
           if (ev.accepted && ev.u_lat != null && ev.v_lat != null) {
             const poly = L.polyline([[ev.u_lat, ev.u_lon], [ev.v_lat, ev.v_lon]], {
-              color: "#16a34a",
-              weight: 2.4,
-              opacity: 0.85,
+              color: acceptedColor,
+              weight: 3.0,
+              opacity: 0.95,
             });
             simAcceptedEdgesLayer.addLayer(poly);
 
             if (simNodeMarkers[ev.source_vertex_id]) {
-              simNodeMarkers[ev.source_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+              simNodeMarkers[ev.source_vertex_id].setStyle({ fillColor: acceptedColor, color: acceptedNodeBorder });
             }
             if (simNodeMarkers[ev.target_vertex_id]) {
-              simNodeMarkers[ev.target_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+              simNodeMarkers[ev.target_vertex_id].setStyle({ fillColor: acceptedColor, color: acceptedNodeBorder });
             }
           }
         }
@@ -1149,34 +1162,34 @@
         const lineCoords = [[curEv.u_lat, curEv.u_lon], [curEv.v_lat, curEv.v_lon]];
 
         if (curEv.accepted) {
-          // Highlight in blue as currently evaluated edge
+          // Highlight in amber/gold as currently evaluated edge
           const evalPoly = L.polyline(lineCoords, {
-            color: "#1e3a8a",
-            weight: 4.2,
+            color: "#f59e0b",
+            weight: 5.2,
             opacity: 1.0,
           });
           simEvaluatedEdgeLayer.addLayer(evalPoly);
 
           // Add to accepted layer
           const permPoly = L.polyline(lineCoords, {
-            color: "#16a34a",
-            weight: 2.4,
-            opacity: 0.85,
+            color: acceptedColor,
+            weight: 3.0,
+            opacity: 0.95,
           });
           simAcceptedEdgesLayer.addLayer(permPoly);
 
-          // Endpoints turn green
+          // Endpoints turn matching dark color
           if (simNodeMarkers[curEv.source_vertex_id]) {
-            simNodeMarkers[curEv.source_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+            simNodeMarkers[curEv.source_vertex_id].setStyle({ fillColor: acceptedColor, color: acceptedNodeBorder });
           }
           if (simNodeMarkers[curEv.target_vertex_id]) {
-            simNodeMarkers[curEv.target_vertex_id].setStyle({ fillColor: "#16a34a", color: "#14532d" });
+            simNodeMarkers[curEv.target_vertex_id].setStyle({ fillColor: acceptedColor, color: acceptedNodeBorder });
           }
         } else if (curEv.event_type === "EDGE_REJECTED") {
           // Candidate edge rejected (e.g. cycle): dashed red line
           const rejPoly = L.polyline(lineCoords, {
             color: "#dc2626",
-            weight: 3.5,
+            weight: 3.8,
             dashArray: "6, 6",
             opacity: 0.95,
           });
@@ -2571,8 +2584,8 @@
       const isGenuineRoad = Boolean(edge.is_road_route && edge.geometry && edge.geometry.length > 1);
 
       const strokeColor = isTopDispatch ? "#ea580c" : "#1e3a8a";
-      const strokeWeight = isTopDispatch ? 5.5 : 2.4;
-      const strokeOpacity = isTopDispatch ? 0.95 : 0.70;
+      const strokeWeight = isTopDispatch ? 5.5 : 2.8;
+      const strokeOpacity = isTopDispatch ? 0.98 : 0.92;
 
       if (isGenuineRoad) {
         polyline = L.polyline(edge.geometry, {
@@ -2585,8 +2598,8 @@
       } else {
         polyline = L.polyline([uCoord, vCoord], {
           color: strokeColor,
-          weight: isTopDispatch ? 4.5 : 1.8,
-          opacity: isTopDispatch ? 0.90 : 0.55,
+          weight: isTopDispatch ? 4.5 : 2.2,
+          opacity: isTopDispatch ? 0.95 : 0.85,
           dashArray: isTopDispatch ? "8, 4" : "4, 4",
         });
         simBounds.extend(uCoord);
