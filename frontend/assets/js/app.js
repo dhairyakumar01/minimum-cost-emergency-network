@@ -9,7 +9,7 @@
 
   const AGENCY_COLORS = {
     "hospital": "#dc2626",
-    "police_station": "#2563eb",
+    "police_station": "#1e3a8a",
     "fire_station": "#ea580c",
   };
 
@@ -848,7 +848,7 @@
       mstEdgesLayer.clearLayers();
       mstNodesLayer.clearLayers();
 
-      const edgeColor = algo === "kruskal" ? "#2563eb" : "#9333ea";
+      const edgeColor = algo === "kruskal" ? "#1e3a8a" : "#7e22ce";
 
       // Render 1,254 PolyLines
       (mstData.edges || []).forEach((edge) => {
@@ -861,8 +861,8 @@
           ],
           {
             color: edgeColor,
-            weight: 2.2,
-            opacity: 0.72,
+            weight: 2.6,
+            opacity: 0.90,
           }
         );
 
@@ -872,7 +872,7 @@
         });
         poly.on("mouseout", () => {
           if (State.mstSelectedEdge !== edge) {
-            poly.setStyle({ weight: 2.2, opacity: 0.72, color: edgeColor });
+            poly.setStyle({ weight: 2.6, opacity: 0.90, color: edgeColor });
           }
         });
         poly.on("click", () => {
@@ -1151,7 +1151,7 @@
         if (curEv.accepted) {
           // Highlight in blue as currently evaluated edge
           const evalPoly = L.polyline(lineCoords, {
-            color: "#2563eb",
+            color: "#1e3a8a",
             weight: 4.2,
             opacity: 1.0,
           });
@@ -2518,9 +2518,9 @@
       let polyline = null;
       const isGenuineRoad = Boolean(edge.is_road_route && edge.geometry && edge.geometry.length > 1);
 
-      const strokeColor = isTopDispatch ? "#f59e0b" : "#2563eb";
+      const strokeColor = isTopDispatch ? "#f59e0b" : "#1e3a8a";
       const strokeWeight = isTopDispatch ? 5.5 : 3.5;
-      const strokeOpacity = isTopDispatch ? 0.95 : 0.82;
+      const strokeOpacity = isTopDispatch ? 0.95 : 0.90;
 
       if (isGenuineRoad) {
         polyline = L.polyline(edge.geometry, {
