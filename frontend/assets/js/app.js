@@ -938,6 +938,22 @@
       simRejectedEdgeLayer = L.layerGroup().addTo(simMap);
       simNodesLayer = L.layerGroup().addTo(simMap);
       simIncidentMarkerLayer = L.layerGroup().addTo(simMap);
+
+      // Allow clicking on map in incident mode to relocate incident origin and regenerate 5km MST
+      simMap.on("click", (e) => {
+        if (State.simGraphContext === "incident") {
+          State.incident = {
+            lat: e.latlng.lat,
+            lon: e.latlng.lng,
+            label: `Custom Incident (${e.latlng.lat.toFixed(4)}°N, ${e.latlng.lng.toFixed(4)}°E)`,
+            isSet: true,
+          };
+          Object.keys(simTraceCache).forEach((k) => {
+            if (k.startsWith("incident_")) delete simTraceCache[k];
+          });
+          loadSimulatorTrace("incident", State.simAlgorithm);
+        }
+      });
     } catch (err) {
       console.error("Simulator map initialization failed:", err);
     }
@@ -993,6 +1009,11 @@
       btn.classList.toggle("active", btn.getAttribute("data-algo") === algorithm);
     });
 
+    const incBar = document.getElementById("sim-incident-bar");
+    if (incBar) {
+      incBar.style.display = graphContext === "incident" ? "flex" : "none";
+    }
+
     // Update legend styles dynamically based on algorithm
     const activeTreeColor = algorithm === "prim" ? "#064e3b" : "#1e3a8a";
     const activeTreeBorder = algorithm === "prim" ? "#022c22" : "#0f172a";
@@ -1011,11 +1032,22 @@
     }
 
     try {
-      const cacheKey = `${graphContext}_${algorithm}`;
+      const incLat = (State.incident && State.incident.lat != null) ? State.incident.lat : 12.9781;
+      const incLon = (State.incident && State.incident.lon != null) ? State.incident.lon : 77.5696;
+      const radiusKm = State.simRadiusKm || 5.0;
+
+      const cacheKey = graphContext === "incident"
+        ? `incident_${algorithm}_${incLat.toFixed(4)}_${incLon.toFixed(4)}_${radiusKm.toFixed(1)}`
+        : `${graphContext}_${algorithm}`;
+
       let data = simTraceCache[cacheKey];
       if (!data) {
         showLoader("Loading Trace...", `Retrieving ${algorithm.toUpperCase()} execution trace`);
-        data = await API.getMstTrace(graphContext, algorithm, State.activeScenarioId);
+        if (graphContext === "incident") {
+          data = await API.getMstTrace(graphContext, algorithm, State.activeScenarioId, incLat, incLon, radiusKm);
+        } else {
+          data = await API.getMstTrace(graphContext, algorithm, State.activeScenarioId);
+        }
         simTraceCache[cacheKey] = data;
         hideLoader();
       }
@@ -1037,20 +1069,49 @@
         const isDense = vertices.length > 100;
         const bounds = L.latLngBounds();
 
+        if (graphContext === "incident") {
+          const centerLat = data.incident_coords ? data.incident_coords[0] : incLat;
+          const centerLon = data.incident_coords ? data.incident_coords[1] : incLon;
+          const rKm = data.radius_km || 5.0;
+
+          // Draw 5 km radius boundary circle
+          const radiusCircle = L.circle([centerLat, centerLon], {
+            radius: rKm * 1000,
+            color: algorithm === "prim" ? "#064e3b" : "#1e3a8a",
+            fillColor: algorithm === "prim" ? "#10b981" : "#3b82f6",
+            fillOpacity: 0.08,
+            weight: 2,
+            dashArray: "6, 6",
+          }).bindTooltip(`<strong>5.0 km Incident Radius</strong><br>${Math.max(0, vertices.length - 1)} facilities covered`);
+          simIncidentMarkerLayer.addLayer(radiusCircle);
+
+          // Update header info text
+          const incLocText = document.getElementById("sim-incident-location-text");
+          if (incLocText) {
+            incLocText.textContent = `${centerLat.toFixed(4)}°N, ${centerLon.toFixed(4)}°E`;
+          }
+          const incFacCount = document.getElementById("sim-incident-facility-count");
+          if (incFacCount) {
+            incFacCount.textContent = String(Math.max(0, vertices.length - 1));
+          }
+        }
+
         vertices.forEach((v) => {
-          if (v.lat == null || v.lon == null) return;
-          const isIncident = v.id === "incident_0" || v.id.startsWith("inc_");
-          const latlng = [v.lat, v.lon];
+          const vLat = v.lat != null ? v.lat : v.latitude;
+          const vLon = v.lon != null ? v.lon : v.longitude;
+          if (vLat == null || vLon == null) return;
+          const isIncident = v.id === "incident_0" || (typeof v.id === "string" && v.id.startsWith("inc_"));
+          const latlng = [vLat, vLon];
           bounds.extend(latlng);
 
           if (isIncident) {
             const incMarker = L.circleMarker(latlng, {
-              radius: 8,
+              radius: 9,
               fillColor: "#dc2626",
               color: "#ffffff",
-              weight: 2,
+              weight: 2.5,
               fillOpacity: 1.0,
-            }).bindTooltip(`<strong>🚨 Incident Origin</strong><br>${v.name || v.id}`);
+            }).bindTooltip(`<strong>🚨 ${v.name || "Incident Origin"}</strong><br><span style="font-size:0.75rem; color:#64748b;">${vLat.toFixed(4)}°N, ${vLon.toFixed(4)}°E</span>`);
             simIncidentMarkerLayer.addLayer(incMarker);
           } else {
             const marker = L.circleMarker(latlng, {
@@ -1333,7 +1394,15 @@
 
     try {
       showLoader("Evaluating Parity...", "Comparing Prim vs Kruskal execution and invariants");
-      const comp = await API.getMstCompare(graphContext, State.activeScenarioId);
+      let comp;
+      if (graphContext === "incident") {
+        const incLat = (State.incident && State.incident.lat != null) ? State.incident.lat : 12.9781;
+        const incLon = (State.incident && State.incident.lon != null) ? State.incident.lon : 77.5696;
+        const radiusKm = State.simRadiusKm || 5.0;
+        comp = await API.getMstCompare(graphContext, State.activeScenarioId, incLat, incLon, radiusKm);
+      } else {
+        comp = await API.getMstCompare(graphContext, State.activeScenarioId);
+      }
       hideLoader();
 
       const k = comp.kruskal_summary || {};

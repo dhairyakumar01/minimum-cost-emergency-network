@@ -25,19 +25,25 @@ SCENARIOS_DB_PATH = BASE_DIR / "data" / "scenarios.db"
 
 
 class SimulatorService:
+    _cache = {}
+    _incident_cache = {}
+
     def __init__(self):
-        self._cache = {}
+        pass
 
     @classmethod
     def get_algorithm_trace(
         cls,
         graph_context: str = "global",
         algorithm: str = "kruskal",
-        scenario_id: Optional[str] = None
+        scenario_id: Optional[str] = None,
+        incident_lat: Optional[float] = None,
+        incident_lon: Optional[float] = None,
+        radius_km: float = 5.0
     ) -> Dict[str, Any]:
         """
         Return the step-by-step event trace for algorithm execution.
-        Supports 'global' (1,255 facilities) and 'incident' (from Emergency Simulation).
+        Supports 'global' (1,255 facilities) and 'incident' (5.0 km radius incident graph).
         """
         graph_norm = graph_context.strip().lower()
         algo_norm = algorithm.strip().lower()
@@ -48,7 +54,13 @@ class SimulatorService:
         if graph_norm == "global":
             return cls._get_global_trace(algo_norm)
         elif graph_norm == "incident":
-            return cls._get_incident_trace(algo_norm, scenario_id)
+            return cls._get_incident_trace(
+                algo=algo_norm,
+                scenario_id=scenario_id,
+                incident_lat=incident_lat,
+                incident_lon=incident_lon,
+                radius_km=radius_km
+            )
         else:
             raise ValueError(f"Invalid graph_context '{graph_context}'. Must be 'global' or 'incident'.")
 
@@ -75,110 +87,152 @@ class SimulatorService:
         return data
 
     @classmethod
-    def _get_incident_trace(cls, algo: str, scenario_id: Optional[str] = None) -> Dict[str, Any]:
+    def _get_incident_trace(
+        cls,
+        algo: str,
+        scenario_id: Optional[str] = None,
+        incident_lat: Optional[float] = None,
+        incident_lon: Optional[float] = None,
+        radius_km: float = 5.0
+    ) -> Dict[str, Any]:
         """
-        Execute instrumented production Prim or Kruskal on active or requested incident graph.
+        Execute instrumented production Prim or Kruskal on a true 5.0 km radius incident graph.
+        All facilities within radius_km of the incident location are connected into a candidate
+        metric space and solved step-by-step with complete trace telemetry.
         """
-        if not SCENARIOS_DB_PATH.exists():
-            raise ValueError("No simulation database found. Please run an Emergency Simulation first.")
+        lat0: Optional[float] = None
+        lon0: Optional[float] = None
+        inc_label: str = "Incident Location Origin"
 
-        conn = sqlite3.connect(SCENARIOS_DB_PATH)
-        conn.row_factory = sqlite3.Row
-        try:
-            if scenario_id:
-                row = conn.execute("SELECT * FROM scenarios WHERE scenario_id=?", (scenario_id,)).fetchone()
-            else:
-                row = conn.execute("SELECT * FROM scenarios WHERE status IN ('COMPLETED', 'DISCONNECTED_FOREST') ORDER BY created_at DESC LIMIT 1").fetchone()
+        # 1. Direct coordinates provided
+        if incident_lat is not None and incident_lon is not None:
+            lat0 = float(incident_lat)
+            lon0 = float(incident_lon)
+            inc_label = f"Incident Origin ({lat0:.4f}°N, {lon0:.4f}°E)"
+        else:
+            # 2. Try loading latest or requested scenario
+            if SCENARIOS_DB_PATH.exists():
+                try:
+                    conn = sqlite3.connect(SCENARIOS_DB_PATH)
+                    conn.row_factory = sqlite3.Row
+                    if scenario_id:
+                        row = conn.execute("SELECT * FROM scenarios WHERE scenario_id=?", (scenario_id,)).fetchone()
+                    else:
+                        row = conn.execute("SELECT * FROM scenarios WHERE status IN ('COMPLETED', 'DISCONNECTED_FOREST') ORDER BY created_at DESC LIMIT 1").fetchone()
+                    
+                    if row and row["result_json"]:
+                        scenario_res = json.loads(row["result_json"])
+                        inc = scenario_res.get("incident", {})
+                        lat0 = inc.get("latitude") or inc.get("lat")
+                        lon0 = inc.get("longitude") or inc.get("lon")
+                        if lat0 is not None and lon0 is not None:
+                            lat0 = float(lat0)
+                            lon0 = float(lon0)
+                            inc_label = inc.get("label") or row.get("incident_label") or "Incident Location Origin"
+                    conn.close()
+                except Exception:
+                    pass
 
-            if not row or not row["result_json"]:
-                raise ValueError("No completed incident simulation scenario available. Please run an Emergency Simulation first to generate an incident-specific graph.")
+        # 3. Fallback to central Bengaluru (Majestic) if no location set
+        if lat0 is None or lon0 is None:
+            lat0 = 12.9781
+            lon0 = 77.5696
+            inc_label = "Majestic (KSR Railway Station)"
 
-            scenario_res = json.loads(row["result_json"])
-        finally:
-            conn.close()
+        cache_key = f"{algo}_{round(lat0, 4)}_{round(lon0, 4)}_{round(radius_km, 2)}"
+        if cache_key in cls._incident_cache:
+            return cls._incident_cache[cache_key]
 
-        params = scenario_res.get("parameters", {})
-        opt_mode = params.get("optimization_mode", "time")
-        k_param = params.get("k_param", 5)
-        inc = scenario_res.get("incident", {})
-        inc_coords = [inc.get("latitude", 12.9781), inc.get("longitude", 77.5696)]
+        # 4. Find all facilities within radius_km
+        facs = data_service.load_facilities()
+        radius_mm = int(radius_km * 1000 * 1000)
 
-        # Extract graph vertices & candidates
-        ranking = scenario_res.get("dispatch_ranking", [])
-        net_mst = scenario_res.get("network_mst", {})
-        raw_edges = net_mst.get("edges", [])
+        in_radius = []
+        for f in facs:
+            d_mm = haversine_integer_mm(lat0, lon0, f["latitude"], f["longitude"])
+            if d_mm <= radius_mm:
+                in_radius.append((f, d_mm))
 
-        # Build vertex list
-        facs_by_id = {f["facility_id"]: f for f in data_service.load_facilities()}
-        vertex_list = [
-            {
-                "id": "incident_0",
-                "name": inc.get("label", "Incident Location Origin"),
-                "latitude": inc_coords[0],
-                "longitude": inc_coords[1],
-                "type": "incident",
-                "agency": "incident",
-            }
-        ]
+        # If sparse or edge of map, fallback to nearest 10 facilities
+        if len(in_radius) < 5:
+            all_sorted = sorted(
+                [(f, haversine_integer_mm(lat0, lon0, f["latitude"], f["longitude"])) for f in facs],
+                key=lambda x: x[1]
+            )
+            in_radius = all_sorted[:10]
+
+        # 5. Build vertices
+        vertex_list = [{
+            "id": "incident_0",
+            "name": inc_label,
+            "lat": lat0,
+            "lon": lon0,
+            "latitude": lat0,
+            "longitude": lon0,
+            "type": "incident",
+            "agency": "incident",
+        }]
 
         vertex_ids = ["incident_0"]
         points_map = {"incident_0": vertex_list[0]}
 
-        for r in ranking:
-            f_id = r["facility_id"]
-            fac_info = facs_by_id.get(f_id, {})
+        for f, _ in in_radius:
+            f_id = f["facility_id"]
             v_obj = {
                 "id": f_id,
-                "name": r.get("facility_name") or fac_info.get("facility_name", f_id),
-                "latitude": fac_info.get("latitude", 0.0),
-                "longitude": fac_info.get("longitude", 0.0),
+                "name": f.get("facility_name", f_id),
+                "lat": f["latitude"],
+                "lon": f["longitude"],
+                "latitude": f["latitude"],
+                "longitude": f["longitude"],
                 "type": "facility",
-                "agency": r.get("agency", "hospital"),
+                "agency": f.get("agency", "facility"),
             }
             vertex_list.append(v_obj)
             vertex_ids.append(f_id)
             points_map[f_id] = v_obj
 
-        # Extract pairwise candidate edges with correct weights based on optimization mode
+        # 6. Build complete candidate edges in decimeters (1 dm = 0.1 m = 0.0001 km)
         candidate_edges = []
-        for e in raw_edges:
-            u, v = e["u"], e["v"]
-            u_pt = points_map.get(u)
-            v_pt = points_map.get(v)
-            if not u_pt or not v_pt:
-                continue
-
-            if opt_mode == "distance":
-                w = int(e.get("road_distance_dm") or e.get("distance_dm") or round(e.get("road_distance_km", 1.0) * 10000))
-                unit_label = "km"
-                w_fmt = f"{w / 10000.0:.3f} km"
-            elif opt_mode == "compromise":
-                w = int(e.get("compromise_weight") or e.get("weight") or 100)
-                unit_label = "score"
-                w_fmt = f"{w} score"
-            else: # time mode
-                w = int(e.get("duration_ds") or round(e.get("t_avg_min", 1.0) * 600))
-                unit_label = "min"
-                w_fmt = f"{w / 600.0:.2f} min"
-
+        for f, d_mm in in_radius:
+            f_id = f["facility_id"]
+            w = int(round(d_mm / 100))
             candidate_edges.append({
-                "u": u,
-                "v": v,
+                "u": "incident_0",
+                "v": f_id,
                 "weight": w,
-                "weight_formatted": w_fmt,
-                "geometry": e.get("geometry"),
-                "is_road_route": e.get("is_road_route", False),
+                "road_distance_km": w / 10000.0,
             })
 
-        # Run instrumented algorithm
+        n = len(in_radius)
+        for i in range(n):
+            f1, _ = in_radius[i]
+            u = f1["facility_id"]
+            lat1, lon1 = points_map[u]["lat"], points_map[u]["lon"]
+            for j in range(i + 1, n):
+                f2, _ = in_radius[j]
+                v = f2["facility_id"]
+                lat2, lon2 = points_map[v]["lat"], points_map[v]["lon"]
+                d = haversine_integer_mm(lat1, lon1, lat2, lon2)
+                w = int(round(d / 100))
+                candidate_edges.append({
+                    "u": u,
+                    "v": v,
+                    "weight": w,
+                    "road_distance_km": w / 10000.0,
+                })
+
         expected_edges = max(0, len(vertex_ids) - 1)
         if algo == "kruskal":
-            alg_res = kruskal_mst(vertex_ids, candidate_edges, weight_key="weight", track_trace=True)
+            alg_res = kruskal_mst(vertex_ids, candidate_edges, weight_key="weight", track_trace=True, max_rejections=200)
         else:
-            alg_res = prim_mst(vertex_ids, candidate_edges, weight_key="weight", start_vertex="incident_0", track_trace=True)
+            alg_res = prim_mst(vertex_ids, candidate_edges, weight_key="weight", start_vertex="incident_0", track_trace=True, max_rejections=200)
 
         raw_trace = alg_res.get("trace") or []
         enriched_events = []
+        accepted_count = 0
+        running_weight = 0
+
         for ev in raw_trace:
             u_id = ev.get("u")
             v_id = ev.get("v")
@@ -186,58 +240,89 @@ class SimulatorService:
             v_info = points_map.get(v_id, {})
             w_val = ev.get("weight", 0)
 
-            if opt_mode == "distance":
-                w_str = f"{w_val / 10000.0:.3f} km"
-                tot_str = f"{ev.get('running_total', 0) / 10000.0:.3f} km"
-            elif opt_mode == "compromise":
-                w_str = f"{w_val} score"
-                tot_str = f"{ev.get('running_total', 0)} score"
-            else:
-                w_str = f"{w_val / 600.0:.2f} min"
-                tot_str = f"{ev.get('running_total', 0) / 600.0:.2f} min"
+            is_acc = ev.get("event_type") == "EDGE_ACCEPTED"
+            if is_acc:
+                accepted_count += 1
+                running_weight += w_val
 
             enriched_ev = dict(ev)
-            enriched_ev["source_name"] = u_info.get("name")
-            enriched_ev["target_name"] = v_info.get("name")
-            enriched_ev["u_coords"] = [u_info.get("latitude"), u_info.get("longitude")] if u_info else None
-            enriched_ev["v_coords"] = [v_info.get("latitude"), v_info.get("longitude")] if v_info else None
-            enriched_ev["edge_weight_formatted"] = w_str if ev.get("event_type") not in ("START", "COMPLETED") else "0"
-            enriched_ev["current_tree_weight_formatted"] = tot_str
+            enriched_ev["accepted"] = is_acc
+            enriched_ev["accepted_edge_count"] = accepted_count
+            enriched_ev["remaining_edge_count"] = max(0, expected_edges - accepted_count)
+            enriched_ev["total_required_edges"] = expected_edges
+
+            enriched_ev["source_vertex_id"] = u_id
+            enriched_ev["target_vertex_id"] = v_id
+            enriched_ev["u_name"] = u_info.get("name", u_id)
+            enriched_ev["v_name"] = v_info.get("name", v_id)
+            enriched_ev["source_name"] = enriched_ev["u_name"]
+            enriched_ev["target_name"] = enriched_ev["v_name"]
+
+            if u_info:
+                enriched_ev["u_lat"] = u_info.get("lat")
+                enriched_ev["u_lon"] = u_info.get("lon")
+                enriched_ev["u_coords"] = [u_info.get("lat"), u_info.get("lon")]
+            if v_info:
+                enriched_ev["v_lat"] = v_info.get("lat")
+                enriched_ev["v_lon"] = v_info.get("lon")
+                enriched_ev["v_coords"] = [v_info.get("lat"), v_info.get("lon")]
+
+            enriched_ev["edge_weight_formatted"] = f"{w_val / 10000.0:.3f} km" if ev.get("event_type") not in ("START", "COMPLETED") else "0.000 km"
+            enriched_ev["current_tree_weight_formatted"] = f"{running_weight / 10000.0:.3f} km"
             enriched_events.append(enriched_ev)
 
         final_w = alg_res.get("total_integer_weight", 0)
-        final_w_fmt = f"{final_w / 600.0:.2f} min" if opt_mode == "time" else (f"{final_w / 10000.0:.3f} km" if opt_mode == "distance" else f"{final_w} score")
+        final_w_fmt = f"{final_w / 10000.0:.3f} km"
 
-        return {
+        result = {
             "graph_context": "incident",
-            "scenario_id": row["scenario_id"],
-            "incident_label": row["incident_label"],
-            "optimization_mode": opt_mode,
-            "k_param": k_param,
+            "scenario_id": scenario_id or "5km_incident_graph",
+            "incident_label": inc_label,
+            "incident_coords": [lat0, lon0],
+            "radius_km": radius_km,
             "algorithm": algo,
             "vertex_count": len(vertex_ids),
             "total_required_edges": expected_edges,
             "final_tree_weight": final_w,
             "final_tree_weight_formatted": final_w_fmt,
-            "weight_unit": unit_label,
+            "weight_unit": "km",
             "is_connected": alg_res.get("is_connected", True),
             "num_components": alg_res.get("num_components", 1),
             "events_count": len(enriched_events),
             "events": enriched_events,
             "vertices": vertex_list,
         }
+        cls._incident_cache[cache_key] = result
+        return result
 
     @classmethod
     def get_comparison_trace(
         cls,
         graph_context: str = "global",
-        scenario_id: Optional[str] = None
+        scenario_id: Optional[str] = None,
+        incident_lat: Optional[float] = None,
+        incident_lon: Optional[float] = None,
+        radius_km: float = 5.0
     ) -> Dict[str, Any]:
         """
         Generate side-by-side comparison metrics between Prim and Kruskal on the exact same graph.
         """
-        kruskal_data = cls.get_algorithm_trace(graph_context, "kruskal", scenario_id)
-        prim_data = cls.get_algorithm_trace(graph_context, "prim", scenario_id)
+        kruskal_data = cls.get_algorithm_trace(
+            graph_context=graph_context,
+            algorithm="kruskal",
+            scenario_id=scenario_id,
+            incident_lat=incident_lat,
+            incident_lon=incident_lon,
+            radius_km=radius_km
+        )
+        prim_data = cls.get_algorithm_trace(
+            graph_context=graph_context,
+            algorithm="prim",
+            scenario_id=scenario_id,
+            incident_lat=incident_lat,
+            incident_lon=incident_lon,
+            radius_km=radius_km
+        )
 
         w_kruskal = kruskal_data["final_tree_weight"]
         w_prim = prim_data["final_tree_weight"]
