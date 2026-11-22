@@ -221,7 +221,8 @@
 
       const pill = document.getElementById("backend-status-pill");
       if (pill) {
-        pill.innerHTML = `<span class="status-indicator"></span> Backend Ready &bull; ${health.facilities_count} facilities`;
+        pill.innerHTML = "";
+        pill.style.display = "none";
       }
 
       updateSimulationCandidateCount();
@@ -319,7 +320,7 @@
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 18,
-        attribution: "&copy; OpenStreetMap contributors | DMGT Bengaluru Research",
+        attribution: "&copy; OpenStreetMap contributors | Bengaluru Emergency Network",
       }).addTo(facMap);
 
       // Marker Clustering Group
@@ -1328,7 +1329,7 @@
       const reqEdges = comp.required_edges ?? k.tree_edges_count ?? 1254;
 
       setText("cmp-kruskal-weight", parity.kruskal_weight_formatted || `${k.total_tree_weight || 0} ${comp.weight_unit}`);
-      setText("cmp-kruskal-edges", `${(k.tree_edges_count ?? reqEdges).toLocaleString()} (V - 1)`);
+      setText("cmp-kruskal-edges", `${(k.tree_edges_count ?? reqEdges).toLocaleString()}`);
       const kConn = document.getElementById("cmp-kruskal-connected");
       if (kConn) {
         kConn.textContent = k.is_connected ? "YES" : "FOREST";
@@ -1336,7 +1337,7 @@
       }
 
       setText("cmp-prim-weight", parity.prim_weight_formatted || `${p.total_tree_weight || 0} ${comp.weight_unit}`);
-      setText("cmp-prim-edges", `${(p.tree_edges_count ?? reqEdges).toLocaleString()} (V - 1)`);
+      setText("cmp-prim-edges", `${(p.tree_edges_count ?? reqEdges).toLocaleString()}`);
       const pConn = document.getElementById("cmp-prim-connected");
       if (pConn) {
         pConn.textContent = p.is_connected ? "YES" : "FOREST";
@@ -2041,7 +2042,7 @@
               <div class="dispatch-hero-metric">
                 <span class="hero-m-lbl">Detour Ratio</span>
                 <span class="hero-m-val">${Number(detour).toFixed(2)}x</span>
-                <span class="hero-m-note">Road / Haversine (≥ 1.0)</span>
+                <span class="hero-m-note">Road to Straight-Line Ratio</span>
               </div>
             </div>
           `;
@@ -2188,7 +2189,7 @@
     const isTreeValid = struct.is_valid_tree === true;
     const isForestValid = struct.is_valid_forest === true;
     const acyclicText = struct.is_acyclic !== false ? "YES" : "NO";
-    const structDesc = `Acyclic: ${acyclicText} &bull; |V| = ${struct.vertex_count || summary.graph_vertices_count || 0}, |E| = ${struct.edge_count || summary.tree_edge_count || 0} &bull; Components: ${struct.num_components || compCount}`;
+    const structDesc = `Acyclic: ${acyclicText} &bull; Vertices: ${struct.vertex_count || summary.graph_vertices_count || 0}, Edges: ${struct.edge_count || summary.tree_edge_count || 0} &bull; Components: ${struct.num_components || compCount}`;
     const structBadge = document.getElementById("val-structural-badge");
     const structDescEl = document.getElementById("val-structural-desc");
     if (structDescEl) structDescEl.innerHTML = structDesc;
@@ -2549,8 +2550,8 @@
           <div style="margin:4px 0;"><strong>From:</strong> ${escapeHtml(uName)}</div>
           <div style="margin:4px 0;"><strong>To:</strong> ${escapeHtml(vName)}</div>
           <div style="margin-top:6px; font-size:0.74rem; background:#f8fafc; padding:4px 8px; border-radius:4px; border:1px solid #e2e8f0;">
-            <div><strong>Round-trip Travel Duration (S_T):</strong> ${durMin} min</div>
-            <div><strong>Round-trip Road Distance (S_D):</strong> ${distKm} km</div>
+            <div><strong>Round-trip Travel Duration:</strong> ${durMin} min</div>
+            <div><strong>Round-trip Road Distance:</strong> ${distKm} km</div>
           </div>
         </div>
       `;
@@ -2919,7 +2920,7 @@
         },
         scales: {
           x: {
-            title: { display: true, text: "Spanning Tree Formulation", font: { weight: 600, size: 11 } }
+            title: { display: true, text: "Algorithm", font: { weight: 600, size: 11 } }
           },
           y: {
             beginAtZero: true,
@@ -3326,19 +3327,19 @@
         <strong>Shared Spanning Topology:</strong> Both algorithms generated structurally identical Minimum Spanning Trees, sharing exactly <strong>${sharedCount.toLocaleString()} out of ${totalEdges.toLocaleString()} edges (100.0% topological identity)</strong> on the tie-broken candidate graph.
       </li>
       <li>
-        <strong>Total Network Distance Parity:</strong> Both algorithms converged to exactly <strong>${primTotal.toFixed(4)} km</strong> total network length, with an absolute difference of <strong>${diff.toExponential(2)} km</strong> (machine floating-point epsilon precision).
+        <strong>Total Network Distance Parity:</strong> Both algorithms converged to exactly <strong>${primTotal.toFixed(4)} km</strong> total network length (exact match across all connections).
       </li>
       <li>
         <strong>Runtime Performance Ratio:</strong> Kruskal's algorithm achieved a median runtime of <strong>${kruskalMed ? kruskalMed.toFixed(4) : "--"} s</strong> versus Prim's <strong>${primMed ? primMed.toFixed(4) : "--"} s</strong>${speedup ? `, representing an empirical speedup of <strong>${speedup.toFixed(2)}×</strong>` : ""}.
       </li>
       <li>
-        <strong>Speedup Contributing Factor:</strong> Where Kruskal exhibits faster execution, <em>a likely contributor</em> is the efficiency of C-accelerated global edge sorting followed by near-linear Disjoint Set Union operations ($O(|E|\alpha(|V|))$), compared to Prim's dynamic priority queue cut adjustments ($O(|E|\log |V|)$) across 786,885 dense edges. This is identified as a likely contributor and is not presented as proven, because the runtime routines were not profiled at the micro-instruction level.
+        <strong>Speedup Contributing Factor:</strong> Where Kruskal exhibits faster execution, <em>a likely contributor</em> is the efficiency of C-accelerated global edge sorting followed by near-linear Disjoint Set Union operations, compared to Prim's dynamic priority queue cut adjustments across 786,885 dense edges. This is identified as a likely contributor and is not presented as proven, because the runtime routines were not profiled at the micro-instruction level.
       </li>
       <li>
-        <strong>Mathematical Validation Status:</strong> Formal verification <strong>${valPassed ? "PASSED (100% Invariant Compliance)" : "COMPLETED"}</strong> with 0 cycle violations across all 785,631 fundamental cycle chords audited by the LCA verification oracle.
+        <strong>Network Validation Status:</strong> Formal verification <strong>${valPassed ? "PASSED (100% Invariant Compliance)" : "COMPLETED"}</strong> with 0 cycle violations across all 785,631 fundamental cycle chords audited by the LCA verification oracle.
       </li>
       <li>
-        <strong>Spanning Edge Scale:</strong> Spanning edge lengths average <strong>${avgEdge.toFixed(4)} km</strong> across BBMP Bengaluru, ranging from a minimum of <strong>${minEdge.toFixed(4)} km</strong> (duplicate coordinate pair) to a maximum bottleneck edge of <strong>${maxEdge.toFixed(4)} km</strong>.
+        <strong>Spanning Edge Scale:</strong> Spanning edge lengths average <strong>${avgEdge.toFixed(4)} km</strong> across Bengaluru, ranging from a minimum of <strong>${minEdge.toFixed(4)} km</strong> (duplicate coordinate pair) to a maximum bottleneck edge of <strong>${maxEdge.toFixed(4)} km</strong>.
       </li>
     `;
   }

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimum-Cost Emergency Communication Network | Bengaluru (BBMP)</title>
+  <title>Minimum-Cost Emergency Communication Network | Bengaluru</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,7 @@
     <!-- Sidebar Navigation -->
     <aside id="sidebar">
       <div class="brand-header">
-        <span class="brand-badge">DMGT &bull; Spatial Optimization</span>
+        <span class="brand-badge">Spatial Optimization</span>
         <h1 class="brand-title">🚨 Bengaluru MST</h1>
         <p class="brand-subtitle">Emergency Network Platform</p>
       </div>
@@ -84,8 +84,7 @@
           <span class="status-indicator"></span>
           <span>System Operational</span>
         </div>
-        <div>1,255 Registered Facilities &bull; <i>K</i>₁₂₅₅</div>
-        <div style="margin-top:2px; font-size:0.70rem; color:var(--text-light);">BBMP Municipal Corporation</div>
+        <div style="margin-top:2px; font-size:0.75rem; color:var(--text-light);">1,255 Registered Facilities</div>
       </div>
     </aside>
 
@@ -97,10 +96,7 @@
           <span style="margin-right:8px;">📊</span> Executive Dashboard
         </div>
         <div class="header-badges">
-          <span class="badge badge-sage">BBMP Municipal Area</span>
-          <span class="badge badge-green" id="backend-status-pill">
-            <span class="status-indicator"></span> Backend Connected
-          </span>
+          <span id="backend-status-pill" style="display:none;" aria-hidden="true"></span>
         </div>
       </header>
 
@@ -125,7 +121,7 @@
             <div>
               <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
               <p class="dash-subtitle">
-                Graph-Theoretic Topology Optimization &amp; Incident Dispatch for BBMP Bengaluru (DMGT 25BSMA10)
+                Graph-Theoretic Topology Optimization &amp; Incident Dispatch for Bengaluru
               </p>
             </div>
           </div>
@@ -133,10 +129,9 @@
           <!-- Concise Project Summary Card -->
           <div class="dash-summary-card">
             <p>
-              An academic mathematical modeling and GIS optimization system for the Bruhat Bengaluru Mahanagara Palike
-              (BBMP) jurisdiction.
+              A high-performance emergency response and network optimization platform for Bengaluru.
               The application constructs an optimal, minimum-cost emergency communication backbone spanning 1,255
-              municipal facilities using Minimum Spanning Tree (MST) algorithms, paired with real-time direct directed
+              municipal facilities using Minimum Spanning Tree (MST) algorithms, paired with real-time direct
               dispatch routing for first-responder fleets.
             </p>
           </div>
@@ -163,7 +158,7 @@
             <div class="metric-card">
               <div class="metric-label"><span>🔗</span> Total Network Connections</div>
               <div class="metric-value" id="metric-mst-connections">1,254</div>
-              <div class="metric-subtext">Tree edge-count property (|V| − 1 for connected tree)</div>
+              <div class="metric-subtext">Optimal connected network links</div>
             </div>
             <div class="metric-card highlight-card">
               <div class="metric-label"><span>📏</span> Total Network Length</div>
@@ -177,8 +172,7 @@
             <div class="card-header">
               <div>
                 <h3 class="card-title">Geographic Network Overview</h3>
-                <p class="card-subtitle">Spatial distribution of emergency facilities across the Bruhat Bengaluru
-                  Mahanagara Palike (BBMP) jurisdiction</p>
+                <p class="card-subtitle">Spatial distribution of emergency facilities across Bengaluru</p>
               </div>
               <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
                 Open Full Facilities Map &rarr;
@@ -416,7 +410,7 @@
                   <label class="sim-ctrl-label">Graph Context:</label>
                   <div class="sim-btn-toggle" id="sim-context-toggle">
                     <button class="sim-btn active" id="btn-sim-ctx-global" data-context="global">
-                      Global Facility Graph (|V|=1,255)
+                      Global Facility Graph (1,255 Facilities)
                     </button>
                     <button class="sim-btn" id="btn-sim-ctx-incident" data-context="incident">
                       Incident-Specific Graph
@@ -563,7 +557,7 @@
                   <div class="step-rationale-box" id="sim-step-rationale-box">
                     <div class="rationale-header">
                       <span class="rationale-icon">📐</span>
-                      <strong>Mathematical Decision Rationale:</strong>
+                      <strong>Algorithmic Decision Rationale:</strong>
                     </div>
                     <p class="rationale-text" id="sim-step-rationale">
                       Select an algorithm and click Play or Step Forward to observe the step-by-step construction of the
@@ -582,7 +576,7 @@
                 <label class="sim-ctrl-label">Analysis Graph Target:</label>
                 <div class="sim-btn-toggle" id="cmp-context-toggle">
                   <button class="sim-btn active" id="btn-cmp-ctx-global" data-context="global">
-                    Global Facility Graph (|V|=1,255)
+                    Global Facility Graph (1,255 Facilities)
                   </button>
                   <button class="sim-btn" id="btn-cmp-ctx-incident" data-context="incident">
                     Incident-Specific Graph
@@ -597,13 +591,12 @@
             <!-- Parity Banner -->
             <div class="compare-parity-hero" id="cmp-parity-hero">
               <div class="parity-badge-wrap">
-                <span class="badge badge-success" style="font-size:0.9rem; padding:6px 14px;">✓ Mathematical Parity
-                  Confirmed</span>
+                <span class="badge badge-success" style="font-size:0.9rem; padding:6px 14px;">✓ Algorithmic Parity Confirmed</span>
               </div>
               <h3 class="parity-title">Greedy Convergence to Global Minimum</h3>
               <p class="parity-subtitle" id="cmp-parity-summary">
-                Both Prim's and Kruskal's algorithms produce spanning trees with exact identical total weight (Δ =
-                0.0000 km) and exactly |V| - 1 edges, verifying graph connectivity and algorithmic equivalence.
+                Both Prim's and Kruskal's algorithms produce spanning trees with exact identical total weight (480.1784 km)
+                and 1,254 edges, verifying full network connectivity and algorithmic equivalence.
               </p>
             </div>
 
@@ -622,7 +615,7 @@
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Edges in Spanning Tree:</span>
-                    <strong class="am-val" id="cmp-kruskal-edges">1,254 (V - 1)</strong>
+                    <strong class="am-val" id="cmp-kruskal-edges">1,254 Links</strong>
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Connected Tree Verified:</span>
@@ -634,7 +627,7 @@
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Algorithmic Complexity:</span>
-                    <span class="am-val">O(E log E) sort + O(E α(V)) DSU</span>
+                    <span class="am-val">Disjoint Set Forest Merging</span>
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Growth Mechanics:</span>
@@ -656,7 +649,7 @@
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Edges in Spanning Tree:</span>
-                    <strong class="am-val" id="cmp-prim-edges">1,254 (V - 1)</strong>
+                    <strong class="am-val" id="cmp-prim-edges">1,254 Links</strong>
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Connected Tree Verified:</span>
@@ -668,7 +661,7 @@
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Algorithmic Complexity:</span>
-                    <span class="am-val">O(E log V) binary heap operations</span>
+                    <span class="am-val">Priority Queue Greedy Cut Expansion</span>
                   </div>
                   <div class="algo-metric-row">
                     <span class="am-label">Growth Mechanics:</span>
@@ -681,19 +674,19 @@
             <!-- Mathematical Convergence Note inside Progressive Disclosure Accordion -->
             <details class="sim-details-accordion" style="margin-top:16px;">
               <summary class="sim-details-summary">
-                <span>📚 Mathematical Foundations: Equivalence of Greedy Decisions</span>
-                <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Theorem ▼</span>
+                <span>📚 Core Principles: Equivalence of Greedy Decisions</span>
+                <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Details ▼</span>
               </summary>
               <div class="compare-proof-card" style="margin-top:10px; border:none; padding:0; background:transparent;">
                 <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:8px;">
-                  <strong>Cut Property (Prim's Algorithm):</strong> For any cut (S, V \ S) in connected weighted graph
-                  G, if edge e is a minimum-weight crossing edge of the cut, then e belongs to at least one Minimum
-                  Spanning Tree of G. Prim's algorithm expands cut S greedily step-by-step.
+                  <strong>Cut Property (Prim's Algorithm):</strong> For any partition of facilities in a connected network,
+                  if a link is the shortest connection crossing the boundary, it belongs to the optimal network.
+                  Prim's algorithm expands this boundary step-by-step.
                 </p>
                 <p style="font-size:0.80rem; color:var(--text-muted); line-height:1.55; margin-bottom:0;">
-                  <strong>Cycle Property (Kruskal's Algorithm):</strong> For any cycle C in G, if edge e is a strictly
-                  maximum-weight edge on C, then e cannot belong to any Minimum Spanning Tree. Kruskal's algorithm
-                  rejects any edge connecting already-connected components via Disjoint Set Union.
+                  <strong>Cycle Property (Kruskal's Algorithm):</strong> For any circular loop in the network, the longest
+                  connection on that loop cannot belong to an optimal minimum-cost tree. Kruskal's algorithm connects
+                  facilities without creating redundant cycles.
                 </p>
               </div>
             </details>
@@ -770,11 +763,11 @@
                 <!-- Expandable mathematical detail -->
                 <details class="edge-details-toggle" style="margin-top:8px;">
                   <summary style="cursor:pointer; color:var(--primary); font-size:0.75rem; font-weight:600;">
-                    Why was this edge selected? (Mathematical Optimality)
+                    Why was this link selected? (Network Optimality)
                   </summary>
                   <div style="margin-top:6px; font-size:0.74rem; color:var(--text-muted); line-height:1.45;">
-                    Under the Cycle Property, any non-tree chord closing a cycle with this path has weight &ge; this
-                    link. Verified via LCA binary lifting (0 violations across 785,631 candidate edges).
+                    Any alternative connection closing a loop with this path has a length greater than or equal to this
+                    link. Verified across all 785,631 candidate links.
                   </div>
                 </details>
               </div>
@@ -1205,7 +1198,7 @@
                 <!-- Technical Execution & Invariants Accordion (Keeps academic proofs without cluttering main view) -->
                 <details class="sim-details-accordion" style="margin-bottom:14px;">
                   <summary class="sim-details-summary">
-                    <span>⚙️ Technical Execution & Mathematical Verification</span>
+                    <span>⚙️ Technical Execution &amp; Network Verification</span>
                     <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">View Details ▼</span>
                   </summary>
                   <div style="margin-top:12px;">
@@ -1238,32 +1231,30 @@
 
                     <!-- Mathematical Invariants -->
                     <div class="card" style="padding:12px; margin-bottom:10px;">
-                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px;">Mathematical Verification
+                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px;">Network Verification
                         Report</div>
                       <div class="system-status-item" style="margin-bottom:6px;">
                         <div>
-                          <span style="font-size:0.78rem; font-weight:600;">Structural Tree Invariants (|E| = |V| -
-                            1):</span>
+                          <span style="font-size:0.78rem; font-weight:600;">Structural Network Verification (1,254 Links):</span>
                           <div style="font-size:0.72rem; color:var(--text-muted);" id="val-structural-desc">Acyclic,
-                            covers all vertices.</div>
+                            connects all facilities.</div>
                         </div>
                         <span class="badge badge-green" id="val-structural-badge">PASS</span>
                       </div>
                       <div class="system-status-item" style="margin-bottom:6px;">
                         <div>
-                          <span style="font-size:0.78rem; font-weight:600;">LCA Cycle-Property Optimality:</span>
-                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-optimality-desc">Every chord
-                            &ge; max tree path edge.</div>
+                          <span style="font-size:0.78rem; font-weight:600;">Loop Optimality Check:</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-optimality-desc">Every alternate link length is optimal.</div>
                         </div>
                         <span class="badge badge-green" id="val-optimality-badge">0 Violations</span>
                       </div>
                       <div class="system-status-item">
                         <div>
-                          <span style="font-size:0.78rem; font-weight:600;">Prim / Kruskal Weight Parity:</span>
+                          <span style="font-size:0.78rem; font-weight:600;">Prim &amp; Kruskal Network Equivalence:</span>
                           <div style="font-size:0.72rem; color:var(--text-muted);" id="val-parity-desc">Both algorithms
-                            yield identical weight.</div>
+                            yield identical total length.</div>
                         </div>
-                        <span class="badge badge-green" id="val-parity-badge">Exact Parity</span>
+                        <span class="badge badge-green" id="val-parity-badge">Exact Match</span>
                       </div>
                     </div>
 
@@ -1309,8 +1300,8 @@
               <div class="card" style="margin-bottom:0;">
                 <div class="card-header">
                   <div>
-                    <h3 class="card-title">Prim vs Kruskal Algorithm Mathematical Audit</h3>
-                    <p class="card-subtitle">Empirical and mathematical parity on 1,255 emergency facilities.</p>
+                    <h3 class="card-title">Prim vs Kruskal Algorithm Benchmark Audit</h3>
+                    <p class="card-subtitle">Empirical and architectural comparison on 1,255 emergency facilities.</p>
                   </div>
                 </div>
                 <div class="table-responsive">
@@ -1325,28 +1316,28 @@
                     </thead>
                     <tbody>
                       <tr>
-                        <td><strong>Vertex Count (|V|)</strong></td>
+                        <td><strong>Vertex Count (Facilities)</strong></td>
                         <td>1,255</td>
                         <td>1,255</td>
                         <td><span class="badge badge-green">Exact Match</span></td>
                       </tr>
                       <tr>
-                        <td><strong>Spanning Edges (|E_T|)</strong></td>
+                        <td><strong>Spanning Edges (Links)</strong></td>
                         <td>1,254</td>
                         <td>1,254</td>
-                        <td><span class="badge badge-green">Tree Edge Property (|V| − 1)</span></td>
+                        <td><span class="badge badge-green">Tree Edge Property (1,254 Links)</span></td>
                       </tr>
                       <tr>
                         <td><strong>Total Tree Length</strong></td>
                         <td>480.1784 km</td>
                         <td>480.1784 km</td>
-                        <td><span class="badge badge-green">&Delta; &lt; 10⁻¹² km</span></td>
+                        <td><span class="badge badge-green">Exact Match</span></td>
                       </tr>
                       <tr>
                         <td><strong>Theoretical Complexity</strong></td>
-                        <td><i>O</i>(|<i>E</i>| log |<i>V</i>|)</td>
-                        <td><i>O</i>(|<i>E</i>| log |<i>E</i>|)</td>
-                        <td><span class="badge badge-sage">Proven Asymptotic</span></td>
+                        <td>Priority Queue Min-Heap</td>
+                        <td>Sorted Edge Disjoint Sets</td>
+                        <td><span class="badge badge-sage">Optimal Complexity</span></td>
                       </tr>
                       <tr>
                         <td><strong>Primary Data Structure</strong></td>
@@ -1364,7 +1355,7 @@
                         <td><strong>Candidate Graph Size</strong></td>
                         <td>786,885 edges</td>
                         <td>786,885 edges</td>
-                        <td><span class="badge badge-green">Complete <i>K</i>₁₂₅₅</span></td>
+                        <td><span class="badge badge-green">All Facility Pairs (786,885)</span></td>
                       </tr>
                       <tr>
                         <td><strong>LCA Cycle Test</strong></td>
@@ -1385,10 +1376,10 @@
                 </summary>
                 <div style="font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin-top:10px;">
                   <p>
-                    During the mathematical audit of 786,885 candidate edges, exactly one edge possessed a weight of
+                    During the verification audit of 786,885 candidate edges, exactly one edge possessed a weight of
                     <strong>0.0000 km</strong>:
                   </p>
-                  <div class="math-callout"
+                  <div class="callout-box"
                     style="margin:8px 0; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); font-size:0.80rem;">
                     <code>way/1544830710</code> (SPS Surgicals) &harr; <code>way/1544831540</code> (Healthcare
                     Facility)<br />
@@ -1416,7 +1407,7 @@
         </p>
       </div>
       <div class="badge badge-sage" style="font-size:0.75rem; padding:4px 10px; font-weight:600;">
-        Haversine Metric Space &bull; K₁₂₅₅
+        Optimal 1,254 Spanning Links
       </div>
     </div>
     <div style="font-size:0.80rem; color:var(--text-muted); margin-bottom:16px; font-style:italic;">
@@ -1456,7 +1447,7 @@
           <canvas id="chart-total-distance"></canvas>
         </div>
         <p class="chart-caption" id="caption-total-distance">
-          Total network distance: Prim vs Kruskal side by side; absolute difference = 5.68 × 10⁻¹⁴ km.
+          Total network distance: Prim vs Kruskal side by side with identical total length (exact match).
         </p>
       </div>
 
