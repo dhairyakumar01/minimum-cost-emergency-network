@@ -6,6 +6,7 @@ dataset audit, geocoding candidates, benchmarks, and methodology manifest.
 """
 import io
 import json
+import os
 from flask import Blueprint, jsonify, request, Response
 
 from backend.services.audit_service import audit_facilities_dataset
@@ -136,6 +137,11 @@ def create_scenario():
     if algorithm not in ("auto", "prim", "kruskal"):
         algorithm = "auto"
 
+    is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+    # In serverless environments, background threads freeze when HTTP responses return.
+    # Running synchronously ensures 100% CPU allocation and rapid 2-3s completion.
+    use_async = not is_serverless
+
     # Trigger scenario
     sc_id = create_and_run_scenario(
         incident_lat=lat,
@@ -145,17 +151,20 @@ def create_scenario():
         radius_km=radius_km,
         optimization_mode=opt_mode,
         k_param=k_param,
-        async_mode=True,
+        async_mode=use_async,
         incident_category=incident_category,
         bypass_cache=bypass_cache,
         algorithm=algorithm,
     )
 
+    init_status = get_scenario_status(sc_id)
+    cur_status = init_status["status"] if init_status else "PENDING"
+
     return jsonify({
         "success": True,
         "data": {
             "scenario_id": sc_id,
-            "status": "PENDING",
+            "status": cur_status,
             "message": "Scenario initialized and running in execution pipeline.",
         }
     }), 202
