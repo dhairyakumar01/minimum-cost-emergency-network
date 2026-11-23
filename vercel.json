@@ -7,35 +7,31 @@
     },
     {
       "source": "/assets/(.*)",
-      "destination": "/frontend/assets/$1"
-    },
-    {
-      "source": "/flutter/(.*)",
-      "destination": "/flutter_app/build/web/$1"
+      "destination": "/api/index.py?__path__=/assets/$1"
     },
     {
       "source": "/app",
-      "destination": "/frontend/app/index.html"
+      "destination": "/api/index.py?__path__=/app"
     },
     {
       "source": "/app/",
-      "destination": "/frontend/app/index.html"
+      "destination": "/api/index.py?__path__=/app/"
     },
     {
       "source": "/app/(.*)",
-      "destination": "/frontend/app/$1"
+      "destination": "/api/index.py?__path__=/app/$1"
     },
     {
       "source": "/favicon.ico",
-      "destination": "/frontend/favicon.ico"
+      "destination": "/api/index.py?__path__=/favicon.ico"
     },
     {
       "source": "/",
-      "destination": "/frontend/index.html"
+      "destination": "/api/index.py?__path__=/"
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/$1"
+      "destination": "/api/index.py?__path__=/$1"
     }
   ]
 }

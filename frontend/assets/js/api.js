@@ -4,7 +4,13 @@
  */
 
 const API = (function () {
-  const BASE_URL = window.location.origin;
+  const BASE_URL = (function () {
+    const origin = window.location.origin;
+    if (!origin || origin === "null" || origin.startsWith("file:")) {
+      return "https://minimum-cost-emergency-network.vercel.app";
+    }
+    return origin;
+  })();
 
   /**
    * Universal fetch wrapper with timeout and standard envelope parsing.

@@ -63,6 +63,25 @@ def create_app(config: Config = None) -> Flask:
         assets_dir = frontend_dir / "assets"
         return send_from_directory(str(assets_dir), subpath)
 
+    @app.route("/frontend/assets/<path:subpath>", methods=["GET"])
+    def serve_frontend_assets(subpath):
+        """Serve static assets if requested with /frontend/ prefix."""
+        assets_dir = frontend_dir / "assets"
+        return send_from_directory(str(assets_dir), subpath)
+
+    @app.route("/frontend/index.html", methods=["GET"])
+    def serve_frontend_index():
+        """Serve index.html if requested with /frontend/ prefix."""
+        return send_from_directory(str(frontend_dir), "index.html")
+
+    @app.route("/favicon.ico", methods=["GET"])
+    def serve_favicon():
+        """Return favicon or 204 No Content."""
+        favicon_file = frontend_dir / "favicon.ico"
+        if favicon_file.exists():
+            return send_from_directory(str(frontend_dir), "favicon.ico")
+        return ("", 204)
+
     # Flutter Web Application serving routes
     flutter_dir = frontend_dir / "app"
 
@@ -92,6 +111,10 @@ def create_app(config: Config = None) -> Flask:
                     "message": f"Endpoint '{request.path}' was not found on this server.",
                 },
             }), 404
+        # If requested path exists as a static file in frontend, serve it
+        possible_file = frontend_dir / request.path.lstrip("/")
+        if possible_file.is_file():
+            return send_from_directory(str(frontend_dir), request.path.lstrip("/"))
         # Fallback to SPA index for non-API frontend navigation
         if frontend_dir.exists() and (frontend_dir / "index.html").exists():
             return send_from_directory(str(frontend_dir), "index.html")

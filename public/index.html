@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimum-Cost Emergency Communication Network | Bengaluru</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="assets/vendor/MarkerCluster.css" />
+  <link rel="stylesheet" href="assets/vendor/MarkerCluster.Default.css" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- Chart.js (v4 UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Global Loading Indicator -->
+  <div id="global-loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Loading Emergency Network...</div>
+    <div class="loader-subtext">Initializing system state</div>
+  </div>
+
+  <div id="app-container">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+      <div class="brand-header">
+        <h1 class="brand-title">🚨 Bengaluru MST</h1>
+        <p class="brand-subtitle">Emergency Network Platform</p>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a class="nav-link active" data-target="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="facilities-map">
+            <span class="nav-icon">🗺️</span>
+            <span>Facilities Map</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="mst-network">
+            <span class="nav-icon">🕸️</span>
+            <span>MST Network</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="simulation">
+            <span class="nav-icon">🚨</span>
+            <span>Emergency Simulation</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="results-stats">
+            <span class="nav-icon">📈</span>
+            <span>Results & Statistics</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="status-row">
+          <span class="status-indicator"></span>
+          <span>System Operational</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- Top Application Bar -->
+      <header class="top-bar">
+        <div class="page-header-title" id="current-page-title">
+          <span style="margin-right:8px;">📊</span> Executive Dashboard
+        </div>
+        <div class="header-badges">
+          <span id="backend-status-pill" style="display:none;" aria-hidden="true"></span>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Error Banner (Hidden by Default) -->
+        <div id="api-error-banner" class="alert-banner alert-danger" style="display:none;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">⚠️</span>
+            <span id="api-error-message">Unable to reach backend service.</span>
+          </div>
+          <button class="btn btn-outline btn-sm btn-retry-connection" style="border-color:#f87171; color:#991b1b;">
+            🔄 Retry Connection
+          </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 1: DASHBOARD (Operational Overview) -->
+        <!-- ================================================================= -->
+        <section id="section-dashboard" class="view-section">
+          <!-- Executive Header -->
+          <div class="dashboard-hero" style="margin-bottom:18px;">
+            <div>
+              <h2 class="dash-title">Minimum-Cost Emergency Communication Network</h2>
+            </div>
+          </div>
+
+          <!-- 4 Primary Key Metric Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label"><span>🏥</span> Total Registered Facilities</div>
+              <div class="metric-value" id="metric-total-facilities">1,255</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label"><span>🏢</span> Facility Composition</div>
+              <div class="metric-composition-inline">
+                <span title="Hospitals"><span style="color:#dc2626;">●</span> <strong
+                    id="metric-hospitals">1,097</strong> <small>Hosp</small></span>
+                <span title="Police"><span style="color:#1e3a8a;">●</span> <strong id="metric-police">138</strong>
+                  <small>Pol</small></span>
+                <span title="Fire"><span style="color:#ea580c;">●</span> <strong id="metric-fire">20</strong>
+                  <small>Fire</small></span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label"><span>🔗</span> Total Network Connections</div>
+              <div class="metric-value" id="metric-mst-connections">1,254</div>
+            </div>
+            <div class="metric-card highlight-card">
+              <div class="metric-label"><span>📏</span> Total Network Length</div>
+              <div class="metric-value" id="metric-mst-length">480.1784 km</div>
+            </div>
+          </div>
+
+          <!-- Geographic Network Overview (Full Width) -->
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Geographic Network Overview</h3>
+                <p class="card-subtitle">Spatial distribution of emergency facilities across Bengaluru</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')">
+                Open Full Facilities Map &rarr;
+              </button>
+            </div>
+            <div class="overview-map-container" style="height:420px;">
+              <div id="dashboard-overview-map" class="overview-map-el"></div>
+            </div>
+          </div>
+
+          <!-- Compact Facility Distribution Summary -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Facility Distribution</h3>
+                <p class="card-subtitle">Municipal first-response facilities registered across Bengaluru</p>
+              </div>
+            </div>
+
+            <div class="agency-dist-grid">
+              <div class="agency-dist-box box-hospital">
+                <div class="dist-box-title">Hospitals &amp; Healthcare Facilities</div>
+                <div class="dist-box-val">1,097 <span
+                    style="font-size:0.85rem; color:#dc2626; font-weight:600;">(87.4%)</span></div>
+                <div class="dist-box-meta">Tertiary hospitals, government medical colleges, trauma care, and community
+                  health centers</div>
+              </div>
+              <div class="agency-dist-box box-police">
+                <div class="dist-box-title">Police Stations &amp; Law Enforcement</div>
+                <div class="dist-box-val">138 <span
+                    style="font-size:0.85rem; color:#1e3a8a; font-weight:600;">(11.0%)</span></div>
+                <div class="dist-box-meta">Bengaluru City Police jurisdictional law enforcement stations and traffic
+                  command divisions</div>
+              </div>
+              <div class="agency-dist-box box-fire">
+                <div class="dist-box-title">Fire &amp; Emergency Response Stations</div>
+                <div class="dist-box-val">20 <span
+                    style="font-size:0.85rem; color:#ea580c; font-weight:600;">(1.6%)</span></div>
+                <div class="dist-box-meta">Karnataka State Fire &amp; Emergency Services hazmat, rescue, and structural
+                  fire stations</div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+              <div>
+                <div
+                  style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Healthcare (1,097)</span>
+                  <span id="pct-hospitals">87.4%</span>
+                </div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-hospitals" style="height:100%; width:87.4%; background:#dc2626;"></div>
+                </div>
+              </div>
+              <div>
+                <div
+                  style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Police (138)</span>
+                  <span id="pct-police">11.0%</span>
+                </div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-police" style="height:100%; width:11.0%; background:#1e3a8a;"></div>
+                </div>
+              </div>
+              <div>
+                <div
+                  style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                  <span>Fire Rescue (20)</span>
+                  <span id="pct-fire">1.6%</span>
+                </div>
+                <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                  <div id="bar-fire" style="height:100%; width:1.6%; background:#ea580c;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 2: FACILITIES MAP (Map-First GIS Experience) -->
+        <!-- ================================================================= -->
+        <section id="section-facilities-map" class="view-section" style="display:none;">
+          <!-- Compact GIS Toolbar -->
+          <div class="gis-toolbar">
+            <div class="gis-toolbar-left">
+              <div class="filter-group">
+                <button class="filter-btn active" data-agency="all">All (1,255)</button>
+                <button class="filter-btn" data-agency="hospital">🔴 Hospitals (1,097)</button>
+                <button class="filter-btn" data-agency="police_station">🔵 Police (138)</button>
+                <button class="filter-btn" data-agency="fire_station">🟠 Fire (20)</button>
+              </div>
+              <div class="search-input-wrap">
+                <span class="search-icon-placeholder">🔍</span>
+                <input type="text" id="facility-map-search" class="search-input"
+                  placeholder="Search facility name or ID..." />
+              </div>
+              <span id="rendered-facilities-count" class="badge badge-gray">
+                Displaying 1,255 facilities
+              </span>
+            </div>
+
+            <div class="gis-toolbar-right">
+              <button id="btn-toggle-incident-mode" class="btn btn-outline"
+                style="border-color:#dc2626; color:#dc2626;">
+                📍 Place Incident Pin
+              </button>
+            </div>
+          </div>
+
+          <!-- Incident Selection Drawer / Bar -->
+          <div class="incident-bar">
+            <div class="incident-bar-top">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="incident-status-pill" class="badge badge-gray">No incident placed</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button id="btn-confirm-incident" class="btn btn-success btn-sm" style="display:none;">
+                  ✓ Confirm Pin
+                </button>
+                <button id="btn-clear-incident" class="btn btn-outline btn-sm" style="display:none;">
+                  ✕ Clear Pin
+                </button>
+                <button id="btn-send-to-sim" class="btn btn-primary btn-sm" style="display:none;">
+                  🚨 Send to Simulation &rarr;
+                </button>
+              </div>
+            </div>
+
+            <div class="incident-coords-row" id="incident-coords-bar"
+              style="display:none; flex-wrap:wrap; gap:10px; align-items:center;">
+              <div class="coord-field" style="flex:1; min-width:240px;">
+                <label>Find Landmark / Incident Address:</label>
+                <input type="text" id="incident-location-search"
+                  placeholder="Search landmark (e.g. Majestic, Indiranagar)..."
+                  style="width:100%; padding:5px 9px; border:1px solid var(--border-color); border-radius:4px; font-size:0.78rem;" />
+              </div>
+              <div class="landmarks-list" style="flex:2; min-width:320px;">
+                <span class="landmark-label">Presets:</span>
+                <button class="landmark-pill" data-lat="12.9781" data-lon="77.5696"
+                  data-name="Majestic (KSR)">Majestic</button>
+                <button class="landmark-pill" data-lat="12.9298" data-lon="77.5835"
+                  data-name="Jayanagar 4th Block">Jayanagar</button>
+                <button class="landmark-pill" data-lat="12.9719" data-lon="77.6412"
+                  data-name="Indiranagar 100ft Rd">Indiranagar</button>
+                <button class="landmark-pill" data-lat="12.9155" data-lon="77.5736"
+                  data-name="Banashankari Metro">Banashankari</button>
+                <button class="landmark-pill" data-lat="12.9866" data-lon="77.7348"
+                  data-name="Whitefield ITPL">Whitefield</button>
+                <button class="landmark-pill" data-lat="12.9507" data-lon="77.5848"
+                  data-name="Lalbagh Botanical Garden">Lalbagh</button>
+              </div>
+              <details class="coord-adv-details" style="width:100%;">
+                <summary>Direct Coordinates Entry (Advanced Option)</summary>
+                <div style="display:flex; gap:12px; margin-top:4px;">
+                  <div class="coord-field">
+                    <label>Latitude (°N):</label>
+                    <input type="number" id="incident-lat-input" step="0.00001" placeholder="12.9716"
+                      style="padding:4px 8px; font-size:0.78rem;" />
+                  </div>
+                  <div class="coord-field">
+                    <label>Longitude (°E):</label>
+                    <input type="number" id="incident-lon-input" step="0.00001" placeholder="77.5946"
+                      style="padding:4px 8px; font-size:0.78rem;" />
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div id="map-container">
+            <div id="leaflet-map"></div>
+
+            <!-- Floating Map Controls Bar -->
+            <div class="map-floating-controls">
+              <button class="map-control-btn" id="btn-fac-map-fullscreen"
+                onclick="App.toggleMapFullscreen('map-container', 'facilities')" title="Toggle Fullscreen">⛶</button>
+              <button class="map-control-btn" id="btn-fac-map-fit" onclick="App.fitFacilitiesMapBounds()"
+                title="Fit Bounds">⊡</button>
+              <button class="map-control-btn" id="btn-fac-map-reset" onclick="App.resetFacilitiesMapView()"
+                title="Reset View">↺</button>
+            </div>
+
+            <!-- Floating Facility Details Panel -->
+            <div id="selected-facility-card" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                <span id="sel-fac-agency"
+                  style="font-size:0.72rem; font-weight:700; text-transform:uppercase;">Agency</span>
+                <button class="btn-icon" id="btn-close-facility-card">✕</button>
+              </div>
+              <h4 id="sel-fac-name"
+                style="font-size:0.96rem; font-weight:700; color:var(--text-main); margin-bottom:4px;">Facility Name
+              </h4>
+              <div style="font-size:0.76rem; color:var(--text-muted); line-height:1.4;">
+                ID: <code id="sel-fac-id">ID</code><br />
+                Coordinates: <span id="sel-fac-coords" style="font-family:var(--font-mono);">0.0, 0.0</span>
+              </div>
+              <div id="sel-fac-distance-box"
+                style="display:none; margin-top:10px; font-size:0.80rem; font-weight:600; color:#1d4ed8; background:#eff6ff; padding:6px 10px; border-radius:4px; border:1px solid #bfdbfe;">
+                📏 Haversine Straight-Line Distance: <span id="sel-fac-dist-val">0.00 km</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 3: MST NETWORK (Algorithm Construction & Verification) -->
+        <!-- ================================================================= -->
+        <section id="section-mst-network" class="view-section" style="display:none;">
+          <!-- Top Sub-Navigation Tabs -->
+          <div class="mst-subnav-bar">
+            <div class="mst-tab-group">
+              <button class="mst-tab-btn active" id="tab-mst-sim" data-target="mst-view-sim">
+                ⚡ Construction Simulator
+              </button>
+              <button class="mst-tab-btn" id="tab-mst-static" data-target="mst-view-static">
+                🌐 Static Spanning Tree (1,254 Links)
+              </button>
+            </div>
+          </div>
+
+          <!-- SUBVIEW 1: ALGORITHM CONSTRUCTION SIMULATOR -->
+          <div id="mst-view-sim" class="mst-subview">
+            <!-- Controls & Playback Toolbar -->
+            <div class="sim-controls-panel">
+              <div class="sim-toolbar-row">
+                <!-- Graph Context Selector -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label">Graph Context:</label>
+                  <div class="sim-btn-toggle" id="sim-context-toggle">
+                    <button class="sim-btn active" id="btn-sim-ctx-global" data-context="global">
+                      Global Facility Graph (1,255 Facilities)
+                    </button>
+                    <button class="sim-btn" id="btn-sim-ctx-incident" data-context="incident">
+                      Incident-Specific Graph
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Algorithm Selector -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label">Algorithm:</label>
+                  <div class="sim-btn-toggle" id="sim-algo-toggle">
+                    <button class="sim-btn active" id="btn-sim-algo-kruskal" data-algo="kruskal">
+                      Kruskal's Algorithm
+                    </button>
+                    <button class="sim-btn" id="btn-sim-algo-prim" data-algo="prim">
+                      Prim's Algorithm
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Playback Speed -->
+                <div class="sim-ctrl-group">
+                  <label class="sim-ctrl-label" for="sim-speed-select">Speed:</label>
+                  <select id="sim-speed-select" class="sim-select">
+                    <option value="600">Slow (600 ms)</option>
+                    <option value="200" selected>Normal (200 ms)</option>
+                    <option value="40">Fast (40 ms)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Incident 5km Banner (Active when Incident-Specific Graph is selected) -->
+              <div id="sim-incident-bar" style="display:none; margin-top:10px; padding:8px 14px; background:linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); border:1px solid #bae6fd; border-radius:var(--radius-md); font-size:0.84rem; color:#0f172a; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.1rem;">🚨</span>
+                  <span><strong>5.0 km Incident Graph:</strong> <span id="sim-incident-location-text">Majestic (12.9781°N, 77.5696°E)</span> • <span id="sim-incident-facility-count" style="font-weight:600; color:#1e3a8a;">400</span> facilities in 5 km radius</span>
+                </div>
+                <div style="font-size:0.78rem; color:#475569; background:#ffffff; padding:3px 8px; border-radius:4px; border:1px solid #cbd5e1;">
+                  💡 <em>Click anywhere on the map to relocate incident origin</em>
+                </div>
+              </div>
+
+              <!-- Playback Controls & Scrubber -->
+              <div class="sim-playback-row">
+                <div class="sim-playback-buttons">
+                  <button class="btn btn-outline btn-sm" id="btn-sim-restart" title="Restart to Step 0">
+                    ⏮ Restart
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btn-sim-prev" title="Previous Step">
+                    ◀ Prev
+                  </button>
+                  <button class="btn btn-primary btn-sm" id="btn-sim-play" title="Play or Pause">
+                    ▶ Play
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btn-sim-next" title="Next Step">
+                    Next ▶
+                  </button>
+                </div>
+
+                <div class="sim-scrubber-wrap">
+                  <input type="range" id="sim-scrubber" class="sim-slider" min="0" max="0" value="0" />
+                  <div class="sim-step-counter">
+                    Event <strong id="sim-step-num">0</strong> of <strong id="sim-total-steps">0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Telemetry Strip -->
+            <div class="sim-telemetry-strip">
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">State</span>
+                <span class="sim-telem-val badge badge-gray" id="sim-telem-status">IDLE</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Tree Weight</span>
+                <span class="sim-telem-val highlight" id="sim-telem-weight">0.0000 km</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Accepted Tree Edges</span>
+                <span class="sim-telem-val" id="sim-telem-edges">0 / 0</span>
+              </div>
+              <div class="sim-telem-card">
+                <span class="sim-telem-label">Edges Remaining</span>
+                <span class="sim-telem-val" id="sim-telem-remaining">0</span>
+              </div>
+              <div class="sim-telem-card" id="sim-telem-component-card">
+                <span class="sim-telem-label" id="sim-telem-comp-label">Components</span>
+                <span class="sim-telem-val" id="sim-telem-components">1,255</span>
+              </div>
+            </div>
+
+            <!-- Visualizer Map & Step Explanation Panel -->
+            <div class="sim-visualizer-grid">
+              <div class="sim-map-container" id="sim-map-container-el"
+                style="height:560px; position:relative; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color);">
+                <div id="sim-leaflet-map" style="height:100%; width:100%;"></div>
+
+                <!-- Floating Map Controls Bar -->
+                <div class="map-floating-controls">
+                  <button class="map-control-btn" id="btn-sim-map-fullscreen"
+                    onclick="App.toggleMapFullscreen('sim-map-container-el', 'sim')"
+                    title="Toggle Fullscreen">⛶</button>
+                  <button class="map-control-btn" id="btn-sim-map-fit" onclick="App.fitSimulatorMapBounds()"
+                    title="Fit Bounds">⊡</button>
+                  <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimulatorMapView()"
+                    title="Reset View">↺</button>
+                </div>
+
+                <div class="sim-legend-overlay">
+                  <div class="legend-item"><span class="legend-line line-candidate"></span> Current Evaluated Edge</div>
+                  <div class="legend-item"><span class="legend-line line-accepted"></span> Accepted Tree Edge</div>
+                  <div class="legend-item"><span class="legend-line line-rejected"></span> Cycle / Discarded</div>
+                </div>
+              </div>
+
+              <!-- Dedicated Step Explanation Panel -->
+              <div class="sim-step-panel" id="sim-step-panel">
+                <div class="step-panel-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="step-panel-title">Current Step Explanation</span>
+                    <span class="badge badge-gray" id="sim-step-type-badge">Step 0</span>
+                  </div>
+                  <span class="badge" id="sim-step-decision-badge">PENDING</span>
+                </div>
+
+                <div class="step-panel-body">
+                  <div class="step-edge-endpoints">
+                    <div class="step-endpoint">
+                      <span class="step-ep-role">Endpoint U</span>
+                      <div class="step-ep-name" id="sim-step-u-name">—</div>
+                      <div class="step-ep-id" id="sim-step-u-id">—</div>
+                    </div>
+                    <div class="step-edge-link" id="sim-step-link-arrow">⟷</div>
+                    <div class="step-endpoint">
+                      <span class="step-ep-role">Endpoint V</span>
+                      <div class="step-ep-name" id="sim-step-v-name">—</div>
+                      <div class="step-ep-id" id="sim-step-v-id">—</div>
+                    </div>
+                  </div>
+
+                  <div class="step-metrics-table">
+                    <div class="step-metric-item">
+                      <span class="step-metric-key">Edge Metric (Weight):</span>
+                      <strong class="step-metric-val" id="sim-step-weight">—</strong>
+                    </div>
+                    <div class="step-metric-item">
+                      <span class="step-metric-key">Selection Principle:</span>
+                      <span class="step-metric-val" id="sim-step-principle">Greedy Optimization</span>
+                    </div>
+                  </div>
+
+                  <div class="step-rationale-box" id="sim-step-rationale-box">
+                    <div class="rationale-header">
+                      <span class="rationale-icon">📐</span>
+                      <strong>Algorithmic Decision Rationale:</strong>
+                    </div>
+                    <p class="rationale-text" id="sim-step-rationale">
+                      Select an algorithm and click Play or Step Forward to observe the step-by-step construction of the
+                      Minimum Spanning Tree.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBVIEW 2: Placeholder for DOM compatibility -->
+          <div id="mst-view-compare" style="display:none;" aria-hidden="true"></div>
+
+          <!-- SUBVIEW 3: STATIC FULL SPANNING TREE (Retained for 100% Backward Compatibility) -->
+          <div id="mst-view-static" class="mst-subview" style="display:none;">
+            <!-- Controls Bar -->
+            <div class="mst-controls-row">
+              <div class="algo-toggle-group">
+                <button class="algo-btn active" id="btn-mst-kruskal" data-algo="kruskal">
+                  Kruskal's Algorithm
+                </button>
+                <button class="algo-btn" id="btn-mst-prim" data-algo="prim">
+                  Prim's Algorithm
+                </button>
+              </div>
+
+              <div class="mst-stats-pills">
+                <span class="mst-pill"><strong>Vertices:</strong> 1,255</span>
+                <span class="mst-pill"><strong>Edges:</strong> 1,254</span>
+                <span class="mst-pill highlight"><strong>Total Tree Length:</strong> 480.1784 km</span>
+              </div>
+            </div>
+
+            <!-- MST Leaflet Map Container -->
+            <div id="mst-map-container"
+              style="height:calc(100vh - 220px); min-height:540px; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-color); position:relative;">
+              <div id="mst-leaflet-map" style="height:100%; width:100%;"></div>
+
+              <!-- Floating Map Controls Bar -->
+              <div class="map-floating-controls">
+                <button class="map-control-btn" id="btn-mst-map-fullscreen"
+                  onclick="App.toggleMapFullscreen('mst-map-container', 'mst')" title="Toggle Fullscreen">⛶</button>
+                <button class="map-control-btn" id="btn-mst-map-fit" onclick="App.fitMstMapBounds()"
+                  title="Fit Bounds">⊡</button>
+                <button class="map-control-btn" id="btn-mst-map-reset" onclick="App.resetMstMapView()"
+                  title="Reset View">↺</button>
+              </div>
+
+              <!-- Floating Edge Inspector Panel -->
+              <div id="mst-edge-detail-card" class="edge-inspector-card" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="edge-badge">Selected Tree Link</span>
+                  <button class="btn-icon" id="btn-close-edge-card">✕</button>
+                </div>
+                <div class="edge-endpoints">
+                  <div class="endpoint">
+                    <span class="ep-label">Endpoint U</span>
+                    <div class="ep-name" id="edge-u-name">Facility U</div>
+                    <div class="ep-id" id="edge-u-id">ID</div>
+                  </div>
+                  <div class="edge-arrow">⟷</div>
+                  <div class="endpoint">
+                    <span class="ep-label">Endpoint V</span>
+                    <div class="ep-name" id="edge-v-name">Facility V</div>
+                    <div class="ep-id" id="edge-v-id">ID</div>
+                  </div>
+                </div>
+                <div class="edge-metrics-row">
+                  <div><strong>Weight (Haversine):</strong> <span id="edge-weight"
+                      style="font-family:var(--font-mono); font-weight:700;">0.0000 km</span></div>
+                  <div><strong>Algorithm:</strong> <span id="edge-algo">Kruskal</span></div>
+                </div>
+
+                <!-- Operational explanation -->
+                <div class="edge-rationale" id="edge-rationale">
+                  Connects two separate components with minimal weight without creating a cycle.
+                </div>
+
+                <!-- Expandable mathematical detail -->
+                <details class="edge-details-toggle" style="margin-top:8px;">
+                  <summary style="cursor:pointer; color:var(--primary); font-size:0.75rem; font-weight:600;">
+                    Why was this link selected? (Network Optimality)
+                  </summary>
+                  <div style="margin-top:6px; font-size:0.74rem; color:var(--text-muted); line-height:1.45;">
+                    Any alternative connection closing a loop with this path has a length greater than or equal to this
+                    link. Verified across all 785,631 candidate links.
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 4: EMERGENCY SIMULATION (Simplified Dispatch Interface) -->
+        <!-- ================================================================= -->
+        <section id="section-simulation" class="view-section" style="display:none;">
+          <div class="simulation-layout">
+
+            <!-- Left Column: Clean Configuration Panel -->
+            <div class="sim-workflow-column">
+              <div class="sim-config-panel">
+                <div class="sim-config-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.15rem;">🚨</span>
+                    <h3 style="font-size:1.0rem; font-weight:700; margin:0; color:#0f172a;">Emergency Dispatch Setup
+                    </h3>
+                  </div>
+                  <span class="badge badge-blue">Dispatch Parameters</span>
+                </div>
+
+                <!-- 1. Incident Location -->
+                <div class="sim-config-section" id="sim-step-1">
+                  <div class="sim-config-label">
+                    <span>1. Incident Location</span>
+                    <button class="btn btn-outline btn-sm" onclick="Navigation.navigateTo('facilities-map')"
+                      style="font-size:0.75rem; padding:3px 10px; font-weight:600;">
+                      📍 Pick on Map
+                    </button>
+                  </div>
+                  <div class="sim-incident-box">
+                    <div class="sim-incident-info">
+                      <span id="sim-incident-coords"
+                        style="font-family:var(--font-mono); font-size:0.86rem; font-weight:700; color:#0f172a;">
+                        12.97810° N, 77.56960° E (Majestic / KSR Railway Station)
+                      </span>
+                      <span id="sim-incident-badge" class="badge badge-blue">Preset Location</span>
+                    </div>
+                  </div>
+
+                  <div style="margin-top:8px;">
+                    <div class="landmarks-list">
+                      <span class="landmark-label">Presets:</span>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9781, 77.5696, 'Majestic (KSR Railway Station)')">Majestic</button>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9298, 77.5835, 'Jayanagar 4th Block')">Jayanagar</button>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9719, 77.6412, 'Indiranagar 100ft Road')">Indiranagar</button>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9155, 77.5736, 'Banashankari Metro')">Banashankari</button>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9866, 77.7348, 'Whitefield ITPL')">Whitefield</button>
+                      <button class="landmark-pill"
+                        onclick="App.setIncidentLocation(12.9507, 77.5848, 'Lalbagh Botanical Garden')">Lalbagh</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Emergency Category -->
+                <div class="sim-config-section" id="sim-step-2">
+                  <div class="sim-config-label">2. Emergency Category</div>
+                  <div class="category-cards-grid">
+                    <div class="category-card active" data-category="medical" onclick="App.selectCategory('medical')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚑</span>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="cat-name">Medical</div>
+                      <div class="cat-desc">Cardiac, trauma, triage</div>
+                    </div>
+                    <div class="category-card" data-category="fire" onclick="App.selectCategory('fire')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚒</span>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="cat-name">Fire / HazMat</div>
+                      <div class="cat-desc">Blaze, chemical spill</div>
+                    </div>
+                    <div class="category-card" data-category="police" onclick="App.selectCategory('police')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚓</span>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="cat-name">Public Safety</div>
+                      <div class="cat-desc">Security response</div>
+                    </div>
+                    <div class="category-card" data-category="traffic" onclick="App.selectCategory('traffic')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <span class="cat-icon">🚗</span>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="cat-name">Road Traffic</div>
+                      <div class="cat-desc">Arterial crash rescue</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Response Agency / Vehicle -->
+                <div class="sim-config-section" id="sim-step-3">
+                  <div class="sim-config-label">3. Response Agency / Vehicle</div>
+                  <div class="agency-selection-grid">
+                    <div class="agency-card active" id="sim-agency-hospital" onclick="App.selectAgency('hospital')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-red">Healthcare & Ambulance</span>
+                        </div>
+                        <div class="agency-vehicle">Ambulance (Force Traveller)</div>
+                        <div class="agency-meta">1,097 Facilities</div>
+                      </div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹12.50 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                    </div>
+
+                    <div class="agency-card" id="sim-agency-police" onclick="App.selectAgency('police_station')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-blue">Law Enforcement</span>
+                        </div>
+                        <div class="agency-vehicle">Police Patrol (Bolero)</div>
+                        <div class="agency-meta">138 Stations</div>
+                      </div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹6.25 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                    </div>
+
+                    <div class="agency-card" id="sim-agency-fire" onclick="App.selectAgency('fire_station')">
+                      <div>
+                        <div class="agency-card-top">
+                          <span class="agency-pill pill-orange">Fire & Rescue</span>
+                        </div>
+                        <div class="agency-vehicle">Fire Engine (Heavy Water Tender)</div>
+                        <div class="agency-meta">20 Stations</div>
+                      </div>
+                      <div style="text-align:right;">
+                        <div class="agency-rate">₹18.00 / km</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Search Radius -->
+                <div class="sim-config-section" id="sim-step-4">
+                  <div class="sim-config-label">4. Search Radius</div>
+                  <div class="radius-control-box">
+                    <div class="radius-slider-wrap">
+                      <input type="range" id="sim-radius-slider" min="2" max="15" step="0.5" value="5.0"
+                        oninput="App.onRadiusChange(this.value)" />
+                      <div class="radius-ticks">
+                        <span>2 km</span>
+                        <span>5 km</span>
+                        <span>8 km</span>
+                        <span>12 km</span>
+                        <span>15 km</span>
+                      </div>
+                    </div>
+                    <div class="radius-stat-box">
+                      <div class="radius-val" id="sim-radius-display">5.0 km</div>
+                      <div class="radius-sub" id="sim-candidate-count">Evaluating...</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Optimization Mode -->
+                <div class="sim-config-section" id="sim-step-5">
+                  <div class="sim-config-label">5. Optimization Mode</div>
+                  <div class="mode-cards-grid">
+                    <div class="mode-card active" data-mode="time" onclick="App.selectMode('time')">
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">⏱️</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="mode-title">Mode 1 — Minimum Time</div>
+                    </div>
+                    <div class="mode-card" data-mode="distance" onclick="App.selectMode('distance')">
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">📏</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="mode-title">Mode 2 — Minimum Road Distance</div>
+                    </div>
+                    <div class="mode-card" data-mode="compromise" onclick="App.selectMode('compromise')">
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <div class="mode-icon">⚖️</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="mode-title">Mode 3 — Overall Optimization</div>
+                    </div>
+                  </div>
+
+                  <!-- Compromise Slider (shown only when Mode 3 is active) -->
+                  <div id="compromise-slider-wrap"
+                    style="display:none; margin-top:8px; padding:8px 12px; background:var(--bg-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span style="font-size:0.78rem; font-weight:700; color:var(--text-main);">Optimization
+                        Balance:</span>
+                      <span id="compromise-k-display"
+                        style="font-family:var(--font-mono); font-weight:700; color:var(--primary); font-size:0.80rem;">Balanced
+                        (50% Time / 50% Distance)</span>
+                    </div>
+                    <input type="range" id="sim-compromise-k-slider" min="0" max="10" step="1" value="5"
+                      oninput="App.onCompromiseKChange(this.value)" style="width:100%; accent-color:var(--primary);" />
+                    <div
+                      style="display:flex; justify-content:space-between; font-size:0.70rem; color:var(--text-muted); margin-top:2px;">
+                      <span>Distance Priority</span>
+                      <span>Balanced</span>
+                      <span>Time Priority</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. Algorithm Selection -->
+                <div class="sim-config-section" id="sim-step-6">
+                  <div class="sim-config-label">6. Algorithm Selection</div>
+                  <div class="algo-cards-grid">
+                    <div class="algo-card active" data-algo="auto" onclick="App.selectAlgorithm('auto')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🤖 Automatic Selection</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Automatically selects optimal algorithm based on candidate network density
+                      </div>
+                    </div>
+                    <div class="algo-card" data-algo="prim" onclick="App.selectAlgorithm('prim')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🌳 Prim's Algorithm</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Cut frontier growing outward from incident origin</div>
+                    </div>
+                    <div class="algo-card" data-algo="kruskal" onclick="App.selectAlgorithm('kruskal')">
+                      <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <div class="algo-title">🔗 Kruskal's Algorithm</div>
+                        <span class="active-check">✓</span>
+                      </div>
+                      <div class="algo-desc">Global edge sorting with component merging</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. Run Dispatch Analysis Button -->
+                <div class="sim-config-section" id="sim-step-7"
+                  style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <button class="btn btn-primary" id="btn-run-simulation" onclick="App.runSimulationPreview()"
+                      style="padding:12px 24px; font-size:0.95rem; font-weight:700; width:100%; justify-content:center; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+                      🚀 Run Dispatch Analysis
+                    </button>
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.78rem;">
+                      <span id="sim-exec-status" style="font-weight:600; color:var(--text-main);">
+                        Ready for analysis
+                      </span>
+                      <span id="pipeline-status-badge" class="badge badge-gray" style="display:none;">Standby</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Right Column: Results Workspace (Route Map + Ranked Recommendations) -->
+            <div class="sim-results-column">
+
+              <!-- Dedicated Simulation Error Banner -->
+              <div id="sim-error-box" class="tab-notice-banner tab-notice-red"
+                style="display:none; margin-bottom:12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:10px 14px; border-radius:var(--radius-sm);">
+                <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">⚠️</span>
+                    <span id="sim-error-msg" style="font-weight:600; font-size:0.80rem;">Simulation execution
+                      encountered an issue.</span>
+                  </div>
+                  <button class="btn btn-outline btn-sm" id="btn-retry-simulation" onclick="App.runSimulationPreview()"
+                    style="border-color:#f87171; color:#991b1b; padding:2px 8px; font-size:0.75rem;">
+                    🔄 Retry Analysis
+                  </button>
+                </div>
+              </div>
+
+              <!-- Stale Results Notice -->
+              <div id="sim-stale-notice" class="tab-notice-banner"
+                style="display:none; margin-bottom:12px; background:#fffbeb; border:1px solid #fef3c7; color:#92400e; padding:10px 14px; border-radius:var(--radius-sm); align-items:center; gap:10px;">
+                <span style="font-size:1.2rem;">⚠️</span>
+                <div style="font-size:0.80rem; line-height:1.4;">
+                  <strong>Configuration Changed:</strong> Parameters were modified. Displayed results reflect prior
+                  execution. Click <strong>Run Dispatch Analysis</strong> to recompute.
+                </div>
+              </div>
+
+              <!-- Route Visualization & Network Map (Prominently Visible at Top) -->
+              <div class="card"
+                style="padding:0; margin-bottom:14px; overflow:hidden; border:1px solid var(--border-color);">
+                <div
+                  style="padding:10px 14px; background:var(--bg-card); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.92rem; font-weight:700; color:var(--text-main);">🗺️ Dispatch Route &
+                      Network Map</span>
+                    <span class="badge badge-blue" id="sim-map-mode-badge">Mode 1 — Minimum Time</span>
+                    <span class="badge badge-green" id="sim-map-algo-badge">Automatic Selection</span>
+                    <span class="badge badge-green" id="sim-map-geom-badge" style="display:none;">Road Geometry</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn btn-primary btn-sm" id="btn-toggle-sim-setup" onclick="App.toggleSimulationSetup()"
+                      style="display:none; align-items:center; gap:6px; font-weight:600; padding:5px 12px; font-size:0.80rem; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+                      ⚙️ <span id="toggle-setup-text">Modify Parameters</span>
+                    </button>
+                    <button class="btn btn-outline btn-sm" id="btn-fit-sim-map" onclick="App.fitSimMapBounds()"
+                      title="Zoom to fit route and network">
+                      ⛶ Fit Route Bounds
+                    </button>
+                  </div>
+                </div>
+
+                <div id="sim-map-wrapper">
+                  <div id="sim-mst-leaflet-map" style="height:380px;"></div>
+
+                  <!-- Floating Map Controls -->
+                  <div class="map-floating-controls">
+                    <button class="map-control-btn" id="btn-sim-map-fullscreen"
+                      onclick="App.toggleMapFullscreen('sim-map-wrapper', 'simMstMap')"
+                      title="Toggle Fullscreen">⛶</button>
+                    <button class="map-control-btn" id="btn-fit-sim-map-float" onclick="App.fitSimMapBounds()"
+                      title="Fit Network Bounds">⊡</button>
+                    <button class="map-control-btn" id="btn-sim-map-reset" onclick="App.resetSimMapView()"
+                      title="Reset View">↺</button>
+                  </div>
+
+                  <!-- Floating Map Legend -->
+                  <div class="sim-map-legend">
+                    <div class="sim-legend-title">Map Legend</div>
+                    <div class="sim-legend-item">
+                      <span style="font-size:1rem;">🚨</span>
+                      <span>Incident Origin</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-marker marker-node"
+                        style="background:#f59e0b; border-color:#78350f;"></span>
+                      <span>Recommended Facility (#1)</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-line line-road" style="background:#f59e0b; height:4px;"></span>
+                      <span>Recommended Route</span>
+                    </div>
+                    <div class="sim-legend-item">
+                      <span class="sim-legend-line line-road" style="background:#1e3a8a;"></span>
+                      <span>Network Link</span>
+                    </div>
+                  </div>
+
+                  <!-- Floating Edge / Facility Tooltip Card -->
+                  <div id="sim-map-tooltip-card" class="sim-map-tooltip" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span id="sim-tt-badge" class="badge badge-blue" style="font-size:0.68rem;">Selected Link</span>
+                      <button class="btn-icon" style="padding:0; font-size:0.75rem;"
+                        onclick="document.getElementById('sim-map-tooltip-card').style.display='none'">✕</button>
+                    </div>
+                    <div id="sim-tt-title"
+                      style="font-size:0.82rem; font-weight:700; color:var(--text-main); margin-bottom:3px;">
+                      Endpoint U ⟷ Endpoint V
+                    </div>
+                    <div id="sim-tt-desc" style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+                      Road Route: 3.2 km &bull; 4.5 min
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dispatch Results Container (Populated dynamically on analysis run) -->
+              <div id="sim-results-output">
+
+                <!-- Scenario Summary KPI Row -->
+                <div class="results-metrics-grid" style="margin-bottom:14px;">
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Available Facilities in Radius</div>
+                    <div class="res-val" id="res-eligible-count">0</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Selected Fleet</div>
+                    <div class="res-val" id="res-agency-name" style="font-size:0.90rem;">Healthcare</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Search Radius</div>
+                    <div class="res-val" id="res-radius-val">5.0 km</div>
+                  </div>
+                  <div class="res-metric-box">
+                    <div class="res-lbl">Selected Algorithm</div>
+                    <div class="res-val" id="res-algo-name" style="font-size:0.88rem;">Automatic</div>
+                  </div>
+                </div>
+
+                <!-- Top Recommendations: Rank 1 Dominant Hero Card + Secondary Alternatives (Rank 2 & 3) -->
+                <div id="sim-ranked-facilities-list" style="margin-bottom:14px;">
+                  <!-- Populated dynamically -->
+                </div>
+
+                <!-- Full Candidate Rankings Accordion -->
+                <details class="sim-details-accordion" style="margin-bottom:14px;">
+                  <summary class="sim-details-summary">
+                    <span>📋 View Complete Candidate Ranking Table (<span id="summary-table-count">All</span> Facilities
+                      in Radius)</span>
+                    <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">Expand Table ▼</span>
+                  </summary>
+                  <div class="table-responsive" style="margin-top:8px; max-height:360px; overflow-y:auto;">
+                    <table class="data-table" id="table-dispatch-full">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Facility Name</th>
+                          <th>Agency</th>
+                          <th>Travel Time</th>
+                          <th>Road Dist</th>
+                          <th>Estimated Cost</th>
+                          <th>Detour Ratio</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tbody-dispatch-full">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+
+                <!-- Technical Execution & Invariants Accordion (Keeps academic proofs without cluttering main view) -->
+                <details class="sim-details-accordion" style="margin-bottom:14px;">
+                  <summary class="sim-details-summary">
+                    <span>⚙️ Technical Execution &amp; Network Verification</span>
+                    <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted);">View Details ▼</span>
+                  </summary>
+                  <div style="margin-top:12px;">
+                    <!-- Algorithm Selection Rationale -->
+                    <div class="card" style="padding:12px; margin-bottom:10px; background:var(--bg-subtle);">
+                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:4px; color:var(--text-main);">
+                        Algorithmic Selection & Network Density
+                      </div>
+                      <div id="tech-algo-rationale"
+                        style="font-size:0.78rem; color:var(--text-muted); line-height:1.45;">
+                        Evaluating algorithm selection rationale...
+                      </div>
+                    </div>
+
+                    <!-- Network Metrics -->
+                    <div class="results-metrics-grid" style="margin-bottom:10px;">
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Network Spanning Edges</div>
+                        <div class="res-val" id="res-tree-edges">0</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Total Tree Weight</div>
+                        <div class="res-val" id="res-tree-length">0.00 km</div>
+                      </div>
+                      <div class="res-metric-box">
+                        <div class="res-lbl">Connected Components</div>
+                        <div class="res-val" id="res-components-count">1 (Tree)</div>
+                      </div>
+                    </div>
+
+                    <!-- Mathematical Invariants -->
+                    <div class="card" style="padding:12px; margin-bottom:10px;">
+                      <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px;">Network Verification
+                        Report</div>
+                      <div class="system-status-item" style="margin-bottom:6px;">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">Structural Network Verification (1,254 Links):</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-structural-desc">Acyclic,
+                            connects all facilities.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-structural-badge">PASS</span>
+                      </div>
+                      <div class="system-status-item" style="margin-bottom:6px;">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">Loop Optimality Check:</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-optimality-desc">Every alternate link length is optimal.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-optimality-badge">0 Violations</span>
+                      </div>
+                      <div class="system-status-item">
+                        <div>
+                          <span style="font-size:0.78rem; font-weight:600;">Prim &amp; Kruskal Network Equivalence:</span>
+                          <div style="font-size:0.72rem; color:var(--text-muted);" id="val-parity-desc">Both algorithms
+                            yield identical total length.</div>
+                        </div>
+                        <span class="badge badge-green" id="val-parity-badge">Exact Match</span>
+                      </div>
+                    </div>
+
+                    <!-- Spanning Tree Edge List Table -->
+                    <div style="margin-top:8px;">
+                      <div style="font-size:0.78rem; font-weight:700; margin-bottom:6px;">Spanning Tree Edge List</div>
+                      <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
+                        <table class="data-table">
+                          <thead>
+                            <tr>
+                              <th>Endpoint U</th>
+                              <th>Endpoint V</th>
+                              <th>Road Duration</th>
+                              <th>Road Distance</th>
+                            </tr>
+                          </thead>
+                          <tbody id="tbody-scenario-mst-edges">
+                            <!-- Populated dynamically -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SECTION 5: RESULTS & STATISTICS (Integrated Results & Methodology) -->
+        <!-- ================================================================= -->
+        <section id="section-results-stats" class="view-section" style="display:none;">
+          <!-- Sub-Tab 1: Project Analysis & Empirical Telemetry -->
+          <div id="section-project-analysis" class="results-subpanel">
+            <!-- Alias anchor for legacy #section-help / #help routing without displaying methodology guide -->
+            <div id="section-help" style="display:none;" aria-hidden="true"></div>
+
+            <!-- Prim vs Kruskal Analysis Section -->
+  <div class="card" style="margin-top:0;">
+    <div class="card-header"
+      style="border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:16px;">
+      <div>
+        <h3 class="card-title" style="font-size:1.15rem; font-weight:700;">📊 Prim vs Kruskal Analysis</h3>
+        <p class="card-subtitle" style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;">
+          Empirical runtime comparison, network geometry, topological distribution, and algorithmic growth profiles
+          across 1,255 municipal facilities.
+        </p>
+      </div>
+      <div class="badge badge-sage" style="font-size:0.75rem; padding:4px 10px; font-weight:600;">
+        Optimal 1,254 Spanning Links
+      </div>
+    </div>
+    <div style="font-size:0.80rem; color:var(--text-muted); margin-bottom:16px; font-style:italic;">
+      Edge weights are Haversine straight-line distances, not road distance, cost or response time.
+    </div>
+
+    <!-- Charts Grid (2 columns on desktop, 1 on mobile) -->
+    <div class="analysis-charts-grid">
+
+      <!-- Chart 1: Runtime Comparison -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">1. Algorithm Runtime Comparison</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim's
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal's
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:260px; position:relative;">
+          <canvas id="chart-runtime-comparison"></canvas>
+        </div>
+        <p class="chart-caption" id="caption-runtime">
+          Median runtime of Prim and Kruskal with standard-deviation error bars from benchmark.json.
+        </p>
+      </div>
+
+      <!-- Chart 2: Total Network Distance -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">2. Total Network Distance</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim's MST
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal's MST
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:260px; position:relative;">
+          <canvas id="chart-total-distance"></canvas>
+        </div>
+        <p class="chart-caption" id="caption-total-distance">
+          Total network distance: Prim vs Kruskal side by side with identical total length (exact match).
+        </p>
+      </div>
+
+      <!-- Chart 3: Construction Curve (Full Width) -->
+      <div class="chart-card chart-card-full">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">3. Construction Curve (Cumulative Spanning Distance)</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim's Order (Tree Growth)
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal's Order (Ascending
+            Weight)
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:300px; position:relative;">
+          <canvas id="chart-construction-curve"></canvas>
+        </div>
+        <p class="chart-caption">
+          Prim's order is the order the tree grew; Kruskal's order is ascending edge length.
+        </p>
+      </div>
+
+      <!-- Chart 4: Edge-Length Distribution -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">4. Edge-Length Distribution</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:260px; position:relative;">
+          <canvas id="chart-edge-length-dist"></canvas>
+        </div>
+        <p class="chart-caption">
+          Overlaid frequency distribution of individual spanning edge lengths (km) across all 1,254 links.
+        </p>
+      </div>
+
+      <!-- Chart 5: MST Edges by Facility-Type Pair -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">5. MST Edges by Facility-Type Pair</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:260px; position:relative;">
+          <canvas id="chart-pair-type-dist"></canvas>
+        </div>
+        <p class="chart-caption">
+          Grouped counts of spanning edges connecting pairs of municipal facility categories.
+        </p>
+      </div>
+
+      <!-- Chart 6: Vertex Degree Distribution -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">6. Vertex Degree Distribution</h4>
+          <div class="chart-legend-custom">
+            <span class="legend-dot" style="background:#16a34a;"></span> Prim
+            <span class="legend-dot" style="background:#9333ea; margin-left:10px;"></span> Kruskal
+          </div>
+        </div>
+        <div class="chart-canvas-wrap" style="height:260px; position:relative;">
+          <canvas id="chart-degree-dist"></canvas>
+        </div>
+        <p class="chart-caption">
+          Number of municipal facilities having 1, 2, 3, or 4+ incident edge connections in each spanning tree.
+        </p>
+      </div>
+
+      <!-- Table 7: 10 Longest MST Connections -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h4 class="chart-card-title">7. Ten Longest MST Connections</h4>
+          <span class="badge badge-sage" style="font-size:0.72rem;">Top 10 Bottleneck Edges</span>
+        </div>
+        <div class="table-responsive" style="max-height:280px; overflow-y:auto;">
+          <table class="data-table" style="font-size:0.76rem;" id="table-longest-edges">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>Facility 1 (U)</th>
+                <th>Facility 2 (V)</th>
+                <th style="text-align:right;">Length (km)</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-longest-edges">
+              <tr>
+                <td colspan="4" style="text-align:center; color:var(--text-muted); padding:16px;">Loading edge
+                  records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="chart-caption">
+          The 10 longest individual edge connections retained in the optimal spanning backbones.
+        </p>
+      </div>
+
+    </div> <!-- Closes .analysis-charts-grid -->
+  </div> <!-- Closes .card (Prim vs Kruskal Analysis) -->
+
+          </div> <!-- Closes #section-project-analysis -->
+        </section> <!-- Closes #section-results-stats -->
+
+      </div> <!-- Closes .content-body -->
+    </main> <!-- Closes #main-content -->
+  </div> <!-- Closes #app-container -->
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Leaflet MarkerCluster JS -->
+  <script src="assets/vendor/leaflet.markercluster.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+
+</html>

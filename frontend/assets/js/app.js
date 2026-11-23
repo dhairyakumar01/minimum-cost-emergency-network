@@ -122,7 +122,7 @@
     showErrorBanner(`Operation warning: ${msg}. Click retry or check connection.`);
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function bootstrap() {
     Navigation.init();
     initApp();
 
@@ -195,7 +195,13 @@
 
     bindFacilitiesMapEvents();
     bindMstEvents();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrap);
+  } else {
+    bootstrap();
+  }
 
   /**
    * Load health and facility catalog from backend.
@@ -2735,6 +2741,7 @@
     const el = document.getElementById("global-loader");
     if (el) {
       el.classList.remove("hidden");
+      el.style.display = "flex";
       const t = el.querySelector(".loader-text");
       const s = el.querySelector(".loader-subtext");
       if (t) t.textContent = title;
@@ -2744,7 +2751,10 @@
 
   function hideLoader() {
     const el = document.getElementById("global-loader");
-    if (el) el.classList.add("hidden");
+    if (el) {
+      el.classList.add("hidden");
+      el.style.display = "none";
+    }
   }
 
   function showErrorBanner(msg) {
