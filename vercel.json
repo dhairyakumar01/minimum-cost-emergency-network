@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/frontend/assets/$1"
+    },
+    {
+      "source": "/flutter/(.*)",
+      "destination": "/flutter_app/build/web/$1"
+    },
+    {
+      "source": "/app",
+      "destination": "/flutter_app/build/web/index.html"
+    },
+    {
+      "source": "/app/(.*)",
+      "destination": "/flutter_app/build/web/$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/frontend/favicon.ico"
+    },
+    {
+      "source": "/",
+      "destination": "/frontend/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
+  ]
+}

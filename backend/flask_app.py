@@ -63,6 +63,24 @@ def create_app(config: Config = None) -> Flask:
         assets_dir = frontend_dir / "assets"
         return send_from_directory(str(assets_dir), subpath)
 
+    # Flutter Web Application serving routes
+    flutter_dir = BASE_DIR / "flutter_app" / "build" / "web"
+
+    @app.route("/app", methods=["GET"])
+    @app.route("/app/", methods=["GET"])
+    def serve_flutter_index():
+        """Serve the Flutter Web Application index HTML."""
+        if flutter_dir.exists() and (flutter_dir / "index.html").exists():
+            return send_from_directory(str(flutter_dir), "index.html")
+        return "Flutter app build not found. Please compile with `flutter build web --base-href /app/`.", 404
+
+    @app.route("/app/<path:subpath>", methods=["GET"])
+    def serve_flutter_assets(subpath):
+        """Serve compiled Flutter Web assets."""
+        if flutter_dir.exists():
+            return send_from_directory(str(flutter_dir), subpath)
+        return "404 Not Found", 404
+
     # Centralized JSON error handlers for API requests
     @app.errorhandler(404)
     def handle_not_found(e):
