@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/api/index.py?__path__=/api/$1"
     },
     {
       "source": "/assets/(.*)",
@@ -15,11 +15,15 @@
     },
     {
       "source": "/app",
-      "destination": "/flutter_app/build/web/index.html"
+      "destination": "/frontend/app/index.html"
+    },
+    {
+      "source": "/app/",
+      "destination": "/frontend/app/index.html"
     },
     {
       "source": "/app/(.*)",
-      "destination": "/flutter_app/build/web/$1"
+      "destination": "/frontend/app/$1"
     },
     {
       "source": "/favicon.ico",

@@ -64,7 +64,7 @@ def create_app(config: Config = None) -> Flask:
         return send_from_directory(str(assets_dir), subpath)
 
     # Flutter Web Application serving routes
-    flutter_dir = BASE_DIR / "flutter_app" / "build" / "web"
+    flutter_dir = frontend_dir / "app"
 
     @app.route("/app", methods=["GET"])
     @app.route("/app/", methods=["GET"])
