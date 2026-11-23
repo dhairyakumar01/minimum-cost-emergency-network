@@ -1113,16 +1113,6 @@
               fillOpacity: 1.0,
             }).bindTooltip(`<strong>🚨 ${v.name || "Incident Origin"}</strong><br><span style="font-size:0.75rem; color:#64748b;">${vLat.toFixed(4)}°N, ${vLon.toFixed(4)}°E</span>`);
             simIncidentMarkerLayer.addLayer(incMarker);
-          } else {
-            const marker = L.circleMarker(latlng, {
-              radius: isDense ? 3 : 5.5,
-              fillColor: "#94a3b8",
-              color: "#64748b",
-              weight: 1,
-              fillOpacity: 0.85,
-            }).bindTooltip(`<strong>${v.name || v.id}</strong><br><span style="font-family:var(--font-mono); font-size:0.72rem; color:#64748b;">${v.id}</span>`);
-            simNodesLayer.addLayer(marker);
-            simNodeMarkers[v.id] = marker;
           }
         });
 
@@ -2553,61 +2543,47 @@
       const isTopRanked = rankIdx === 0;
       const isTopAlt = rankIdx >= 1 && rankIdx <= 4;
 
-      let markerRadius = 2.0;
-      let markerFill = "#64748b";
-      let markerBorder = "#475569";
-      let markerWeight = 0.8;
-      let markerOpacity = 0.35;
-      let markerZIndex = 100;
+      if (isTopRanked || isTopAlt) {
+        let markerRadius = isTopRanked ? 11 : 7;
+        let markerFill = isTopRanked ? "#f59e0b" : "#2563eb";
+        let markerBorder = "#ffffff";
+        let markerWeight = isTopRanked ? 3.5 : 2.5;
+        let markerOpacity = isTopRanked ? 1.0 : 0.95;
+        let markerZIndex = isTopRanked ? 3000 : 2000;
 
-      if (isTopRanked) {
-        markerRadius = 11;
-        markerFill = "#f59e0b";
-        markerBorder = "#ffffff";
-        markerWeight = 3.5;
-        markerOpacity = 1.0;
-        markerZIndex = 3000;
-      } else if (isTopAlt) {
-        markerRadius = 7;
-        markerFill = "#2563eb";
-        markerBorder = "#ffffff";
-        markerWeight = 2.5;
-        markerOpacity = 0.95;
-        markerZIndex = 2000;
+        const marker = L.circleMarker(latLng, {
+          radius: markerRadius,
+          fillColor: markerFill,
+          color: markerBorder,
+          weight: markerWeight,
+          opacity: 1,
+          fillOpacity: markerOpacity,
+          zIndexOffset: markerZIndex,
+        });
+
+        const timeMin = fac.travel_time_min !== undefined ? Number(fac.travel_time_min).toFixed(1) : (fac.travel_time_ds ? (fac.travel_time_ds / 600).toFixed(1) : "N/A");
+        const roadKm = fac.road_distance_km !== undefined ? Number(fac.road_distance_km).toFixed(2) : (fac.road_distance_dm ? (fac.road_distance_dm / 10000).toFixed(2) : "N/A");
+
+        marker.bindPopup(`
+          <div style="font-size:0.80rem; line-height:1.45;">
+            ${isTopRanked ? '<span class="badge badge-amber" style="font-size:0.70rem; margin-bottom:4px; font-weight:700;">⭐ #1 RECOMMENDED DISPATCH FACILITY</span><br/>' : ''}
+            ${isTopAlt ? `<span class="badge badge-blue" style="font-size:0.68rem; margin-bottom:4px; font-weight:600;">Rank #${rankIdx + 1} Alternative</span><br/>` : ''}
+            <span class="badge ${fac.agency === 'police' ? 'badge-blue' : (fac.agency === 'fire' ? 'badge-amber' : 'badge-red')}" style="font-size:0.68rem; margin-bottom:4px; text-transform:uppercase;">
+              ${escapeHtml(fac.agency || "Agency")}
+            </span>
+            <h4 style="font-size:0.88rem; font-weight:700; margin:2px 0;">${escapeHtml(fac.facility_name)}</h4>
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
+              ID: <code>${fac.facility_id || fid}</code> &bull; (${fac.latitude.toFixed(5)}, ${fac.longitude.toFixed(5)})
+            </div>
+            <div style="margin-top:6px; font-size:0.75rem; border-top:1px solid #e2e8f0; padding-top:4px;">
+              <div><strong>Direct Travel Time:</strong> ${timeMin} min</div>
+              <div><strong>Direct Road Distance:</strong> ${roadKm} km</div>
+            </div>
+          </div>
+        `);
+
+        simFacilitiesLayer.addLayer(marker);
       }
-
-      const marker = L.circleMarker(latLng, {
-        radius: markerRadius,
-        fillColor: markerFill,
-        color: markerBorder,
-        weight: markerWeight,
-        opacity: 1,
-        fillOpacity: markerOpacity,
-        zIndexOffset: markerZIndex,
-      });
-
-      const timeMin = fac.travel_time_min !== undefined ? Number(fac.travel_time_min).toFixed(1) : (fac.travel_time_ds ? (fac.travel_time_ds / 600).toFixed(1) : "N/A");
-      const roadKm = fac.road_distance_km !== undefined ? Number(fac.road_distance_km).toFixed(2) : (fac.road_distance_dm ? (fac.road_distance_dm / 10000).toFixed(2) : "N/A");
-
-      marker.bindPopup(`
-        <div style="font-size:0.80rem; line-height:1.45;">
-          ${isTopRanked ? '<span class="badge badge-amber" style="font-size:0.70rem; margin-bottom:4px; font-weight:700;">⭐ #1 RECOMMENDED DISPATCH FACILITY</span><br/>' : ''}
-          ${isTopAlt ? `<span class="badge badge-blue" style="font-size:0.68rem; margin-bottom:4px; font-weight:600;">Rank #${rankIdx + 1} Alternative</span><br/>` : ''}
-          <span class="badge ${fac.agency === 'police' ? 'badge-blue' : (fac.agency === 'fire' ? 'badge-amber' : 'badge-red')}" style="font-size:0.68rem; margin-bottom:4px; text-transform:uppercase;">
-            ${escapeHtml(fac.agency || "Agency")}
-          </span>
-          <h4 style="font-size:0.88rem; font-weight:700; margin:2px 0;">${escapeHtml(fac.facility_name)}</h4>
-          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">
-            ID: <code>${fac.facility_id || fid}</code> &bull; (${fac.latitude.toFixed(5)}, ${fac.longitude.toFixed(5)})
-          </div>
-          <div style="margin-top:6px; font-size:0.75rem; border-top:1px solid #e2e8f0; padding-top:4px;">
-            <div><strong>Direct Travel Time:</strong> ${timeMin} min</div>
-            <div><strong>Direct Road Distance:</strong> ${roadKm} km</div>
-          </div>
-        </div>
-      `);
-
-      simFacilitiesLayer.addLayer(marker);
     });
 
     // 4. Identify Top Dispatch Recommended Edges
