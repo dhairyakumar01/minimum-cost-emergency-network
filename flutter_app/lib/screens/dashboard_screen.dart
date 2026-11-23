@@ -14,20 +14,26 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   SystemHealth? _health;
+  List<Facility> _sampleFacilities = [];
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchHealth();
+    _fetchDashboardData();
   }
 
-  Future<void> _fetchHealth() async {
+  Future<void> _fetchDashboardData() async {
     setState(() => _loading = true);
-    final h = await ApiService.checkHealth();
+    final healthFuture = ApiService.checkHealth();
+    final facilitiesFuture = ApiService.getFacilities();
+
+    final results = await Future.wait([healthFuture, facilitiesFuture]);
+
     if (mounted) {
       setState(() {
-        _health = h;
+        _health = results[0] as SystemHealth;
+        _sampleFacilities = results[1] as List<Facility>;
         _loading = false;
       });
     }
@@ -66,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onPressed: () {
               ApiService.setBaseUrl(controller.text.trim());
               Navigator.pop(ctx);
-              _fetchHealth();
+              _fetchDashboardData();
             },
             child: const Text('Save & Reconnect'),
           ),
@@ -101,7 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.refresh, size: 20),
             tooltip: 'Refresh Status',
-            onPressed: _fetchHealth,
+            onPressed: _fetchDashboardData,
           ),
         ],
       ),
@@ -111,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Strip Card - Fully mobile-optimized with no horizontal row overflow
+            // Status Strip Card
             Card(
               color: isOnline ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
               shape: RoundedRectangleBorder(
@@ -227,6 +233,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 14),
 
+            // Emergency Facility Composition Breakdown
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Facility Composition (1,255 Total)',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textMain),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'BBMP Area',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.sidebarDark),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Proportional distribution bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 1097,
+                            child: Container(height: 8, color: AppTheme.hospitalColor),
+                          ),
+                          Expanded(
+                            flex: 138,
+                            child: Container(height: 8, color: AppTheme.policeColor),
+                          ),
+                          Expanded(
+                            flex: 20,
+                            child: Container(height: 8, color: AppTheme.fireColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.spaceBetween,
+                      children: [
+                        _agencyBadge('1,097 Hospitals', '87.4%', AppTheme.hospitalColor),
+                        _agencyBadge('138 Police', '11.0%', AppTheme.policeColor),
+                        _agencyBadge('20 Fire', '1.6%', AppTheme.fireColor),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
             // Responsive KPI Grid (safe aspect ratio, no vertical text overflow)
             LayoutBuilder(
               builder: (ctx, constraints) {
@@ -271,7 +339,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
+
+            // Spatial Network Distribution Mini-Map
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.map_outlined, size: 18, color: AppTheme.sidebarDark),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Spatial Network Overview',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textMain),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () => widget.onNavigate(1),
+                          child: const Text(
+                            'Open Full Map →',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.sidebarDark),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 140,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.borderLight),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: CustomPaint(
+                          painter: MiniNetworkPainter(
+                            facilities: _sampleFacilities,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '🔴 Hospital  •  🔵 Police  •  🟠 Fire Station',
+                            style: TextStyle(fontSize: 10, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
 
             // Quick Access Modules
             const Text(
@@ -314,6 +455,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _agencyBadge(String label, String pct, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '$label ($pct)',
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
+        ),
+      ],
     );
   }
 
@@ -415,5 +574,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+}
+
+class MiniNetworkPainter extends CustomPainter {
+  final List<Facility> facilities;
+
+  MiniNetworkPainter({required this.facilities});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Grid lines for dark map aesthetic
+    final gridPaint = Paint()
+      ..color = Colors.white.withAlpha(12)
+      ..strokeWidth = 0.5;
+
+    for (int i = 1; i < 4; i++) {
+      canvas.drawLine(Offset(0, size.height * (i / 4)), Offset(size.width, size.height * (i / 4)), gridPaint);
+      canvas.drawLine(Offset(size.width * (i / 4), 0), Offset(size.width * (i / 4), size.height), gridPaint);
+    }
+
+    if (facilities.isEmpty) {
+      // Draw subtle placeholder dots if loading
+      final placeholderPaint = Paint()..color = const Color(0xFF38BDF8).withAlpha(100);
+      canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.5), 3, placeholderPaint);
+      canvas.drawCircle(Offset(size.width * 0.4, size.height * 0.4), 2.5, placeholderPaint);
+      canvas.drawCircle(Offset(size.width * 0.6, size.height * 0.6), 2.5, placeholderPaint);
+      return;
+    }
+
+    const minLat = 12.80;
+    const maxLat = 13.15;
+    const minLon = 77.40;
+    const maxLon = 77.80;
+
+    double projectX(double lon) => ((lon - minLon) / (maxLon - minLon)) * size.width;
+    double projectY(double lat) => size.height - (((lat - minLat) / (maxLat - minLat)) * size.height);
+
+    final hospPaint = Paint()..color = AppTheme.hospitalColor.withAlpha(200);
+    final polPaint = Paint()..color = AppTheme.policeColor.withAlpha(220);
+    final firePaint = Paint()..color = AppTheme.fireColor;
+
+    for (final f in facilities) {
+      final x = projectX(f.longitude);
+      final y = projectY(f.latitude);
+      if (x >= 0 && x <= size.width && y >= 0 && y <= size.height) {
+        Paint p = hospPaint;
+        double radius = 1.6;
+        if (f.agency == 'police' || f.agency == 'police_station') {
+          p = polPaint;
+          radius = 2.0;
+        } else if (f.agency == 'fire' || f.agency == 'fire_station') {
+          p = firePaint;
+          radius = 2.4;
+        }
+        canvas.drawCircle(Offset(x, y), radius, p);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant MiniNetworkPainter oldDelegate) {
+    return oldDelegate.facilities.length != facilities.length;
   }
 }

@@ -14,6 +14,7 @@ class MstSimulatorScreen extends StatefulWidget {
 class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
   String _graphContext = 'global';
   String _algorithm = 'kruskal';
+  int _playbackSpeedMs = 120; // 300ms (Slow), 120ms (Normal), 40ms (Fast)
 
   List<MstTraceEvent> _events = [];
   int _currentStep = 0;
@@ -75,7 +76,8 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
   void _play() {
     if (_events.isEmpty) return;
     setState(() => _isPlaying = true);
-    _playbackTimer = Timer.periodic(const Duration(milliseconds: 120), (timer) {
+    _playbackTimer?.cancel();
+    _playbackTimer = Timer.periodic(Duration(milliseconds: _playbackSpeedMs), (timer) {
       if (_currentStep < _events.length - 1) {
         setState(() => _currentStep++);
       } else {
@@ -108,6 +110,14 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
     }
   }
 
+  void _setSpeed(int ms) {
+    setState(() => _playbackSpeedMs = ms);
+    if (_isPlaying) {
+      _pause();
+      _play();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final curEv = _events.isNotEmpty && _currentStep < _events.length
@@ -121,7 +131,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MST Construction Simulator', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('MST Network Simulator', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -204,7 +214,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                '5.0 km Incident Graph • Majesic Origin (${_incidentLat.toStringAsFixed(4)}°N, ${_incidentLon.toStringAsFixed(4)}°E) • $_coveredFacilityCount facilities',
+                                '5.0 km Incident Graph • Majestic Origin (${_incidentLat.toStringAsFixed(4)}°N, ${_incidentLon.toStringAsFixed(4)}°E) • $_coveredFacilityCount facilities',
                                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF1E3A8A)),
                               ),
                             ),
@@ -215,7 +225,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
 
                     const SizedBox(height: 12),
                     const Divider(height: 1),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
                     // Playback Deck: Mobile-first responsive controls
                     Row(
@@ -248,20 +258,39 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                       ],
                     ),
 
+                    // Speed selection chips
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        const Text('Speed: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+                        _speedChip('Slow', 300),
+                        _speedChip('Normal', 120),
+                        _speedChip('Fast', 40),
+                      ],
+                    ),
+
                     // Step counter & slider
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Step $_currentStep of ${_events.isNotEmpty ? _events.length - 1 : 0}',
+                            'Event $_currentStep of ${_events.isNotEmpty ? _events.length - 1 : 0}',
                             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
                           ),
                           Text(
-                            '${((_events.isNotEmpty ? _currentStep / (_events.length - 1) : 0) * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.sidebarDark),
+                            '${((_events.isNotEmpty ? _currentStep / (_events.length - 1) : 0) * 100).toStringAsFixed(0)}% Complete',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: _algorithm == 'prim' ? AppTheme.accentEmerald : AppTheme.accentNavy,
+                            ),
                           ),
                         ],
                       ),
@@ -303,7 +332,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                         Container(width: 1, height: 28, color: AppTheme.borderLight),
                         Expanded(
                           child: _telemItem(
-                            _algorithm == 'kruskal' ? 'COMPONENTS' : 'VISITED CUT',
+                            _algorithm == 'kruskal' ? 'DSU COMPONENTS' : 'VISITED CUT NODES',
                             '${_algorithm == 'kruskal' ? (curEv?.componentCount ?? 0) : (curEv?.visitedVertexCount ?? 0)}',
                             Colors.purple,
                           ),
@@ -318,7 +347,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
 
             // Visual Canvas with Dynamic Bounding Box (Cleaner edge rendering without dots)
             Container(
-              height: 260,
+              height: 270,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: const Color(0xFF0F172A),
@@ -330,7 +359,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                 child: Stack(
                   children: [
                     CustomPaint(
-                      size: const Size(double.infinity, 260),
+                      size: const Size(double.infinity, 270),
                       painter: MstGraphPainter(
                         events: _events,
                         currentStep: _currentStep,
@@ -354,6 +383,29 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                         child: Text(
                           '${_algorithm.toUpperCase()} SPANNING TREE • $acceptedCount EDGES ACCEPTED',
                           style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace'),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(180),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(width: 8, height: 2, color: const Color(0xFFF59E0B)),
+                            const SizedBox(width: 4),
+                            const Text('Current', style: TextStyle(color: Colors.white70, fontSize: 9)),
+                            const SizedBox(width: 6),
+                            Container(width: 8, height: 2, color: _algorithm == 'prim' ? const Color(0xFF10B981) : const Color(0xFF3B82F6)),
+                            const SizedBox(width: 4),
+                            const Text('Tree Edge', style: TextStyle(color: Colors.white70, fontSize: 9)),
+                          ],
                         ),
                       ),
                     ),
@@ -437,6 +489,23 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
     );
   }
 
+  Widget _speedChip(String label, int ms) {
+    final isSelected = _playbackSpeedMs == ms;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: _algorithm == 'prim' ? AppTheme.accentEmerald : AppTheme.accentNavy,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : AppTheme.textMain,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 10,
+      ),
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      onSelected: (_) => _setSpeed(ms),
+    );
+  }
+
   Widget _telemItem(String label, String value, Color color) {
     return Column(
       children: [
@@ -484,14 +553,12 @@ class MstGraphPainter extends CustomPainter {
     double minLat, maxLat, minLon, maxLon;
 
     if (isIncident) {
-      // 5km is approximately ~0.045 degrees latitude and ~0.046 degrees longitude
       const span = 0.055;
       minLat = centerLat - span;
       maxLat = centerLat + span;
       minLon = centerLon - span;
       maxLon = centerLon + span;
     } else {
-      // Full Bengaluru bounding box
       minLat = 12.80;
       maxLat = 13.15;
       minLon = 77.40;

@@ -67,6 +67,72 @@ class ResultsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
+            // Visual Charts Section
+            const Text(
+              'Empirical Performance Benchmarks',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain),
+            ),
+            const SizedBox(height: 8),
+
+            // Runtime Speedup & Parity Visual Bar Charts
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Algorithm Execution Runtime (s)',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '3.18× Kruskal Speedup',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentNavy),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Visual comparison bars for Runtime
+                    _buildHorizontalBar('Prim\'s Algorithm', 5.029, 6.0, '5.029 s', AppTheme.accentEmerald),
+                    const SizedBox(height: 6),
+                    _buildHorizontalBar('Kruskal\'s Algorithm', 1.581, 6.0, '1.581 s', AppTheme.accentNavy),
+                    const SizedBox(height: 14),
+                    const Divider(height: 1),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Total Spanning Distance Parity (km)',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '100% Convergence Match',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.sidebarDark),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _buildHorizontalBar('Prim\'s Tree Weight', 480.178, 500.0, '480.1784 km', AppTheme.accentEmerald),
+                    const SizedBox(height: 6),
+                    _buildHorizontalBar('Kruskal\'s Tree Weight', 480.178, 500.0, '480.1784 km', AppTheme.accentNavy),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
             // Responsive Algorithm Comparison (Mobile stacked, wide side-by-side)
             LayoutBuilder(
               builder: (ctx, constraints) {
@@ -112,10 +178,76 @@ class ResultsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 14),
+
+            // Top Bottleneck Spanning Edges Card
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Longest MST Spanning Links',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Top 5 Bottlenecks', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentAmber)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    _bottleneckItem('#1', 'Hesaraghatta PHC', 'Yelahanka General Hospital', '7.8256 km'),
+                    _bottleneckItem('#2', 'Sarjapura Community Health', 'Electronic City Clinic', '6.4190 km'),
+                    _bottleneckItem('#3', 'Nelamangala Taluk Hospital', 'Madavara Health Post', '5.9324 km'),
+                    _bottleneckItem('#4', 'Kengeri Satellite Station', 'Rajarajeshwari Nagar Post', '5.1042 km'),
+                    _bottleneckItem('#5', 'Hoskote Perimeter Post', 'KR Puram General Hospital', '4.8871 km'),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
           ],
         ),
       ),
+    );
+  }
+
+  static Widget _buildHorizontalBar(String label, double value, double maxVal, String displayVal, Color color) {
+    final pct = (value / maxVal).clamp(0.0, 1.0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(displayVal, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+          ],
+        ),
+        const SizedBox(height: 3),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: pct,
+            backgroundColor: AppTheme.borderLight,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 8,
+          ),
+        ),
+      ],
     );
   }
 
@@ -207,8 +339,17 @@ class ResultsScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-          Flexible(
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            flex: 3,
             child: Text(
               val,
               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
@@ -257,6 +398,31 @@ class ResultsScreen extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottleneckItem(String rank, String u, String v, String dist) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.bgCanvas,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppTheme.borderLight),
+            ),
+            child: Text(rank, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text('$u ↔ $v', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+          ),
+          const SizedBox(width: 6),
+          Text(dist, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentAmber)),
         ],
       ),
     );
