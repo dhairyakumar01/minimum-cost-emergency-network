@@ -1,20 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 class ApiService {
-  static String _resolveDefaultBaseUrl() {
-    if (kIsWeb) {
-      final origin = Uri.base.origin;
-      if (origin.isNotEmpty && !origin.startsWith('file:') && !origin.contains('localhost:0')) {
-        return origin;
-      }
-    }
-    return 'http://127.0.0.1:5000';
-  }
-
-  static String baseUrl = _resolveDefaultBaseUrl();
+  static String baseUrl = 'http://127.0.0.1:5000';
 
   static void setBaseUrl(String url) {
     baseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
@@ -150,3 +139,4 @@ class ApiService {
     }
   }
 }
+
