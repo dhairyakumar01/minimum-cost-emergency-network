@@ -42,7 +42,7 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
         return const Color(0xFFDC2626);
       case 'fire':
       case 'fire_station':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFFD97706);
       case 'police':
         return const Color(0xFF2563EB);
       default:
@@ -67,62 +67,98 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
   void _showFacilityDetails(Facility fac) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _getAgencyColor(fac.agency).withAlpha(30),
-                    borderRadius: BorderRadius.circular(8),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppTheme.borderLight,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: Icon(_getAgencyIcon(fac.agency), color: _getAgencyColor(fac.agency)),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fac.agency.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: _getAgencyColor(fac.agency),
-                        ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _getAgencyColor(fac.agency).withAlpha(25),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      Text(
-                        fac.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      child: Icon(_getAgencyIcon(fac.agency), color: _getAgencyColor(fac.agency), size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _getAgencyColor(fac.agency).withAlpha(25),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              fac.agency.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _getAgencyColor(fac.agency),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            fac.name,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                const Divider(height: 24),
+                _detailRow('Facility ID', fac.id),
+                _detailRow('Latitude', '${fac.latitude.toStringAsFixed(5)}° N'),
+                _detailRow('Longitude', '${fac.longitude.toStringAsFixed(5)}° E'),
+                _detailRow('Municipal Zone', 'Bengaluru BBMP Metropolitan'),
+                _detailRow('Spanning Degree', 'Connected in Minimum Cost Tree'),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('Close'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24),
-            _detailRow('Facility ID', fac.id),
-            _detailRow('Latitude', '${fac.latitude.toFixed(5)}° N'),
-            _detailRow('Longitude', '${fac.longitude.toFixed(5)}° E'),
-            _detailRow('Coverage Area', 'Bengaluru BBMP Municipal Zone'),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => Navigator.pop(ctx),
-                icon: const Icon(Icons.check),
-                label: const Text('Close'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -130,12 +166,19 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
 
   Widget _detailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
@@ -149,9 +192,9 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
       ),
       body: Column(
         children: [
-          // Filter & Search Header
+          // Filter & Search Header Card
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             color: Colors.white,
             child: Column(
               children: [
@@ -160,6 +203,7 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
                     hintText: 'Search 1,255 emergency facilities...',
                     prefixIcon: Icon(Icons.search, size: 20),
                     isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   onChanged: (val) {
                     _searchQuery = val;
@@ -169,14 +213,15 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
                 const SizedBox(height: 10),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _filterChip('All Facilities', 'all'),
-                      const SizedBox(width: 8),
+                      _filterChip('All (1,255)', 'all'),
+                      const SizedBox(width: 6),
                       _filterChip('Hospitals', 'hospital'),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       _filterChip('Fire Stations', 'fire'),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       _filterChip('Police Stations', 'police'),
                     ],
                   ),
@@ -184,18 +229,21 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, color: AppTheme.borderLight),
 
           // Count Strip
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             color: AppTheme.bgCanvas,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${_facilities.length} Emergency Facilities Found',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
+                Expanded(
+                  child: Text(
+                    '${_facilities.length} Emergency Facilities Found',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 if (_loading)
                   const SizedBox(
@@ -220,23 +268,56 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
                       )
                     : ListView.builder(
                         itemCount: _facilities.length,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         itemBuilder: (ctx, idx) {
                           final f = _facilities[idx];
                           final color = _getAgencyColor(f.agency);
                           return Card(
                             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: color.withAlpha(30),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              leading: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: color.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                                 child: Icon(_getAgencyIcon(f.agency), color: color, size: 20),
                               ),
                               title: Text(
                                 f.name,
-                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              subtitle: Text(
-                                '${f.agency.toUpperCase()} • (${f.latitude.toStringAsFixed(4)}°N, ${f.longitude.toStringAsFixed(4)}°E)',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                              subtitle: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: color.withAlpha(20),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      f.agency.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: color,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      '${f.latitude.toStringAsFixed(4)}°N, ${f.longitude.toStringAsFixed(4)}°E',
+                                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
                               trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textMuted),
                               onTap: () => _showFacilityDetails(f),
@@ -250,25 +331,23 @@ class _FacilitiesScreenState extends State<FacilitiesScreen> {
     );
   }
 
-  Widget _filterChip(String label, String agencyVal) {
-    final selected = _selectedAgency == agencyVal;
+  Widget _filterChip(String label, String agency) {
+    final selected = _selectedAgency == agency;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       selectedColor: AppTheme.sidebarDark,
       labelStyle: TextStyle(
         color: selected ? Colors.white : AppTheme.textMain,
-        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
+        fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+        fontSize: 11,
       ),
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       onSelected: (_) {
-        setState(() => _selectedAgency = agencyVal);
+        setState(() => _selectedAgency = agency);
         _loadFacilities();
       },
     );
   }
-}
-
-extension DoubleExtension on double {
-  String toFixed(int fractionDigits) => toStringAsFixed(fractionDigits);
 }

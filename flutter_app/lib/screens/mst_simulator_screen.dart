@@ -52,7 +52,6 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
 
       final rawEvents = (res['events'] as List<dynamic>? ?? []);
       final parsed = rawEvents.map((e) => MstTraceEvent.fromJson(e)).toList();
-
       final vertices = (res['vertices'] as List<dynamic>? ?? []);
 
       if (mounted) {
@@ -76,7 +75,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
   void _play() {
     if (_events.isEmpty) return;
     setState(() => _isPlaying = true);
-    _playbackTimer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+    _playbackTimer = Timer.periodic(const Duration(milliseconds: 120), (timer) {
       if (_currentStep < _events.length - 1) {
         setState(() => _currentStep++);
       } else {
@@ -125,7 +124,8 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
         title: const Text('MST Construction Simulator', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,50 +134,59 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Toggles Row
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        // Graph Context
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Graph: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                            SegmentedButton<String>(
-                              segments: const [
-                                ButtonSegment(value: 'global', label: Text('Global (1,255)')),
-                                ButtonSegment(value: 'incident', label: Text('5km Incident')),
-                              ],
-                              selected: {_graphContext},
-                              onSelectionChanged: (val) {
-                                setState(() => _graphContext = val.first);
-                                _loadTrace();
-                              },
-                            ),
-                          ],
-                        ),
-                        // Algorithm
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Algo: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                            SegmentedButton<String>(
-                              segments: const [
-                                ButtonSegment(value: 'kruskal', label: Text('Kruskal')),
-                                ButtonSegment(value: 'prim', label: Text('Prim')),
-                              ],
-                              selected: {_algorithm},
-                              onSelectionChanged: (val) {
-                                setState(() => _algorithm = val.first);
-                                _loadTrace();
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
+                    // Graph Context Toggle (Full width mobile-safe)
+                    const Text('Graph Scope:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.textMuted)),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'global',
+                            label: Text('Global (1,255)'),
+                            icon: Icon(Icons.public, size: 16),
+                          ),
+                          ButtonSegment(
+                            value: 'incident',
+                            label: Text('5km Incident'),
+                            icon: Icon(Icons.crisis_alert, size: 16),
+                          ),
+                        ],
+                        selected: {_graphContext},
+                        onSelectionChanged: (val) {
+                          setState(() => _graphContext = val.first);
+                          _loadTrace();
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Algorithm Toggle (Full width mobile-safe)
+                    const Text('Algorithm Mode:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.textMuted)),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'kruskal',
+                            label: Text("Kruskal's Algorithm"),
+                            icon: Icon(Icons.device_hub, size: 16),
+                          ),
+                          ButtonSegment(
+                            value: 'prim',
+                            label: Text("Prim's Algorithm"),
+                            icon: Icon(Icons.share, size: 16),
+                          ),
+                        ],
+                        selected: {_algorithm},
+                        onSelectionChanged: (val) {
+                          setState(() => _algorithm = val.first);
+                          _loadTrace();
+                        },
+                      ),
                     ),
 
                     if (_graphContext == 'incident') ...[
@@ -195,8 +204,8 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                '5.0 km Incident Graph: ${_incidentLat.toStringAsFixed(4)}°N, ${_incidentLon.toStringAsFixed(4)}°E • $_coveredFacilityCount facilities',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E3A8A)),
+                                '5.0 km Incident Graph • Majesic Origin (${_incidentLat.toStringAsFixed(4)}°N, ${_incidentLon.toStringAsFixed(4)}°E) • $_coveredFacilityCount facilities',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF1E3A8A)),
                               ),
                             ),
                           ],
@@ -205,9 +214,12 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                     ],
 
                     const SizedBox(height: 12),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
 
-                    // Playback Controls
+                    // Playback Deck: Mobile-first responsive controls
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         IconButton(
                           onPressed: _restart,
@@ -221,10 +233,11 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                         ),
                         ElevatedButton.icon(
                           onPressed: _isPlaying ? _pause : _play,
-                          icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                          icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, size: 20),
                           label: Text(_isPlaying ? 'Pause' : 'Play'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _algorithm == 'prim' ? AppTheme.accentEmerald : AppTheme.accentNavy,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           ),
                         ),
                         IconButton(
@@ -232,20 +245,32 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                           icon: const Icon(Icons.skip_next),
                           tooltip: 'Next Step',
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Event $_currentStep of ${_events.length}',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
                       ],
                     ),
 
-                    // Scrubber Slider
+                    // Step counter & slider
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Step $_currentStep of ${_events.isNotEmpty ? _events.length - 1 : 0}',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
+                          ),
+                          Text(
+                            '${((_events.isNotEmpty ? _currentStep / (_events.length - 1) : 0) * 100).toStringAsFixed(0)}%',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.sidebarDark),
+                          ),
+                        ],
+                      ),
+                    ),
                     Slider(
                       value: _events.isNotEmpty ? _currentStep.clamp(0, _events.length - 1).toDouble() : 0.0,
                       min: 0.0,
                       max: _events.isNotEmpty ? (_events.length - 1).toDouble() : 1.0,
-                      divisions: _events.isNotEmpty ? _events.length : 1,
+                      divisions: _events.isNotEmpty && _events.length > 1 ? _events.length - 1 : 1,
                       activeColor: _algorithm == 'prim' ? AppTheme.accentEmerald : AppTheme.accentNavy,
                       onChanged: (val) {
                         _pause();
@@ -258,20 +283,32 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Live Telemetry Strip
+            // Live Telemetry Strip: 2x2 compact grid for mobile (zero overflow!)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: Column(
                   children: [
-                    _telemItem('STATE', stateStr, Colors.blue),
-                    _telemItem('TREE WEIGHT', weightStr, AppTheme.accentAmber),
-                    _telemItem('ACCEPTED EDGES', '$acceptedCount / $totalEdges', AppTheme.sidebarDark),
-                    _telemItem(
-                      _algorithm == 'kruskal' ? 'COMPONENTS' : 'VISITED CUT',
-                      '${_algorithm == 'kruskal' ? (curEv?.componentCount ?? 0) : (curEv?.visitedVertexCount ?? 0)}',
-                      Colors.purple,
+                    Row(
+                      children: [
+                        Expanded(child: _telemItem('STATE', stateStr, Colors.blue)),
+                        Container(width: 1, height: 28, color: AppTheme.borderLight),
+                        Expanded(child: _telemItem('TREE WEIGHT', weightStr, AppTheme.accentAmber)),
+                      ],
+                    ),
+                    const Divider(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: _telemItem('ACCEPTED EDGES', '$acceptedCount / $totalEdges', AppTheme.sidebarDark)),
+                        Container(width: 1, height: 28, color: AppTheme.borderLight),
+                        Expanded(
+                          child: _telemItem(
+                            _algorithm == 'kruskal' ? 'COMPONENTS' : 'VISITED CUT',
+                            '${_algorithm == 'kruskal' ? (curEv?.componentCount ?? 0) : (curEv?.visitedVertexCount ?? 0)}',
+                            Colors.purple,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -279,7 +316,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Visual Canvas (Cleaner edge rendering without dots)
+            // Visual Canvas with Dynamic Bounding Box (Cleaner edge rendering without dots)
             Container(
               height: 260,
               width: double.infinity,
@@ -298,6 +335,9 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                         events: _events,
                         currentStep: _currentStep,
                         algo: _algorithm,
+                        isIncident: _graphContext == 'incident',
+                        centerLat: _incidentLat,
+                        centerLon: _incidentLon,
                       ),
                     ),
                     if (_loading)
@@ -308,7 +348,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(180),
+                          color: Colors.black.withAlpha(190),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -334,12 +374,16 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Step #${curEv.sequenceNumber} (${curEv.eventType})',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          Expanded(
+                            child: Text(
+                              'Step #${curEv.sequenceNumber} (${curEv.eventType})',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: curEv.accepted ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
                               borderRadius: BorderRadius.circular(6),
@@ -347,7 +391,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                             child: Text(
                               curEv.accepted ? 'ACCEPTED' : (curEv.eventType == 'EDGE_REJECTED' ? 'CYCLE REJECTED' : 'INFO'),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                                 color: curEv.accepted ? const Color(0xFF166534) : const Color(0xFF991B1B),
                               ),
@@ -358,8 +402,11 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Edge: ${curEv.sourceName ?? curEv.sourceVertexId ?? "Root"} ↔ ${curEv.targetName ?? curEv.targetVertexId ?? "—"}',
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         'Weight: ${curEv.edgeWeightFormatted}',
                         style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
@@ -367,6 +414,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                       if (curEv.decisionRationale != null && curEv.decisionRationale!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: AppTheme.bgCanvas,
@@ -374,7 +422,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                           ),
                           child: Text(
                             curEv.decisionRationale!,
-                            style: const TextStyle(fontSize: 12, color: AppTheme.textMain),
+                            style: const TextStyle(fontSize: 11, color: AppTheme.textMain, height: 1.3),
                           ),
                         ),
                       ],
@@ -382,6 +430,7 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
                   ),
                 ),
               ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -391,9 +440,20 @@ class _MstSimulatorScreenState extends State<MstSimulatorScreen> {
   Widget _telemItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ],
     );
   }
@@ -403,37 +463,65 @@ class MstGraphPainter extends CustomPainter {
   final List<MstTraceEvent> events;
   final int currentStep;
   final String algo;
+  final bool isIncident;
+  final double centerLat;
+  final double centerLon;
 
   MstGraphPainter({
     required this.events,
     required this.currentStep,
     required this.algo,
+    this.isIncident = false,
+    this.centerLat = 12.9781,
+    this.centerLon = 77.5696,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (events.isEmpty) return;
 
-    // Fixed geographic bounding box for Bengaluru
-    const minLat = 12.80;
-    const maxLat = 13.15;
-    const minLon = 77.40;
-    const maxLon = 77.80;
+    // Dynamic bounding box: If incident, zoom to the 5km radius window so the subgraph fills the screen!
+    double minLat, maxLat, minLon, maxLon;
+
+    if (isIncident) {
+      // 5km is approximately ~0.045 degrees latitude and ~0.046 degrees longitude
+      const span = 0.055;
+      minLat = centerLat - span;
+      maxLat = centerLat + span;
+      minLon = centerLon - span;
+      maxLon = centerLon + span;
+    } else {
+      // Full Bengaluru bounding box
+      minLat = 12.80;
+      maxLat = 13.15;
+      minLon = 77.40;
+      maxLon = 77.80;
+    }
 
     double projectX(double lon) => ((lon - minLon) / (maxLon - minLon)) * size.width;
     double projectY(double lat) => size.height - (((lat - minLat) / (maxLat - minLat)) * size.height);
 
+    // Subtle coordinate grid background
+    final gridPaint = Paint()
+      ..color = Colors.white.withAlpha(15)
+      ..strokeWidth = 0.5;
+
+    for (int i = 1; i < 4; i++) {
+      canvas.drawLine(Offset(0, size.height * (i / 4)), Offset(size.width, size.height * (i / 4)), gridPaint);
+      canvas.drawLine(Offset(size.width * (i / 4), 0), Offset(size.width * (i / 4), size.height), gridPaint);
+    }
+
     final edgePaint = Paint()
       ..color = algo == 'prim' ? const Color(0xFF10B981) : const Color(0xFF3B82F6)
-      ..strokeWidth = 1.5
+      ..strokeWidth = isIncident ? 2.5 : 1.5
       ..style = PaintingStyle.stroke;
 
     final evalPaint = Paint()
       ..color = const Color(0xFFF59E0B)
-      ..strokeWidth = 3.0
+      ..strokeWidth = isIncident ? 4.0 : 3.0
       ..style = PaintingStyle.stroke;
 
-    // Draw all accepted edges up to currentStep
+    // Draw all accepted edges up to currentStep (clean edges with zero blue dots!)
     for (int i = 0; i <= currentStep && i < events.length; i++) {
       final ev = events[i];
       if (ev.accepted && ev.uLat != null && ev.uLon != null && ev.vLat != null && ev.vLon != null) {
@@ -454,6 +542,8 @@ class MstGraphPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant MstGraphPainter oldDelegate) {
-    return oldDelegate.currentStep != currentStep || oldDelegate.algo != algo;
+    return oldDelegate.currentStep != currentStep ||
+        oldDelegate.algo != algo ||
+        oldDelegate.isIncident != isIncident;
   }
 }

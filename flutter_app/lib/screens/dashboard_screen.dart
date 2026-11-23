@@ -38,21 +38,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Backend API Server URL'),
+        title: const Text('Backend API Server URL', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Enter the Flask backend or deployed Vercel API endpoint URL:',
-              style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
               decoration: const InputDecoration(
-                hintText: 'http://127.0.0.1:5000',
-                prefixIcon: Icon(Icons.cloud_queue),
+                hintText: 'https://minimum-cost-emergency-network.vercel.app',
+                prefixIcon: Icon(Icons.cloud_queue, size: 20),
               ),
             ),
           ],
@@ -77,6 +77,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isOnline = _health?.isHealthy ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -85,7 +87,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Expanded(
               child: Text(
                 'Bengaluru MST Network',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -93,81 +94,140 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Server Connection Settings',
+            icon: const Icon(Icons.settings_outlined, size: 20),
+            tooltip: 'Server Connection',
             onPressed: _showSettingsDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, size: 20),
             tooltip: 'Refresh Status',
             onPressed: _fetchHealth,
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Strip
+            // Status Strip Card - Fully mobile-optimized with no horizontal row overflow
             Card(
-              color: (_health?.isHealthy ?? false) ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
+              color: isOnline ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: (_health?.isHealthy ?? false) ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA),
+                  color: isOnline ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA),
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Row(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      (_health?.isHealthy ?? false) ? Icons.check_circle : Icons.warning_amber_rounded,
-                      color: (_health?.isHealthy ?? false) ? AppTheme.accentEmerald : AppTheme.accentRed,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _loading
-                            ? 'Checking backend connection...'
-                            : (_health?.statusText ?? 'Offline'),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: (_health?.isHealthy ?? false) ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                    Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isOnline ? AppTheme.accentEmerald : AppTheme.accentRed,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _loading
+                                ? 'Connecting to backend...'
+                                : (isOnline ? 'System Operational • 1,255 Nodes' : 'Backend Disconnected'),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isOnline ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isOnline ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            isOnline ? 'ONLINE' : 'OFFLINE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isOnline ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Endpoint: ${ApiService.baseUrl}',
-                        style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.cloud_done_outlined, size: 14, color: AppTheme.textMuted),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            ApiService.baseUrl,
+                            style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontFamily: 'monospace'),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Platform Hero Description
-            const Text(
-              'Platform Overview',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.borderLight),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.sidebarDark.withAlpha(25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.account_tree_outlined, color: AppTheme.sidebarDark, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Platform Overview',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Mathematical Minimum Cost Emergency Communication Network for Bengaluru BBMP area with 100% Kruskal & Prim algorithmic parity.',
+                    style: TextStyle(fontSize: 12, color: AppTheme.textMuted, height: 1.4),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 4),
-            const Text(
-              'Mathematical Minimum Cost Emergency Communication Network for Bengaluru BBMP area with 100% Kruskal & Prim algorithmic parity.',
-              style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // KPI Grid
+            // Responsive KPI Grid (safe aspect ratio, no vertical text overflow)
             LayoutBuilder(
               builder: (ctx, constraints) {
                 final isWide = constraints.maxWidth > 600;
@@ -175,9 +235,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisCount: isWide ? 4 : 2,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: isWide ? 1.6 : 1.1,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: isWide ? 1.6 : 1.35,
                   children: [
                     _buildKpiCard(
                       'Total Facilities',
@@ -211,14 +271,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
             // Quick Access Modules
             const Text(
               'Interactive Modules',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             _buildModuleTile(
               title: 'Construction Simulator',
               subtitle: 'Step-by-step Kruskal and Prim execution on 1,255 facilities and 5.0 km incident graphs.',
@@ -226,7 +286,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: AppTheme.accentNavy,
               onTap: () => widget.onNavigate(2),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             _buildModuleTile(
               title: 'Emergency Simulation & Dispatch',
               subtitle: '6-Step multi-criteria emergency response routing with 3 optimization modes.',
@@ -234,7 +294,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: AppTheme.accentRed,
               onTap: () => widget.onNavigate(3),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             _buildModuleTile(
               title: 'Facilities Directory',
               subtitle: 'Search and inspect all 1,255 verified emergency stations across Bengaluru.',
@@ -242,7 +302,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: AppTheme.sidebarDark,
               onTap: () => widget.onNavigate(1),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             _buildModuleTile(
               title: 'Results & Statistics',
               subtitle: 'Empirical runtime analysis, theoretical complexity, and zero-violation invariants.',
@@ -250,25 +310,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: AppTheme.accentEmerald,
               onTap: () => widget.onNavigate(4),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildKpiCard(
-    String label,
-    String value,
-    String subtitle,
-    IconData icon,
-    Color accentColor,
-  ) {
+  Widget _buildKpiCard(String label, String value, String sub, IconData icon, Color color) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,11 +332,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Text(
                     label,
                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted),
-                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(icon, color: accentColor, size: 18),
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: color.withAlpha(25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(icon, size: 16, color: color),
+                ),
               ],
             ),
             FittedBox(
@@ -289,18 +350,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 value,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: accentColor,
-                ),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textMain),
               ),
             ),
             Text(
-              subtitle,
+              sub,
               style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
-              maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ],
         ),
@@ -318,37 +375,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: color.withAlpha(30),
+                  color: color.withAlpha(25),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: color, size: 26),
+                child: Icon(icon, color: color, size: 22),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.textMain),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, height: 1.3),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppTheme.textMuted),
+              const SizedBox(width: 6),
+              const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textMuted),
             ],
           ),
         ),

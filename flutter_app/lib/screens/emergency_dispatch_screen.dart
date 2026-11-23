@@ -65,29 +65,31 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
         title: const Text('Emergency Simulation & Dispatch', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Workflow Configuration Card
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Incident & Dispatch Setup',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
                     // Incident Label
                     TextField(
                       controller: _labelController,
                       decoration: const InputDecoration(
                         labelText: 'Incident Location / Landmark',
-                        prefixIcon: Icon(Icons.location_on),
+                        prefixIcon: Icon(Icons.location_on, size: 20),
+                        isDense: true,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -99,15 +101,21 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
                           child: TextField(
                             controller: _latController,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Latitude (°N)'),
+                            decoration: const InputDecoration(
+                              labelText: 'Latitude (°N)',
+                              isDense: true,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
                             controller: _lonController,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Longitude (°E)'),
+                            decoration: const InputDecoration(
+                              labelText: 'Longitude (°E)',
+                              isDense: true,
+                            ),
                           ),
                         ),
                       ],
@@ -115,34 +123,53 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
                     const SizedBox(height: 12),
 
                     // Category Selector
-                    const Text('Emergency Category:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const Text('Emergency Service Category:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
                     const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        _categoryChip('Medical (Hospital)', 'medical', 'hospital', Icons.local_hospital),
-                        _categoryChip('Fire & Rescue', 'fire', 'fire', Icons.local_fire_department),
-                        _categoryChip('Police / Law', 'security', 'police', Icons.local_police),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _categoryChip('Medical (Hospital)', 'medical', 'hospital', Icons.local_hospital),
+                          const SizedBox(width: 6),
+                          _categoryChip('Fire & Rescue', 'fire', 'fire', Icons.local_fire_department),
+                          const SizedBox(width: 6),
+                          _categoryChip('Police / Security', 'security', 'police', Icons.local_police),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
 
                     // Optimization Mode
-                    const Text('Routing Optimization Mode:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    const Text('Routing Optimization Goal:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
                     const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      initialValue: _mode,
-                      decoration: const InputDecoration(isDense: true),
-                      items: const [
-                        DropdownMenuItem(value: 'time', child: Text('Mode 1: Minimum Time (Fastest Dispatch)')),
-                        DropdownMenuItem(value: 'distance', child: Text('Mode 2: Minimum Road Distance (Shortest Path)')),
-                        DropdownMenuItem(value: 'compromise', child: Text('Mode 3: Risk-Balanced Compromise (Weighted Score)')),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _mode = val);
-                      },
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'time',
+                            label: Text('Fastest Time'),
+                            icon: Icon(Icons.speed, size: 16),
+                          ),
+                          ButtonSegment(
+                            value: 'distance',
+                            label: Text('Shortest Path'),
+                            icon: Icon(Icons.route, size: 16),
+                          ),
+                          ButtonSegment(
+                            value: 'compromise',
+                            label: Text('Balanced'),
+                            icon: Icon(Icons.balance, size: 16),
+                          ),
+                        ],
+                        selected: {_mode},
+                        onSelectionChanged: (val) {
+                          setState(() => _mode = val.first);
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
 
                     // Run Dispatch Button
                     SizedBox(
@@ -155,11 +182,11 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
                                 height: 16,
                                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                               )
-                            : const Icon(Icons.flash_on),
+                            : const Icon(Icons.flash_on, size: 18),
                         label: Text(_loading ? 'Computing Optimal Dispatch...' : 'Run Emergency Dispatch Simulation'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentRed,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
                         ),
                       ),
                     ),
@@ -167,13 +194,13 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Results Section
             if (topFacility != null) ...[
               const Text(
                 'Optimal Dispatch Recommendation',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               const SizedBox(height: 8),
 
@@ -185,58 +212,72 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
                   side: const BorderSide(color: Color(0xFFFDE68A), width: 1.5),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.accentAmber,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              '⭐ #1 RECOMMENDED DISPATCH FACILITY',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentAmber,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                '⭐ #1 RECOMMENDED DISPATCH',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             topFacility['agency']?.toString().toUpperCase() ?? 'EMERGENCY',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.textMuted),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: AppTheme.textMuted),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       Text(
                         topFacility['facility_name'] ?? 'Facility',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         'ID: ${topFacility['facility_id']}',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textMuted, fontFamily: 'monospace'),
+                        style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontFamily: 'monospace'),
                       ),
-                      const Divider(height: 20),
+                      const Divider(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _statItem(
-                            'EST. TRAVEL TIME',
-                            '${(topFacility['travel_time_min'] ?? (topFacility['travel_time_ds'] != null ? topFacility['travel_time_ds'] / 600.0 : 0.0)).toStringAsFixed(1)} min',
-                            AppTheme.accentRed,
+                          Expanded(
+                            child: _statItem(
+                              'EST. TIME',
+                              '${(topFacility['travel_time_min'] ?? (topFacility['travel_time_ds'] != null ? topFacility['travel_time_ds'] / 600.0 : 0.0)).toStringAsFixed(1)} min',
+                              AppTheme.accentRed,
+                            ),
                           ),
-                          _statItem(
-                            'ROAD DISTANCE',
-                            '${(topFacility['road_distance_km'] ?? (topFacility['road_distance_dm'] != null ? topFacility['road_distance_dm'] / 10000.0 : 0.0)).toStringAsFixed(2)} km',
-                            AppTheme.accentNavy,
+                          Container(width: 1, height: 26, color: const Color(0xFFFDE68A)),
+                          Expanded(
+                            child: _statItem(
+                              'DISTANCE',
+                              '${(topFacility['road_distance_km'] ?? (topFacility['road_distance_dm'] != null ? topFacility['road_distance_dm'] / 10000.0 : 0.0)).toStringAsFixed(2)} km',
+                              AppTheme.accentNavy,
+                            ),
                           ),
-                          _statItem(
-                            'DISPATCH SCORE',
-                            '${topFacility['compromise_score'] ?? topFacility['weight'] ?? 100}',
-                            AppTheme.sidebarDark,
+                          Container(width: 1, height: 26, color: const Color(0xFFFDE68A)),
+                          Expanded(
+                            child: _statItem(
+                              'SCORE',
+                              '${topFacility['compromise_score'] ?? topFacility['weight'] ?? 100}',
+                              AppTheme.sidebarDark,
+                            ),
                           ),
                         ],
                       ),
@@ -249,35 +290,40 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
               // Alternative Ranked Facilities
               const Text(
                 'Alternative Standby Stations (Rank #2 - #5)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
 
               ...ranking.skip(1).take(4).toList().asMap().entries.map((entry) {
                 final idx = entry.key + 2;
                 final f = entry.value;
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 6),
                   child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue.withAlpha(30),
+                      radius: 16,
+                      backgroundColor: Colors.blue.withAlpha(25),
                       child: Text(
                         '#$idx',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 12),
                       ),
                     ),
                     title: Text(
                       f['facility_name'] ?? 'Alternative Facility',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
                       'Travel: ${(f['travel_time_min'] ?? 0.0).toStringAsFixed(1)} min • Dist: ${(f['road_distance_km'] ?? 0.0).toStringAsFixed(2)} km',
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                     ),
                   ),
                 );
               }),
             ],
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -287,15 +333,17 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
   Widget _categoryChip(String label, String cat, String agency, IconData icon) {
     final selected = _category == cat;
     return ChoiceChip(
-      avatar: Icon(icon, size: 16, color: selected ? Colors.white : AppTheme.sidebarDark),
+      avatar: Icon(icon, size: 15, color: selected ? Colors.white : AppTheme.sidebarDark),
       label: Text(label),
       selected: selected,
       selectedColor: AppTheme.sidebarDark,
       labelStyle: TextStyle(
         color: selected ? Colors.white : AppTheme.textMain,
         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
+        fontSize: 11,
       ),
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       onSelected: (_) {
         setState(() {
           _category = cat;
@@ -308,9 +356,12 @@ class _EmergencyDispatchScreenState extends State<EmergencyDispatchScreen> {
   Widget _statItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+        Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color)),
+        ),
       ],
     );
   }
