@@ -23,9 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TRACE_CACHE_DIR = BASE_DIR / "results" / "trace_cache"
 
 def _resolve_simulator_db_path() -> Path:
-    if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
-        return Path("/tmp/scenarios.db")
-    return BASE_DIR / "data" / "scenarios.db"
+    from backend.services.scenario_service import _resolve_scenario_db_path
+    return _resolve_scenario_db_path()
 
 SCENARIOS_DB_PATH = _resolve_simulator_db_path()
 

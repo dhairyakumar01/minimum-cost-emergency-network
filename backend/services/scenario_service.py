@@ -36,17 +36,30 @@ from backend.services.routing_service import (
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
+_SCENARIO_DB_LOCK = threading.Lock()
+_SCENARIO_TABLE_INITIALIZED = False
+
 def _resolve_scenario_db_path() -> Path:
     is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
     if is_serverless:
         target = Path("/tmp/scenarios.db")
-        source = DATA_DIR / "scenarios.db"
-        if not target.exists() and source.exists():
-            try:
-                import shutil
-                shutil.copy2(str(source), str(target))
-            except Exception:
-                pass
+        if not target.exists():
+            gz_source = DATA_DIR / "scenarios.db.gz"
+            source = DATA_DIR / "scenarios.db"
+            if gz_source.exists():
+                try:
+                    import gzip
+                    with gzip.open(str(gz_source), "rb") as f_in:
+                        with open(str(target), "wb") as f_out:
+                            f_out.write(f_in.read())
+                except Exception:
+                    pass
+            elif source.exists():
+                try:
+                    import shutil
+                    shutil.copy2(str(source), str(target))
+                except Exception:
+                    pass
         return target
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     return DATA_DIR / "scenarios.db"
@@ -62,41 +75,53 @@ ASSUMED_FUEL_RATES = {
 
 
 def get_scenario_db() -> sqlite3.Connection:
+    global _SCENARIO_TABLE_INITIALIZED
     target_path = _resolve_scenario_db_path()
     try:
         target_path.parent.mkdir(parents=True, exist_ok=True)
     except Exception:
         pass
-    conn = sqlite3.connect(target_path, check_same_thread=False)
+    conn = sqlite3.connect(target_path, timeout=60.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    with conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS scenarios (
-                scenario_id TEXT PRIMARY KEY,
-                created_at TEXT NOT NULL,
-                status TEXT NOT NULL,
-                stage_index INTEGER NOT NULL,
-                stage_name TEXT NOT NULL,
-                error_message TEXT,
-                incident_lat REAL NOT NULL,
-                incident_lon REAL NOT NULL,
-                incident_label TEXT,
-                agency TEXT NOT NULL,
-                radius_km REAL NOT NULL,
-                optimization_mode TEXT NOT NULL,
-                k_param INTEGER NOT NULL,
-                result_json TEXT,
-                cache_key TEXT
-            )
-        """)
-        # Ensure cache_key column exists if table existed previously
-        cur = conn.cursor()
-        cur.execute("PRAGMA table_info(scenarios)")
-        cols = [r[1] for r in cur.fetchall()]
-        if "cache_key" not in cols:
-            conn.execute("ALTER TABLE scenarios ADD COLUMN cache_key TEXT")
-        if "incident_category" not in cols:
-            conn.execute("ALTER TABLE scenarios ADD COLUMN incident_category TEXT DEFAULT 'Medical Emergency'")
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=60000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+
+    if not _SCENARIO_TABLE_INITIALIZED:
+        with _SCENARIO_DB_LOCK:
+            if not _SCENARIO_TABLE_INITIALIZED:
+                with conn:
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS scenarios (
+                            scenario_id TEXT PRIMARY KEY,
+                            created_at TEXT NOT NULL,
+                            status TEXT NOT NULL,
+                            stage_index INTEGER NOT NULL,
+                            stage_name TEXT NOT NULL,
+                            error_message TEXT,
+                            incident_lat REAL NOT NULL,
+                            incident_lon REAL NOT NULL,
+                            incident_label TEXT,
+                            agency TEXT NOT NULL,
+                            radius_km REAL NOT NULL,
+                            optimization_mode TEXT NOT NULL,
+                            k_param INTEGER NOT NULL,
+                            result_json TEXT,
+                            cache_key TEXT,
+                            incident_category TEXT DEFAULT 'Medical Emergency'
+                        )
+                    """)
+                    cur = conn.cursor()
+                    cur.execute("PRAGMA table_info(scenarios)")
+                    cols = [r[1] for r in cur.fetchall()]
+                    if "cache_key" not in cols:
+                        conn.execute("ALTER TABLE scenarios ADD COLUMN cache_key TEXT")
+                    if "incident_category" not in cols:
+                        conn.execute("ALTER TABLE scenarios ADD COLUMN incident_category TEXT DEFAULT 'Medical Emergency'")
+                _SCENARIO_TABLE_INITIALIZED = True
     return conn
 
 
@@ -266,11 +291,12 @@ def execute_scenario_pipeline(
     )
 
     def update_stage(idx: int, name: str, status: str = "RUNNING"):
-        with conn:
-            conn.execute(
-                "UPDATE scenarios SET stage_index=?, stage_name=?, status=?, cache_key=?, incident_category=? WHERE scenario_id=?",
-                (idx, name, status, cache_key, incident_category, scenario_id)
-            )
+        with _SCENARIO_DB_LOCK:
+            with conn:
+                conn.execute(
+                    "UPDATE scenarios SET stage_index=?, stage_name=?, status=?, cache_key=?, incident_category=? WHERE scenario_id=?",
+                    (idx, name, status, cache_key, incident_category, scenario_id)
+                )
 
     try:
         # Check Scenario Cache first (instant reuse for identical parameters, unless bypass_cache=True)
@@ -344,6 +370,25 @@ def execute_scenario_pipeline(
 
         if not eligible_candidates:
             raise ValueError(f"No eligible {norm_agency} facilities found within {radius_km:.1f} km radius. Try increasing search radius.")
+
+        # Sort eligible candidates strictly by Haversine distance ascending
+        eligible_candidates.sort(key=lambda x: x["haversine_km"])
+        total_eligible_count = len(eligible_candidates)
+
+        # In dense metropolitan clusters (e.g. 300+ facilities in 5 km),
+        # prioritize the top 40 closest facilities for real-time routing graph construction
+        MAX_DISPATCH_GRAPH_NODES = 40
+        if len(eligible_candidates) > MAX_DISPATCH_GRAPH_NODES:
+            excess = eligible_candidates[MAX_DISPATCH_GRAPH_NODES:]
+            eligible_candidates = eligible_candidates[:MAX_DISPATCH_GRAPH_NODES]
+            for fac in excess:
+                exclusions.append({
+                    "facility_id": fac["facility_id"],
+                    "facility_name": fac["facility_name"],
+                    "reason_code": "DISTANCE_RANK_CUTOFF",
+                    "reason": f"Distance rank exceeds top {MAX_DISPATCH_GRAPH_NODES} cutoff; prioritized closest emergency response facilities.",
+                    "haversine_km": fac["haversine_km"],
+                })
 
         graph_points = [incident_point] + eligible_candidates
         vertex_ids = [p["id"] for p in graph_points]
@@ -583,7 +628,7 @@ def execute_scenario_pipeline(
                 "graph_density": round(graph_density, 3),
             },
             "summary": {
-                "total_candidates_in_radius": len(eligible_candidates),
+                "total_candidates_in_radius": total_eligible_count,
                 "graph_vertices_count": len(vertex_ids),
                 "evaluated_chords_count": optimality_cert["chords_tested"],
                 "tree_edge_count": len(active_edges_with_geom),

@@ -33,10 +33,12 @@ def create_app(config: Config = None) -> Flask:
     app.register_blueprint(network_bp)
     app.register_blueprint(scenarios_bp)
 
-    # Pre-warm in-memory dataset cache for maximum initial request speed
+    # Pre-warm in-memory dataset cache and route cache for maximum initial request speed
     try:
         from backend.services.data_service import data_service
         data_service.load_facilities()
+        from backend.services.routing_service import ensure_route_cache_loaded
+        ensure_route_cache_loaded()
     except Exception:
         pass
 

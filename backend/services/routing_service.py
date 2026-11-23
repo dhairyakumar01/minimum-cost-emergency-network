@@ -21,17 +21,30 @@ from typing import Dict, Any, List, Optional, Tuple
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
+_ROUTING_DB_LOCK = threading.Lock()
+_ROUTING_TABLE_INITIALIZED = False
+
 def _resolve_routing_db_path() -> Path:
     is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
     if is_serverless:
         target = Path("/tmp/routes.db")
-        source = DATA_DIR / "cache" / "routes.db"
-        if not target.exists() and source.exists():
-            try:
-                import shutil
-                shutil.copy2(str(source), str(target))
-            except Exception:
-                pass
+        if not target.exists():
+            gz_source = DATA_DIR / "cache" / "routes.db.gz"
+            source = DATA_DIR / "cache" / "routes.db"
+            if gz_source.exists():
+                try:
+                    import gzip
+                    with gzip.open(str(gz_source), "rb") as f_in:
+                        with open(str(target), "wb") as f_out:
+                            f_out.write(f_in.read())
+                except Exception:
+                    pass
+            elif source.exists():
+                try:
+                    import shutil
+                    shutil.copy2(str(source), str(target))
+                except Exception:
+                    pass
         return target
     cache_dir = DATA_DIR / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -39,7 +52,7 @@ def _resolve_routing_db_path() -> Path:
 
 CACHE_DB_PATH = _resolve_routing_db_path()
 LOCAL_OSRM_URL = os.environ.get("OSRM_BASE_URL", "http://localhost:5001")
-PUBLIC_OSRM_URL = "http://router.project-osrm.org"
+PUBLIC_OSRM_URL = "https://router.project-osrm.org"
 
 # Snapping distance threshold in meters
 DEFAULT_MAX_SNAPPING_METERS = 500.0
@@ -50,47 +63,59 @@ def round_half_up(val: float) -> int:
 
 
 def get_db_connection() -> sqlite3.Connection:
+    global _ROUTING_TABLE_INITIALIZED
     target_path = _resolve_routing_db_path()
     try:
         target_path.parent.mkdir(parents=True, exist_ok=True)
     except Exception:
         pass
-    conn = sqlite3.connect(target_path)
+    conn = sqlite3.connect(target_path, timeout=60.0)
     conn.row_factory = sqlite3.Row
-    with conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS route_measurements (
-                origin TEXT NOT NULL,
-                dest TEXT NOT NULL,
-                duration_ds INTEGER NOT NULL,
-                distance_dm INTEGER NOT NULL,
-                snapped_orig_m REAL,
-                snapped_dest_m REAL,
-                timestamp TEXT NOT NULL,
-                PRIMARY KEY (origin, dest)
-            )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS snapping_cache (
-                coord TEXT PRIMARY KEY,
-                snapped_lon REAL NOT NULL,
-                snapped_lat REAL NOT NULL,
-                snapping_distance_m REAL NOT NULL,
-                street_name TEXT,
-                timestamp TEXT NOT NULL
-            )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS edge_geometry_cache (
-                origin TEXT NOT NULL,
-                dest TEXT NOT NULL,
-                geometry_geojson TEXT NOT NULL,
-                distance_m REAL,
-                duration_s REAL,
-                timestamp TEXT NOT NULL,
-                PRIMARY KEY (origin, dest)
-            )
-        """)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=60000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+
+    if not _ROUTING_TABLE_INITIALIZED:
+        with _ROUTING_DB_LOCK:
+            if not _ROUTING_TABLE_INITIALIZED:
+                with conn:
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS route_measurements (
+                            origin TEXT NOT NULL,
+                            dest TEXT NOT NULL,
+                            duration_ds INTEGER NOT NULL,
+                            distance_dm INTEGER NOT NULL,
+                            snapped_orig_m REAL,
+                            snapped_dest_m REAL,
+                            timestamp TEXT NOT NULL,
+                            PRIMARY KEY (origin, dest)
+                        )
+                    """)
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS snapping_cache (
+                            coord TEXT PRIMARY KEY,
+                            snapped_lon REAL NOT NULL,
+                            snapped_lat REAL NOT NULL,
+                            snapping_distance_m REAL NOT NULL,
+                            street_name TEXT,
+                            timestamp TEXT NOT NULL
+                        )
+                    """)
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS edge_geometry_cache (
+                            origin TEXT NOT NULL,
+                            dest TEXT NOT NULL,
+                            geometry_geojson TEXT NOT NULL,
+                            distance_m REAL,
+                            duration_s REAL,
+                            timestamp TEXT NOT NULL,
+                            PRIMARY KEY (origin, dest)
+                        )
+                    """)
+                _ROUTING_TABLE_INITIALIZED = True
     return conn
 
 
@@ -382,16 +407,17 @@ def get_pairwise_measurements(
 
         # Bulk save newly obtained measurements to SQLite in one quick batch
         if new_measurements_to_persist:
-            conn = get_db_connection()
-            try:
-                with conn:
-                    conn.executemany("""
-                        INSERT OR REPLACE INTO route_measurements
-                        (origin, dest, duration_ds, distance_dm, timestamp)
-                        VALUES (?, ?, ?, ?, datetime('now'))
-                    """, new_measurements_to_persist)
-            finally:
-                conn.close()
+            with _ROUTING_DB_LOCK:
+                conn = get_db_connection()
+                try:
+                    with conn:
+                        conn.executemany("""
+                            INSERT OR REPLACE INTO route_measurements
+                            (origin, dest, duration_ds, distance_dm, timestamp)
+                            VALUES (?, ?, ?, ?, datetime('now'))
+                        """, new_measurements_to_persist)
+                finally:
+                    conn.close()
 
     # 3. Construct undirected symmetric edges: S_T(i, j) and S_D(i, j)
     symmetric_edges = []
@@ -537,15 +563,16 @@ def fetch_mst_edge_geometries(
 
         # Bulk persist new geometries to SQLite
         if newly_fetched:
-            conn = get_db_connection()
-            try:
-                with conn:
-                    conn.executemany("""
-                        INSERT OR REPLACE INTO edge_geometry_cache
-                        (origin, dest, geometry_geojson, distance_m, duration_s, timestamp)
-                        VALUES (?, ?, ?, ?, ?, datetime('now'))
-                    """, newly_fetched)
-            finally:
-                conn.close()
+            with _ROUTING_DB_LOCK:
+                conn = get_db_connection()
+                try:
+                    with conn:
+                        conn.executemany("""
+                            INSERT OR REPLACE INTO edge_geometry_cache
+                            (origin, dest, geometry_geojson, distance_m, duration_s, timestamp)
+                            VALUES (?, ?, ?, ?, ?, datetime('now'))
+                        """, newly_fetched)
+                finally:
+                    conn.close()
 
     return mst_edges

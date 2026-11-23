@@ -12,7 +12,6 @@ notebooks
 dist
 *.apk
 *.db
-data/cache
 data/scenarios.db
 data/cache/routes.db
 results/complete_graph_edges.csv
