@@ -21,7 +21,13 @@ from backend.services.graph_engine import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 TRACE_CACHE_DIR = BASE_DIR / "results" / "trace_cache"
-SCENARIOS_DB_PATH = BASE_DIR / "data" / "scenarios.db"
+
+def _resolve_simulator_db_path() -> Path:
+    if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        return Path("/tmp/scenarios.db")
+    return BASE_DIR / "data" / "scenarios.db"
+
+SCENARIOS_DB_PATH = _resolve_simulator_db_path()
 
 
 class SimulatorService:

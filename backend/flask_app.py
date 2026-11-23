@@ -33,6 +33,13 @@ def create_app(config: Config = None) -> Flask:
     app.register_blueprint(network_bp)
     app.register_blueprint(scenarios_bp)
 
+    # Pre-warm in-memory dataset cache for maximum initial request speed
+    try:
+        from backend.services.data_service import data_service
+        data_service.load_facilities()
+    except Exception:
+        pass
+
     # Server timing header middleware
     @app.before_request
     def start_timer():

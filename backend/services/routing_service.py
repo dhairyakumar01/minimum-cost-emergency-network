@@ -10,6 +10,7 @@ import concurrent.futures
 import json
 import math
 import os
+import shutil
 import sqlite3
 import threading
 import time
@@ -19,7 +20,24 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-CACHE_DB_PATH = DATA_DIR / "cache" / "routes.db"
+
+def _resolve_routing_db_path() -> Path:
+    is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+    if is_serverless:
+        target = Path("/tmp/routes.db")
+        source = DATA_DIR / "cache" / "routes.db"
+        if not target.exists() and source.exists():
+            try:
+                import shutil
+                shutil.copy2(str(source), str(target))
+            except Exception:
+                pass
+        return target
+    cache_dir = DATA_DIR / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir / "routes.db"
+
+CACHE_DB_PATH = _resolve_routing_db_path()
 LOCAL_OSRM_URL = os.environ.get("OSRM_BASE_URL", "http://localhost:5001")
 PUBLIC_OSRM_URL = "http://router.project-osrm.org"
 
@@ -32,8 +50,12 @@ def round_half_up(val: float) -> int:
 
 
 def get_db_connection() -> sqlite3.Connection:
-    CACHE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(CACHE_DB_PATH)
+    target_path = _resolve_routing_db_path()
+    try:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+    conn = sqlite3.connect(target_path)
     conn.row_factory = sqlite3.Row
     with conn:
         conn.execute("""

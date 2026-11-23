@@ -8,6 +8,8 @@ and OSRM road-route geometry retrieval for network map visualization.
 import hashlib
 import json
 import math
+import os
+import shutil
 import sqlite3
 import threading
 import time
@@ -33,7 +35,23 @@ from backend.services.routing_service import (
 )
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-DB_PATH = DATA_DIR / "scenarios.db"
+
+def _resolve_scenario_db_path() -> Path:
+    is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+    if is_serverless:
+        target = Path("/tmp/scenarios.db")
+        source = DATA_DIR / "scenarios.db"
+        if not target.exists() and source.exists():
+            try:
+                import shutil
+                shutil.copy2(str(source), str(target))
+            except Exception:
+                pass
+        return target
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    return DATA_DIR / "scenarios.db"
+
+DB_PATH = _resolve_scenario_db_path()
 
 # Fuel rates per kilometer (assumed project parameters)
 ASSUMED_FUEL_RATES = {
@@ -44,8 +62,12 @@ ASSUMED_FUEL_RATES = {
 
 
 def get_scenario_db() -> sqlite3.Connection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    target_path = _resolve_scenario_db_path()
+    try:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+    conn = sqlite3.connect(target_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     with conn:
         conn.execute("""
