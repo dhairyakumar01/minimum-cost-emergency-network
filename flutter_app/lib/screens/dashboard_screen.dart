@@ -140,9 +140,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    Text(
-                      'Endpoint: ${ApiService.baseUrl}',
-                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Endpoint: ${ApiService.baseUrl}',
+                        style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                      ),
                     ),
                   ],
                 ),
